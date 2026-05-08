@@ -1104,7 +1104,7 @@ body[data-icon-style="glass"][data-icon-theme="tainted"] #desktop-widgets .fa-br
             --cursor-default: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4.5 3.5 L 4.5 19.5 L 8.5 15.5 L 12 23 L 14.5 22 L 11 14.5 L 17.5 14.5 Z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/></svg>') 4 3, default;
             
             /* Fixed Pointer Hand (Standard index finger) */
-            --cursor-pointer: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.5 12V3.5C8.5 2.12 9.62 1 11 1C12.38 1 13.5 2.12 13.5 3.5V9.5C13.5 9.5 14.5 8.5 15.5 8.5C16.6 8.5 17.5 9.4 17.5 10.5V11.5C17.5 11.5 18.5 10.5 19.5 10.5C20.6 10.5 21.5 11.4 21.5 12.5V16C21.5 19.87 18.37 23 14.5 23H10C6.13 23 3 19.87 3 16V13L4.5 11.5C5.3 10.7 6.7 10.7 7.5 11.5L8.5 12.5V12Z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/></svg>') 11 1, pointer;
+        --cursor-pointer: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 11V8.99c0-.88.59-1.64 1.44-1.86h.05A1.99 1.99 0 0 1 14 9.05V12v-2c0-.88.6-1.65 1.46-1.87h.05A1.98 1.98 0 0 1 18 10.06V13v-1.94a2 2 0 0 1 1.51-1.94h0A2 2 0 0 1 22 11.06V14c0 .6-.08 1.27-.21 1.97a7.96 7.96 0 0 1-7.55 6.48 54.98 54.98 0 0 1-4.48 0 7.96 7.96 0 0 1-7.55-6.48C2.08 15.27 2 14.59 2 14v-1.49c0-1.11.9-2.01 2.01-2.01h0a2 2 0 0 1 2.01 2.03l-.01.97v-10c0-1.1.9-2 2-2h0a2 2 0 0 1 2 2V11Z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/></svg>') 10 1, pointer;
             
             /* Text I-Beam */
             --cursor-text: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4V20M8 4H16M8 20H16" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4V20M8 4H16M8 20H16" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>') 12 12, text;
@@ -1978,6 +1978,27 @@ body.music-playing #dynamic-island::before {
         <div id="boot-text" class="mt-4 text-xs text-gray-500 font-mono">Initializing kernel...</div>
     </div>
 
+<!-- Task View / Virtual Desktops Overlay -->
+<div id="task-view-overlay" class="fixed inset-0 z-[90000] hidden flex-col bg-black/60 backdrop-blur-md opacity-0 transition-opacity duration-300">
+    <!-- Top: Open Windows on Current Desktop -->
+    <div class="flex-1 p-10 overflow-y-auto" onclick="toggleTaskView()">
+        <div id="task-view-windows" class="flex flex-wrap justify-center gap-8 items-center h-full">
+            <!-- Injected by JS -->
+        </div>
+    </div>
+    
+    <!-- Bottom: Desktops Bar -->
+    <div class="h-48 bg-black/40 border-t border-ui-border flex items-center p-6 gap-4 overflow-x-auto shadow-[0_-10px_30px_rgba(0,0,0,0.5)]" onclick="event.stopPropagation()">
+        <div id="task-view-desktops" class="flex items-center gap-4 h-full">
+            <!-- Injected by JS -->
+        </div>
+        <button onclick="createNewDesktop()" class="h-32 w-48 rounded-xl border-2 border-dashed border-ui-400 hover:border-ui-100 hover:bg-white/5 flex flex-col items-center justify-center gap-2 text-ui-400 hover:text-ui-100 transition group shrink-0">
+            <i class="fa-solid fa-plus text-2xl group-hover:scale-110 transition-transform"></i>
+            <span class="text-sm font-bold">New Desktop</span>
+        </button>
+    </div>
+</div>
+
 <!-- System File Dialog (Open / Save) -->
 <div id="system-file-dialog" class="fixed inset-0 z-[100000] bg-black/50 hidden items-center justify-center backdrop-blur-sm select-none">
     <div class="bg-ui-800 border border-ui-border rounded-xl shadow-2xl w-[600px] h-[450px] flex flex-col transform scale-95 transition-all overflow-hidden" id="sfd-content">
@@ -1998,7 +2019,7 @@ body.music-playing #dynamic-island::before {
 
         <!-- Grid View -->
         <div class="flex-1 p-4 overflow-y-auto bg-ui-900 custom-scrollbar" onclick="sfdDeselect()">
-            <div id="sfd-grid" class="grid grid-cols-4 sm:grid-cols-5 gap-4 content-start">
+            <div id="sfd-grid" class="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-4 content-start">
                 <!-- Rendered Items Injected by JS -->
             </div>
         </div>
@@ -2022,6 +2043,27 @@ body.music-playing #dynamic-island::before {
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- File Transfer Dialog -->
+<div id="file-transfer-dialog" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100000] bg-ui-800 border border-ui-border rounded-xl shadow-2xl w-80 flex flex-col hidden transform scale-95 transition-all opacity-0 pointer-events-none">
+    <div class="p-3 border-b border-ui-border flex items-center gap-2 bg-ui-900 rounded-t-xl">
+        <i id="ft-icon" class="fa-solid fa-copy text-accent-400"></i>
+        <span id="ft-title" class="text-xs font-bold text-ui-100">Copying items...</span>
+    </div>
+    <div class="p-4 flex flex-col gap-3">
+        <div class="flex justify-between text-[10px] text-ui-400">
+            <span id="ft-from" class="truncate max-w-[45%]">From: Desktop</span>
+            <span id="ft-to" class="truncate max-w-[45%] text-right">To: Documents</span>
+        </div>
+        <div class="h-2 w-full bg-ui-900 rounded-full overflow-hidden border border-ui-border shadow-inner">
+            <div id="ft-progress-bar" class="h-full bg-accent-500 w-0 transition-all duration-200"></div>
+        </div>
+        <div class="flex justify-between text-[10px] text-ui-400">
+            <span id="ft-details">Calculating time...</span>
+            <span id="ft-percentage" class="font-bold">0%</span>
         </div>
     </div>
 </div>
@@ -2207,12 +2249,12 @@ body.music-playing #dynamic-island::before {
 
 <!-- Omni Search -->
         <div id="omni-overlay" class="fixed inset-0 z-[1000000] hidden flex-col items-center pt-[20vh] bg-black/20 backdrop-blur-sm opacity-0 transition-opacity duration-200" onclick="if(event.target.id === 'omni-overlay') closeOmni()">
-            <div id="omni-container" class="w-[650px] max-w-[90vw] mx-auto bg-ui-800/90 backdrop-blur-3xl border border-ui-border rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-200 flex flex-col">
-                <div class="flex items-center px-5 py-4 border-b border-ui-border gap-3">
-                    <i class="fa-solid fa-magnifying-glass text-ui-400 text-2xl"></i>
-                    <input type="text" id="omni-input" class="w-full bg-transparent border-none outline-none text-2xl text-ui-100 placeholder-ui-400/50 font-light" placeholder="Omni Search" oninput="handleOmniInput(event)" onkeydown="handleOmniKeys(event)" autocomplete="off" spellcheck="false">
+            <div id="omni-container" class="w-[650px] max-w-[90vw] mx-auto bg-gray-800/90 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-200 flex flex-col">
+                <div class="flex items-center px-5 py-4 border-b border-white/10 gap-3">
+                    <i class="fa-solid fa-magnifying-glass text-gray-400 text-2xl"></i>
+                    <input type="text" id="omni-input" class="w-full bg-transparent border-none outline-none text-2xl text-white placeholder-gray-500 font-light" placeholder="Omni Search" oninput="handleOmniInput(event)" onkeydown="handleOmniKeys(event)" autocomplete="off" spellcheck="false">
                 </div>
-                <div id="omni-results" class="max-h-[60vh] overflow-y-auto custom-scrollbar hidden flex-col pb-2 w-full text-left">
+                <div id="omni-results" class="max-h-[60vh] overflow-y-auto custom-scrollbar hidden flex-col pb-2 w-full text-left text-gray-100">
                     <!-- Results injected here -->
                 </div>
             </div>
@@ -2301,8 +2343,11 @@ body.music-playing #dynamic-island::before {
         <div id="taskbar-left" class="flex-1 flex items-center h-full px-0 transition-all duration-500 z-10 gap-1 pointer-events-none">
             <!-- Zones injected via JS will have pointer-events-auto -->
             <div id="taskbar-start-zone" class="flex items-center gap-1 h-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-auto px-2">
-                <button onclick="toggleStartMenu()" class="w-10 h-10 rounded hover:bg-ui-700/20 flex items-center justify-center transition active:scale-95">
+                <button onclick="toggleStartMenu()" class="w-10 h-10 rounded hover:bg-ui-700/20 flex items-center justify-center transition active:scale-95" title="Start Menu">
                     <i class="fa-solid fa-moon text-accent-400 text-xl"></i>
+                </button>
+                <button onclick="toggleTaskView()" class="w-10 h-10 rounded hover:bg-ui-700/20 flex items-center justify-center transition active:scale-95" title="Task View (Virtual Desktops)">
+                    <i class="fa-solid fa-layer-group text-ui-400 text-lg"></i>
                 </button>
                 
                 <div id="taskbar-search" class="hidden items-center bg-ui-800/50 border border-ui-border rounded-full px-3 py-1.5 ml-2 focus-within:border-accent-500 transition-colors w-48 cursor-text">
@@ -2359,6 +2404,9 @@ body.music-playing #dynamic-island::before {
         let windows = {};
         let instanceCounts = {}; 
         let activeWindow = null;
+let currentDesktopId = 1;
+let nextDesktopId = 2;
+let desktops = [{ id: 1, name: 'Desktop 1' }];
         let isStartMenuOpen = false;
         let isControlCenterOpen = false;
 	let notifications = [];
@@ -2780,6 +2828,12 @@ function fmtTime(seconds) {
 
         // Pinned Apps State (loaded from local storage)
         let pinnedApps = JSON.parse(localStorage.getItem('gemini_pinned_apps')) || ['terminal', 'browser', 'notes', 'music', 'photos', 'settings', 'bin'];
+
+let pinnedSidebarFolders = JSON.parse(localStorage.getItem('gemini_sidebar_folders')) || [];
+        function saveSidebarFolders() {
+            localStorage.setItem('gemini_sidebar_folders', JSON.stringify(pinnedSidebarFolders));
+        }
+
 // Migration: Ensure 'bin' is pinned if missing (fixes missing Bin on Taskbar/Dock)
         if (!pinnedApps.includes('bin')) {
             pinnedApps.push('bin');
@@ -2820,10 +2874,12 @@ let settings = JSON.parse(localStorage.getItem('gemini_settings')) || {
     cursorStroke: '#000000',
     cursorOpacity: 100,
     cursorGlow: 0,
-    cursorGlowColor: '#3b82f6'
+    cursorGlowColor: '#3b82f6',
+    omniSearchEnabled: true
 };
 
 // Taskbar Migration Checks
+if(settings.omniSearchEnabled === undefined) settings.omniSearchEnabled = true;
 if(settings.taskbarLayout === undefined) settings.taskbarLayout = 'monolith';
 if(settings.taskbarSegmentation === undefined) settings.taskbarSegmentation = 'connected';
 if(settings.taskbarAlignment === undefined) settings.taskbarAlignment = 'left';
@@ -2845,6 +2901,7 @@ if(settings.dynamicIsland === undefined) settings.dynamicIsland = true;
 // Migration checks for new settings
 if(settings.titlebarStyle === undefined) settings.titlebarStyle = 'mac';
 if(settings.titlebarButtonOrder === undefined) settings.titlebarButtonOrder = 'close,min,max';
+if(settings.titlebarButtonAlign === undefined) settings.titlebarButtonAlign = settings.titlebarStyle === 'mac' ? 'left' : 'right';
 if(settings.showTaskbarSearch === undefined) settings.showTaskbarSearch = false;
 if(settings.autoHideDock === undefined) settings.autoHideDock = false;
 if(settings.dockIndicatorWidth === undefined) settings.dockIndicatorWidth = 140;
@@ -3844,7 +3901,7 @@ content: (wid) => `
         return `
 <div class="h-full flex bg-ui-900 text-ui-100 relative" id="settings-root-${wid}">
     <!-- Sidebar Navigation -->
-    <div class="w-28 sm:w-1/3 shrink-0 bg-ui-800 p-2 sm:p-4 border-r border-ui-border flex flex-col gap-1 overflow-y-auto">
+    <div class="w-36 sm:w-48 shrink-0 bg-ui-800 p-2 sm:p-4 border-r border-ui-border flex flex-col gap-1 overflow-y-auto">
         <div class="text-[10px] sm:text-xs font-bold text-ui-400 uppercase mb-2 sm:mb-4">Personalize</div>
         <div onclick="showSettingsPage('layout', '${wid}')" id="nav-layout-${wid}" class="p-2 bg-accent-600 rounded text-xs cursor-pointer transition-colors text-white">Layout</div>
         <div onclick="showSettingsPage('background', '${wid}')" id="nav-background-${wid}" class="p-2 hover:bg-ui-700 rounded text-xs cursor-pointer text-ui-400 transition-colors">Background</div>
@@ -4047,6 +4104,17 @@ content: (wid) => `
                     <div class="flex bg-ui-800 rounded p-1 shrink-0">
                         <button onclick="setTitlebarStyle('mac')" class="px-3 py-1 text-xs rounded transition ${settings.titlebarStyle === 'mac' ? 'bg-ui-900 text-ui-100 shadow' : 'text-ui-400 hover:text-ui-100'}">Mac</button>
                         <button onclick="setTitlebarStyle('windows')" class="px-3 py-1 text-xs rounded transition ${settings.titlebarStyle === 'windows' ? 'bg-ui-900 text-ui-100 shadow' : 'text-ui-400 hover:text-ui-100'}">Windows</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between p-4 bg-ui-700 rounded-xl mb-4 gap-4">
+                    <div class="min-w-[150px]">
+                        <div class="font-bold text-sm">Button Alignment</div>
+                        <div class="text-xs text-ui-400">Left or right side of the window</div>
+                    </div>
+                    <div class="flex bg-ui-800 rounded p-1 shrink-0">
+                        <button onclick="setTitlebarAlign('left')" class="px-3 py-1 text-xs rounded transition ${settings.titlebarButtonAlign === 'left' ? 'bg-ui-900 text-ui-100 shadow' : 'text-ui-400 hover:text-ui-100'}">Left</button>
+                        <button onclick="setTitlebarAlign('right')" class="px-3 py-1 text-xs rounded transition ${settings.titlebarButtonAlign === 'right' ? 'bg-ui-900 text-ui-100 shadow' : 'text-ui-400 hover:text-ui-100'}">Right</button>
                     </div>
                 </div>
 
@@ -4447,6 +4515,18 @@ content: (wid) => `
         <div id="page-input-${wid}" class="settings-page absolute inset-0 p-4 sm:p-6 overflow-y-auto hidden">
             <h2 class="text-lg font-bold mb-4">System & Input</h2>
             
+            <!-- Omni Search Setting -->
+            <div class="flex flex-wrap items-center justify-between p-4 bg-ui-700 rounded-xl mb-4 gap-4">
+                <div class="min-w-[150px]">
+                    <div class="font-bold text-sm">Omni Search</div>
+                    <div class="text-xs text-ui-400">Quick global search (Cmd/Ctrl + Space)</div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input type="checkbox" class="sr-only peer" ${settings.omniSearchEnabled !== false ? 'checked' : ''} onchange="toggleSetting('omniSearchEnabled', this.checked)">
+                    <div class="w-11 h-6 bg-ui-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-600"></div>
+                </label>
+            </div>
+
             <!-- Double Click Setting -->
             <div class="flex flex-wrap items-center justify-between p-4 bg-ui-700 rounded-xl mb-4 gap-4">
                 <div class="min-w-[150px]">
@@ -4556,39 +4636,61 @@ content: (wid) => `
                 title: 'Files',
                 icon: 'fa-folder-open',
                 color: 'text-blue-400',
-                width: 650,
-                height: 450,
+                width: 750,
+                height: 480,
                 content: (wid) => `
-                    <div class="h-full flex flex-col bg-ui-900 text-ui-100">
-                        <!-- Toolbar -->
-                        <div class="flex items-center gap-2 p-2 border-b border-ui-border bg-ui-800 relative z-20">
-                            <!-- Nav Buttons -->
-                            <button onclick="fsNavigate('${wid}', 'up')" class="p-1.5 rounded hover:bg-ui-700 text-ui-400 hover:text-white transition" title="Up"><i class="fa-solid fa-arrow-up"></i></button>
-                            <div class="h-4 w-[1px] bg-ui-border mx-1"></div>
-                            
-                            <!-- Action Buttons -->
-                            <button onclick="fsCreateFolder('${wid}')" class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-ui-700 text-xs font-medium transition whitespace-nowrap"><i class="fa-solid fa-folder-plus text-blue-400"></i> <span class="hidden sm:inline">New Folder</span></button>
-                            <button onclick="fsCreateFile('${wid}')" class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-ui-700 text-xs font-medium transition whitespace-nowrap"><i class="fa-solid fa-file-circle-plus text-green-400"></i> <span class="hidden sm:inline">New File</span></button>
-                            
-                            <!-- Dynamic Search Bar -->
-                            <div class="group relative flex items-center ml-2 h-7 transition-all duration-300 ease-out w-8 hover:w-48 focus-within:w-48 bg-ui-700/30 hover:bg-ui-900 border border-transparent hover:border-ui-border rounded-full overflow-hidden shrink-0">
-                                <div class="absolute left-0 w-8 h-full flex items-center justify-center pointer-events-none">
-                                    <i class="fa-solid fa-magnifying-glass text-xs text-ui-400 group-hover:text-accent-400 transition-colors"></i>
-                                </div>
-                                <input type="text" id="fs-search-${wid}" 
-                                    class="w-full h-full bg-transparent border-none outline-none text-xs text-ui-100 pl-8 pr-3 placeholder-ui-400/50 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity cursor-text"
-                                    placeholder="Search..." 
-                                    oninput="renderFileView('${wid}')"
-                                    autocomplete="off">
-                            </div>
-
-                            <div class="flex-1"></div>
-                            
-                            <!-- Path Bar -->
-                            <div id="fs-path-${wid}" class="px-3 py-1 bg-ui-900 rounded border border-ui-border text-xs font-mono text-ui-400 select-all max-w-[150px] truncate">/</div>
-                        </div>
+                    <div class="h-full flex bg-ui-900 text-ui-100">
                         
-                        <div id="fs-grid-${wid}" class="flex-1 p-4 overflow-y-auto grid grid-cols-4 sm:grid-cols-5 gap-4 content-start relative" onclick="fsDeselect('${wid}')">
+                        <!-- macOS Style Sidebar (Injected by JS) -->
+                        <div id="fs-sidebar-${wid}" class="w-40 sm:w-44 shrink-0 bg-ui-800/80 backdrop-blur border-r border-ui-border flex flex-col py-3 gap-0.5 overflow-y-auto select-none z-30"
+                             ondragover="handleSidebarDragOver(event)" ondragleave="handleSidebarDragLeave(event)" ondrop="handleSidebarDrop(event)">
+                        </div>
+
+                        <!-- Main Content Area -->
+                        <div class="flex-1 flex flex-col min-w-0 bg-ui-900">
+                            <!-- Toolbar -->
+                            <div class="flex items-center gap-2 p-2 border-b border-ui-border bg-ui-800/50 backdrop-blur relative z-20">
+                                <!-- Nav Buttons -->
+                                <button onclick="fsNavigate('${wid}', 'up')" class="p-1.5 rounded hover:bg-ui-700 text-ui-400 hover:text-white transition" title="Up"><i class="fa-solid fa-arrow-up"></i></button>
+                                <div class="h-4 w-[1px] bg-ui-border mx-1"></div>
+                                
+                                <!-- Action Buttons -->
+                                <button onclick="fsCreateFolder('${wid}')" class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-ui-700 text-xs font-medium transition whitespace-nowrap"><i class="fa-solid fa-folder-plus text-blue-400"></i> <span class="hidden sm:inline">New Folder</span></button>
+                                <button onclick="fsCreateFile('${wid}')" class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-ui-700 text-xs font-medium transition whitespace-nowrap"><i class="fa-solid fa-file-circle-plus text-green-400"></i> <span class="hidden sm:inline">New File</span></button>
+                                
+                                <!-- Clipboard Toolbar Button -->
+                                <div class="h-4 w-[1px] bg-ui-border mx-1 hidden sm:block"></div>
+                                <div class="group relative flex items-center h-7 bg-ui-700/30 hover:bg-ui-800 border border-transparent hover:border-ui-border rounded-md overflow-hidden transition-all duration-300 w-8 hover:w-28 shrink-0">
+                                    <div class="absolute left-0 w-8 h-full flex items-center justify-center pointer-events-none z-10">
+                                        <i class="fa-solid fa-clipboard text-xs text-ui-400 group-hover:text-accent-400 transition-colors"></i>
+                                    </div>
+                                    <div class="absolute left-8 flex items-center h-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        <button onclick="fsSetClipboard('cut', '${wid}')" class="w-6 h-full hover:bg-white/10 flex items-center justify-center text-ui-400 hover:text-white transition" title="Cut"><i class="fa-solid fa-scissors text-[10px]"></i></button>
+                                        <button onclick="fsSetClipboard('copy', '${wid}')" class="w-7 h-full hover:bg-white/10 flex items-center justify-center text-ui-400 hover:text-white transition" title="Copy"><i class="fa-solid fa-copy text-[10px]"></i></button>
+                                        <button onclick="fsPaste(windows['${wid}'].fsState.currentFolder, '${wid}')" class="w-7 h-full hover:bg-white/10 flex items-center justify-center text-ui-400 hover:text-white transition" title="Paste"><i class="fa-solid fa-paste text-[10px]"></i></button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Dynamic Search Bar -->
+                                <div class="group relative flex items-center ml-2 h-7 transition-all duration-300 ease-out w-8 hover:w-48 focus-within:w-48 bg-ui-700/30 hover:bg-ui-900 border border-transparent hover:border-ui-border rounded-full overflow-hidden shrink-0">
+                                    <div class="absolute left-0 w-8 h-full flex items-center justify-center pointer-events-none">
+                                        <i class="fa-solid fa-magnifying-glass text-xs text-ui-400 group-hover:text-accent-400 transition-colors"></i>
+                                    </div>
+                                    <input type="text" id="fs-search-${wid}" 
+                                        class="w-full h-full bg-transparent border-none outline-none text-xs text-ui-100 pl-8 pr-3 placeholder-ui-400/50 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity cursor-text"
+                                        placeholder="Search..." 
+                                        oninput="renderFileView('${wid}')"
+                                        autocomplete="off">
+                                </div>
+
+                                <div class="flex-1"></div>
+                                
+                                <!-- Path Bar -->
+                                <div id="fs-path-${wid}" class="px-3 py-1 bg-ui-900/50 rounded border border-ui-border text-xs font-mono text-ui-400 select-all max-w-[150px] truncate shadow-inner">/</div>
+                            </div>
+                            
+                            <div id="fs-grid-${wid}" class="flex-1 p-4 overflow-y-auto grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-4 content-start relative" onclick="fsDeselect('${wid}')">
+                            </div>
                         </div>
                     </div>
                 `
@@ -4945,7 +5047,6 @@ function generateTitlebarButtonsHTML(wid) {
             
             // Generate Content
             const content = typeof app.content === 'function' ? app.content(windowId) : app.content;
-            const tbarStyle = settings.titlebarStyle || 'mac';
             
             windowEl.innerHTML = `
                 <div class="resize-handle resize-nw" onmousedown="startResize(event, '${windowId}', 'nw')"></div>
@@ -4957,11 +5058,8 @@ function generateTitlebarButtonsHTML(wid) {
                 <div class="resize-handle resize-s" onmousedown="startResize(event, '${windowId}', 's')"></div>
                 <div class="resize-handle resize-se" onmousedown="startResize(event, '${windowId}', 'se')"></div>
                 
-                <div class="title-bar relative h-8 bg-ui-800 flex items-center justify-between ${tbarStyle === 'windows' ? 'pl-3 pr-0' : 'px-3'} select-none border-b border-ui-border" onmousedown="startDrag(event, '${windowId}')">
-                    ${tbarStyle === 'mac' 
-                        ? `<div class="flex items-center gap-3 z-10">${generateTitlebarButtonsHTML(windowId)}</div><div class="absolute inset-0 flex items-center justify-center pointer-events-none gap-2"><i class="fa-solid ${app.icon} ${app.color} text-xs"></i><span class="text-[11px] font-semibold opacity-80">${app.title}</span></div>` 
-                        : `<div class="flex items-center gap-2 z-10"><i class="fa-solid ${app.icon} ${app.color} text-xs"></i><span class="text-[11px] font-semibold opacity-80">${app.title}</span></div> <div class="z-10">${generateTitlebarButtonsHTML(windowId)}</div>`
-                    }
+                <div class="${getTitlebarClasses()}" onmousedown="startDrag(event, '${windowId}')">
+                    ${getTitlebarInner(app, windowId)}
                 </div>
                 
                 <div class="flex-1 relative overflow-hidden bg-ui-900" onclick="focusWindow('${windowId}')">${content}</div>
@@ -4974,8 +5072,9 @@ function generateTitlebarButtonsHTML(wid) {
                 snapped: null, 
                 prevRect: null, 
                 appId: appId,
-                state: appState, // Notes/Browser State
-                fsState: appId === 'files' ? appState : null // Files State
+                desktopId: currentDesktopId,
+                state: appState, 
+                fsState: appId === 'files' ? appState : null 
             };
 
             // 6. Append and Initialize
@@ -4986,7 +5085,10 @@ function generateTitlebarButtonsHTML(wid) {
             focusWindow(windowId);
             
             // 7. Run Specific Initializers (Fixes blank content)
-            if (appId === 'files') renderFileView(windowId);
+            if (appId === 'files') {
+                renderFilesSidebar(windowId);
+                renderFileView(windowId);
+            }
             if (appId === 'system-info') initSysInfo(windowId);
             if (appId === 'notes') renderNoteTabs(windowId);
             if (appId === 'browser') renderBrowserTabs(windowId);
@@ -6247,7 +6349,9 @@ function updateStageManager() {
     if (!settings.stageManager) return;
 
     const strip = document.getElementById('stage-manager-strip');
-    const sortedWindows = Object.entries(windows).sort((a, b) => parseInt(a[1].element.style.zIndex) - parseInt(b[1].element.style.zIndex));
+    const sortedWindows = Object.entries(windows)
+        .filter(([wid, win]) => win.desktopId === currentDesktopId) // Filter for active desktop
+        .sort((a, b) => parseInt(a[1].element.style.zIndex) - parseInt(b[1].element.style.zIndex));
     const existingIds = Array.from(strip.children).map(c => c.dataset.wid);
     strip.innerHTML = ''; 
 
@@ -6433,6 +6537,7 @@ function renderTaskbarWindows() {
     // 1. Group Open Windows
     const groups = {};
     Object.values(windows).forEach(win => {
+        if (win.desktopId !== currentDesktopId) return; // Only show apps for current desktop
         if (!groups[win.appId]) groups[win.appId] = [];
         groups[win.appId].push(win);
     });
@@ -6467,16 +6572,18 @@ function renderTaskbarWindows() {
 
         let activeClass = '';
         if (isActiveGroup) {
-            // Background highlight and subtle ring for focused window
-            activeClass = 'bg-white/10 shadow-md rounded-xl ring-1 ring-white/20';
+            // Grey filled rounded rectangle for focused app
+            activeClass = 'bg-ui-700 border border-transparent rounded-xl shadow-sm';
         } else if (isOpen) {
-            activeClass = 'bg-white/5 hover:bg-white/10 rounded-xl';
+            // Just the outline turned grey for unfocused open apps
+            activeClass = 'border border-ui-400 rounded-xl hover:bg-ui-700/50';
         } else {
-            activeClass = 'hover:bg-white/10 rounded-xl';
+            // Standard state for closed pinned apps
+            activeClass = 'border border-transparent rounded-xl hover:bg-ui-700/50';
         }
 
         const btn = document.createElement('div');
-        btn.className = `taskbar-group relative w-10 h-10 flex items-center justify-center bg-transparent cursor-pointer transition-all duration-200 opacity-90 hover:opacity-100 group ${activeClass}`; 
+        btn.className = `taskbar-group relative w-10 h-10 flex items-center justify-center cursor-pointer transition-all duration-200 opacity-90 hover:opacity-100 group ${isOpen ? 'is-open' : ''} ${activeClass}`; 
         
         // --- PREVIEW LOGIC ---
         let previewHtml = '';
@@ -6555,12 +6662,21 @@ function renderTaskbarWindows() {
     folderItems.forEach(itemId => {
         const folderInfo = fileSystem.find(f => f.id === itemId);
         const btn = document.createElement('div');
-        btn.className = `taskbar-group relative w-10 h-10 flex items-center justify-center bg-transparent hover:bg-white/10 rounded-xl cursor-pointer transition-all duration-200 opacity-90 hover:opacity-100 group`;
+        btn.className = `taskbar-group relative w-10 h-10 flex items-center justify-center border border-transparent hover:bg-ui-700/50 rounded-xl cursor-pointer transition-all duration-200 opacity-90 hover:opacity-100 group`;
         
-        // --- NEW: HOVER LABEL FOR FOLDERS ---
         const labelHtml = `<div class="absolute bottom-full mb-2 bg-ui-800 text-xs px-2 py-1 rounded border border-ui-border opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">${folderInfo ? folderInfo.name : 'Folder'}</div>`;
         
-        btn.innerHTML = `<i class="fa-solid fa-folder text-blue-400 text-lg"></i>${labelHtml}`;
+        const emblemIcon = getFolderEmblem(itemId);
+        let folderIconHtml = `<i class="fa-solid fa-folder text-blue-400 text-lg"></i>`;
+        if (emblemIcon) {
+            folderIconHtml = `
+            <div class="relative flex items-center justify-center">
+                <i class="fa-solid fa-folder text-blue-400 text-lg"></i>
+                <i class="fa-solid ${emblemIcon} absolute text-[8px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>
+            </div>`;
+        }
+        
+        btn.innerHTML = `${folderIconHtml}${labelHtml}`;
         
         btn.onclick = (e) => {
             const currentFolder = fileSystem.find(f => f.id === itemId);
@@ -6588,7 +6704,7 @@ function renderTaskbarWindows() {
     // 7. Render Bin
     const isBinFull = fileSystem.some(f => f.parentId === 'bin');
     const binBtn = document.createElement('div');
-    binBtn.className = `taskbar-group relative w-10 h-10 flex items-center justify-center bg-transparent hover:bg-white/10 rounded-xl cursor-pointer transition-all duration-200 opacity-90 hover:opacity-100 group`;
+    binBtn.className = `taskbar-group relative w-10 h-10 flex items-center justify-center border border-transparent hover:bg-ui-700/50 rounded-xl cursor-pointer transition-all duration-200 opacity-90 hover:opacity-100 group`;
     
     const iconClass = isBinFull ? 'fa-trash-can-arrow-up' : 'fa-trash-can';
     const colorClass = isBinFull ? 'text-red-400' : 'text-ui-400';
@@ -6845,7 +6961,14 @@ function handleDesktopMouseDown(e) {
                     </div>
                 </div>
 
+                ${fsClipboard.items.length > 0 ? `
+                <div class="border-t border-ui-border my-1"></div>
+                <div class="ctx-item pl-6 relative" onclick="fsPaste('desktop', 'desktop'); hideDesktopContextMenu()">
+                    <i class="fa-solid fa-paste text-accent-400 absolute left-2"></i> <span>Paste</span>
+                </div>` : ''}
+
                 <!-- Refresh (Moved here, Icon removed) -->
+                <div class="border-t border-ui-border my-1"></div>
                 <div class="ctx-item pl-6" onclick="refreshUI('desktop'); hideDesktopContextMenu()">
                     <span>Refresh</span>
                 </div>
@@ -7318,8 +7441,9 @@ if (isResizing) {
     itemsToRender.forEach((item, index) => {
         const icon = document.createElement('div');
         const isSelected = selectedIcons.has(item.id);
+        const isCut = fsClipboard.action === 'cut' && fsClipboard.items.includes(item.id);
         
-        icon.className = `desktop-icon ${sizeClasses} flex flex-col items-center justify-center gap-2 rounded hover:bg-white/10 cursor-pointer transition border border-transparent ${isSelected ? 'selected' : ''}`;
+        icon.className = `desktop-icon ${sizeClasses} flex flex-col items-center justify-center gap-2 rounded hover:bg-white/10 cursor-pointer transition border border-transparent ${isSelected ? 'selected' : ''} ${isCut ? 'opacity-50' : ''}`;
         icon.style.position = 'absolute';
         icon.style.pointerEvents = 'auto';
 
@@ -7428,13 +7552,45 @@ if (isResizing) {
             }
         };
 
-        icon.onclick = (e) => { e.stopPropagation(); if (!e.ctrlKey && !e.metaKey) selectedIcons.clear(); selectedIcons.add(item.id); renderDesktopIcons(); handleClick(false); };
+        icon.onclick = (e) => { 
+            e.stopPropagation(); 
+            
+            if (e.ctrlKey || e.metaKey) {
+                // Ctrl-click: Toggle selection without opening
+                if (selectedIcons.has(item.id)) {
+                    selectedIcons.delete(item.id);
+                } else {
+                    selectedIcons.add(item.id);
+                }
+                // Visual update only
+                document.querySelectorAll('.desktop-icon').forEach(i => {
+                    if (selectedIcons.has(i.dataset.id)) i.classList.add('selected');
+                    else i.classList.remove('selected');
+                });
+            } else {
+                // Standard click
+                selectedIcons.clear(); 
+                selectedIcons.add(item.id); 
+                document.querySelectorAll('.desktop-icon').forEach(i => {
+                    if (selectedIcons.has(i.dataset.id)) i.classList.add('selected');
+                    else i.classList.remove('selected');
+                });
+                handleClick(false); 
+            }
+        };
+        
         icon.ondblclick = (e) => { e.stopPropagation(); handleClick(true); };
 
         icon.oncontextmenu = (e) => {
             e.preventDefault(); e.stopPropagation();
-            selectedIcons.add(item.id);
-            renderDesktopIcons();
+            if (!selectedIcons.has(item.id)) {
+                selectedIcons.clear();
+                selectedIcons.add(item.id);
+                document.querySelectorAll('.desktop-icon').forEach(i => {
+                    if (selectedIcons.has(i.dataset.id)) i.classList.add('selected');
+                    else i.classList.remove('selected');
+                });
+            }
             if (item.type === 'bin') showBinContext(e);
             else if (item.type === 'shortcut') showShortcutContext(e, item);
             else showFileContextMenu(e, 'desktop', item.id);
@@ -7805,6 +7961,17 @@ function closeWeatherModal() {
 
     if(!grid) return;
 
+    // Update Sidebar Active State
+    document.querySelectorAll(`#window-${wid} .fs-sidebar-item`).forEach(el => {
+        if (el.dataset.folder === state.currentFolder && !searchTerm) {
+            el.classList.add('bg-white/10', 'font-medium', 'text-ui-100');
+            el.classList.remove('text-ui-400');
+        } else {
+            el.classList.remove('bg-white/10', 'font-medium', 'text-ui-100');
+            el.classList.add('text-ui-400');
+        }
+    });
+
     // Drag and Drop Logic
     grid.ondragover = (e) => handleDragOver(e, false);
     grid.ondragleave = (e) => handleDragLeave(e, false);
@@ -7851,8 +8018,8 @@ function closeWeatherModal() {
 
         // Restore default layout (Grid vs List based on settings)
         // Note: We use settings.folderPreviewMode if available or default to grid 
-        // This resets the class back to the default responsive grid
-        grid.className = "flex-1 p-4 overflow-y-auto grid grid-cols-4 sm:grid-cols-5 gap-4 content-start relative";
+        // This resets the class back to the default responsive grid, now using auto-fill for dynamic wrapping
+        grid.className = "flex-1 p-4 overflow-y-auto grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-4 content-start relative";
     }
 
     // Sort items (Folders first, then alphabetical)
@@ -7870,9 +8037,10 @@ function closeWeatherModal() {
     items.forEach(item => {
         const el = document.createElement('div');
         const isSelected = state.selected.has(item.id);
+        const isCut = fsClipboard.action === 'cut' && fsClipboard.items.includes(item.id);
         
         // Base classes
-        let classes = `file-item rounded hover:bg-white/5 cursor-pointer border border-transparent transition ${isSelected ? 'selected-file-item' : ''}`;
+        let classes = `file-item rounded hover:bg-white/5 cursor-pointer border border-transparent transition ${isSelected ? 'selected-file-item' : ''} ${isCut ? 'opacity-50' : ''}`;
         
         // Apply different styling for Search List View vs Standard Grid
         if (searchTerm) {
@@ -7899,15 +8067,34 @@ function closeWeatherModal() {
         // Click Handlers
         el.onclick = (e) => {
             e.stopPropagation();
-            if(settings.doubleClickToOpen) { 
-                if (!e.ctrlKey && !e.metaKey) state.selected.clear();
-                state.selected.add(item.id);
-                document.querySelectorAll(`#fs-grid-${wid} .file-item`).forEach(i => i.classList.remove('selected-file-item'));
-                el.classList.add('selected-file-item');
-            } else { 
-                handleItemOpen(item);
+            if (e.ctrlKey || e.metaKey) {
+                // Ctrl-click: Toggle selection without opening
+                if (state.selected.has(item.id)) {
+                    state.selected.delete(item.id);
+                } else {
+                    state.selected.add(item.id);
+                }
+                
+                // Visual update without full DOM re-render
+                document.querySelectorAll(`#fs-grid-${wid} .file-item`).forEach(i => {
+                    if (state.selected.has(i.dataset.id)) i.classList.add('selected-file-item');
+                    else i.classList.remove('selected-file-item');
+                });
+            } else {
+                if (settings.doubleClickToOpen) { 
+                    // Normal click: Clear others, select this one
+                    state.selected.clear();
+                    state.selected.add(item.id);
+                    document.querySelectorAll(`#fs-grid-${wid} .file-item`).forEach(i => {
+                        if (state.selected.has(i.dataset.id)) i.classList.add('selected-file-item');
+                        else i.classList.remove('selected-file-item');
+                    });
+                } else { 
+                    handleItemOpen(item);
+                }
             }
         };
+        
         el.ondblclick = (e) => {
             e.stopPropagation();
             handleItemOpen(item);
@@ -7930,8 +8117,13 @@ function closeWeatherModal() {
                 state.selected.clear();
                 state.selected.add(item.id);
             } 
-            document.querySelectorAll(`#fs-grid-${wid} .file-item`).forEach(i => i.classList.remove('selected-file-item'));
-            el.classList.add('selected-file-item');
+            
+            // Visual update without full DOM re-render
+            document.querySelectorAll(`#fs-grid-${wid} .file-item`).forEach(i => {
+                if (state.selected.has(i.dataset.id)) i.classList.add('selected-file-item');
+                else i.classList.remove('selected-file-item');
+            });
+            
             showFileContextMenu(e, wid, item.id);
         };
 
@@ -7940,30 +8132,37 @@ function closeWeatherModal() {
         
         // --- EMBLEM LOGIC ---
         let emblemHtml = '';
-        if (item.type === 'folder' && !searchTerm) {
+        let listEmblemHtml = '';
+        if (item.type === 'folder') {
             const emblemIcon = getFolderEmblem(item.id);
             if (emblemIcon) {
-                // Fix: Using inline styles to ensure positioning works
-                // top: 40% places it slightly above the absolute center, looking visually correct on the folder body
-                emblemHtml = `<i class="fa-solid ${emblemIcon} absolute text-[10px] text-blue-900/40 drop-shadow-sm pointer-events-none z-10" 
-                                 style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>`;
+                emblemHtml = `<i class="fa-solid ${emblemIcon} absolute text-[10px] text-blue-900/40 drop-shadow-sm pointer-events-none z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>`;
+                listEmblemHtml = `<i class="fa-solid ${emblemIcon} absolute text-[8px] text-blue-900/40 drop-shadow-sm pointer-events-none z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>`;
             }
         }
         // --------------------
 
         let displayName = item.name;
         if (searchTerm) {
-        const regex = new RegExp(`(${searchTerm})`, 'gi');
-        // Changed styling to make it definitively bold/highlighted. Using text-accent-400 with thick weight.
-        displayName = item.name.replace(regex, '<span class="bg-accent-500/30 text-accent-400 font-black tracking-wide rounded px-0.5">$1</span>');
-    }
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            displayName = item.name.replace(regex, '<span class="bg-accent-500/30 text-accent-400 font-black tracking-wide rounded px-0.5">$1</span>');
+        }
 
         if (searchTerm) {
-            // LIST VIEW (No Emblem for cleaner list)
+            // LIST VIEW
             const filePath = getFilePath(item.id);
+            let iconContainer = `<i class="fa-solid ${getFileIcon(item.type)} text-xl drop-shadow-md pointer-events-none"></i>`;
+            if (item.type === 'folder') {
+                iconContainer = `
+                <div class="relative flex items-center justify-center">
+                    <i class="fa-solid fa-folder text-blue-400 text-xl drop-shadow-md pointer-events-none"></i>
+                    ${listEmblemHtml}
+                </div>`;
+            }
+
             el.innerHTML = `
                 <div class="w-8 flex justify-center flex-shrink-0">
-                    <i class="fa-solid ${getFileIcon(item.type)} text-xl drop-shadow-md pointer-events-none"></i>
+                    ${iconContainer}
                 </div>
                 <div class="flex-1 min-w-0 flex flex-col">
                     <span class="text-xs font-medium text-ui-100 truncate pointer-events-none">${displayName}</span>
@@ -7971,9 +8170,9 @@ function closeWeatherModal() {
                 </div>
             `;
         } else {
-            // GRID VIEW (With Emblem)
+            // GRID VIEW
             el.innerHTML = `
-                <div class="relative">
+                <div class="relative flex items-center justify-center">
                     ${progressRing} 
                     <i class="fa-solid ${getFileIcon(item.type)} text-3xl drop-shadow-md pointer-events-none relative z-0"></i>
                     ${emblemHtml}
@@ -7987,16 +8186,31 @@ function closeWeatherModal() {
 }
 
         function fsNavigate(wid, dir) {
-    const state = windows[wid].fsState;
-    if (dir === 'up') {
-        const curr = fileSystem.find(f => f.id === state.currentFolder);
-        if (curr && curr.parentId) {
-            state.currentFolder = curr.parentId;
-            state.selected.clear(); // Use .clear()
+            const state = windows[wid].fsState;
+            if (dir === 'up') {
+                const curr = fileSystem.find(f => f.id === state.currentFolder);
+                if (curr && curr.parentId) {
+                    state.currentFolder = curr.parentId;
+                    state.selected.clear();
+                    renderFileView(wid);
+                }
+            }
+        }
+
+        // ADD THIS NEW FUNCTION RIGHT HERE
+        function fsNavigateTo(wid, folderId) {
+            const state = windows[wid]?.fsState;
+            if (!state) return;
+            
+            state.currentFolder = folderId;
+            state.selected.clear();
+            
+            // Clear search if one was active
+            const searchInput = document.getElementById(`fs-search-${wid}`);
+            if (searchInput) searchInput.value = '';
+            
             renderFileView(wid);
         }
-    }
-}
 
 function fsDeselect(wid) {
     if (!isDragging && windows[wid] && windows[wid].fsState) {
@@ -8117,6 +8331,109 @@ function fsDeselect(wid) {
             });
         }
         
+let fsClipboard = { action: null, items: [] };
+
+        function fsSetClipboard(action, context) {
+            let selected = [];
+            if (context === 'desktop') {
+                selected = Array.from(selectedIcons);
+            } else if (windows[context]) {
+                selected = Array.from(windows[context].fsState.selected);
+            }
+            
+            // Protect core system folders from cut/copy
+            const protectedFolders = ['root', 'bin', 'desktop', 'docs', 'imgs'];
+            selected = selected.filter(id => !protectedFolders.includes(id));
+
+            if (selected.length === 0) return;
+
+            fsClipboard = { action, items: selected };
+            pushNotification("Clipboard", `${selected.length} item(s) ${action === 'copy' ? 'copied' : 'cut'}.`);
+            
+            renderDesktopIcons();
+            Object.keys(windows).forEach(key => {
+                if (windows[key].appId === 'files') renderFileView(key);
+            });
+        }
+
+        function performCopy(item, targetParentId) {
+            const newItemId = item.type + '-' + Date.now() + Math.floor(Math.random()*1000);
+            
+            let newName = item.name;
+            let counter = 1;
+            // Prevent name collisions by adding " - Copy [n]"
+            while(fileSystem.some(f => f.parentId === targetParentId && f.name.toLowerCase() === newName.toLowerCase())) {
+                const lastDot = item.name.lastIndexOf('.');
+                if (item.type === 'file' && lastDot > 0) {
+                    newName = `${item.name.substring(0, lastDot)} - Copy ${counter}${item.name.substring(lastDot)}`;
+                } else {
+                    newName = `${item.name} - Copy ${counter}`;
+                }
+                counter++;
+            }
+
+            const newItem = { ...item, id: newItemId, parentId: targetParentId, name: newName };
+            delete newItem.x; delete newItem.y;
+            fileSystem.push(newItem);
+
+            // Recursively copy children if it's a folder
+            if (item.type === 'folder') {
+                const children = fileSystem.filter(f => f.parentId === item.id);
+                children.forEach(child => performCopy(child, newItemId));
+            }
+
+            return newItem;
+        }
+
+        function fsPaste(targetFolderId, wid = null) {
+    if (!fsClipboard.action || fsClipboard.items.length === 0) return;
+
+    if (targetFolderId === 'bin') {
+        pushNotification("Error", "Cannot paste directly into Recycle Bin.");
+        return;
+    }
+
+    // Determine UI attributes
+    const firstItem = fileSystem.find(f => f.id === fsClipboard.items[0]);
+    const sourceId = firstItem ? firstItem.parentId : 'Unknown';
+    const actionName = fsClipboard.action === 'cut' ? 'Moving' : 'Copying';
+
+    // Hook into loading screen UI
+    simulateFileOperation(actionName, fsClipboard.items.length, sourceId, targetFolderId, () => {
+        let pastedCount = 0;
+
+        fsClipboard.items.forEach(itemId => {
+            const item = fileSystem.find(f => f.id === itemId);
+            if (!item) return;
+
+            if (fsClipboard.action === 'cut') {
+                if (item.type === 'folder' && isCircularMove(item.id, targetFolderId)) return;
+                item.parentId = targetFolderId;
+                delete item.x; delete item.y;
+                pastedCount++;
+            } else if (fsClipboard.action === 'copy') {
+                const newItem = performCopy(item, targetFolderId);
+                if (newItem) pastedCount++;
+            }
+        });
+
+        // Clear clipboard if items were cut
+        if (fsClipboard.action === 'cut') {
+            fsClipboard = { action: null, items: [] }; 
+        }
+
+        // Save & Refresh State
+        if (pastedCount > 0) {
+            saveFileSystem();
+            pushNotification("Clipboard", `Pasted ${pastedCount} item(s).`);
+            renderDesktopIcons();
+            Object.keys(windows).forEach(key => {
+                if (windows[key].appId === 'files') renderFileView(key);
+            });
+        }
+    });
+}
+
         function fsDeleteItem(wid, itemId) {
             const protectedFolders = ['root', 'bin', 'desktop', 'docs', 'imgs'];
             if (protectedFolders.includes(itemId)) {
@@ -8139,6 +8456,12 @@ function fsDeselect(wid) {
                     fileSystem = fileSystem.filter(f => f.id !== itemId && f.parentId !== itemId);
                     pushNotification("FileSystem", "Item permanently deleted.");
                     
+// If it was a pinned sidebar folder, unpin it
+                    if (pinnedSidebarFolders.includes(itemId)) {
+                        pinnedSidebarFolders = pinnedSidebarFolders.filter(id => id !== itemId);
+                        saveSidebarFolders();
+                    }
+
                     // FIX: If it was a pinned folder, unpin it
                     if (pinnedApps.includes(itemId)) {
                         pinnedApps = pinnedApps.filter(id => id !== itemId);
@@ -8203,6 +8526,11 @@ function fsDeselect(wid) {
                     if (wid === 'desktop' || item.parentId === 'desktop') {
                         renderDesktopIcons();
                     } 
+
+// Refresh sidebars if pinned name changes
+                    Object.keys(windows).forEach(key => {
+                        if(windows[key].appId === 'files') renderFilesSidebar(key);
+                    });
                     
                     // If called from a window, or if other windows are open looking at this folder
                     Object.keys(windows).forEach(key => {
@@ -8332,6 +8660,7 @@ function fsDeselect(wid) {
     if (itemId) {
         const isFolder = item && item.type === 'folder';
         const isPinned = item ? pinnedApps.includes(item.id) : false;
+        const isSidebarPinned = item ? pinnedSidebarFolders.includes(item.id) : false; // NEW
         const pinLabel = settings.layout === 'macos' ? 'Dock' : 'Taskbar';
         
         // Protect core system folders
@@ -8348,17 +8677,32 @@ function fsDeselect(wid) {
             `;
         } else if (isFolder) {
              const actionText = isPinned ? 'Unpin from' : 'Pin to';
+             const sidebarActionText = isSidebarPinned ? 'Unpin from Sidebar' : 'Pin to Sidebar'; // NEW
              extraOptions = `
                 <div class="border-t border-ui-border my-1"></div>
                 <div class="ctx-item" onclick="togglePinFolder('${itemId}'); hideDesktopContextMenu()">
                     <i class="fa-solid fa-thumbtack ${isPinned ? 'text-accent-400' : 'text-ui-400'}"></i> 
                     <span>${actionText} ${pinLabel}</span>
                 </div>
+                ${!isSystemFolder ? `
+                <!-- NEW: Sidebar Pin Option -->
+                <div class="ctx-item" onclick="toggleSidebarPin('${itemId}'); hideDesktopContextMenu()">
+                    <i class="fa-solid fa-list-ul ${isSidebarPinned ? 'text-accent-400' : 'text-ui-400'}"></i> 
+                    <span>${sidebarActionText}</span>
+                </div>
+                ` : ''}
             `;
         }
 
         ctxMenu.innerHTML = `
             ${(!isInBin && !isSystemFolder) ? `
+            <div class="ctx-item" onclick="fsSetClipboard('cut', '${wid}'); hideDesktopContextMenu()">
+                <i class="fa-solid fa-scissors text-ui-400"></i> <span>Cut</span>
+            </div>
+            <div class="ctx-item" onclick="fsSetClipboard('copy', '${wid}'); hideDesktopContextMenu()">
+                <i class="fa-solid fa-copy text-ui-400"></i> <span>Copy</span>
+            </div>
+            <div class="border-t border-ui-border my-1"></div>
             <div class="ctx-item" onclick="fsRenameItem('${wid}', '${itemId}'); hideDesktopContextMenu()">
                 <i class="fa-solid fa-pen text-ui-400"></i> <span>Rename</span>
             </div>` : ''}
@@ -8381,6 +8725,12 @@ function fsDeselect(wid) {
             <div class="ctx-item" onclick="refreshUI('${wid}'); hideDesktopContextMenu()">
                 <i class="fa-solid fa-rotate-right text-ui-400"></i> <span>Refresh</span>
             </div>
+            ${(!isInBin && fsClipboard.items.length > 0) ? `
+            <div class="border-t border-ui-border my-1"></div>
+            <div class="ctx-item" onclick="fsPaste('${currentFolder}', '${wid}'); hideDesktopContextMenu()">
+                <i class="fa-solid fa-paste text-accent-400"></i> <span>Paste</span>
+            </div>
+            ` : ''}
             <div class="border-t border-ui-border my-1"></div>
             <div class="ctx-item" onclick="fsCreateFolder('${wid}'); hideDesktopContextMenu()">
                 <i class="fa-solid fa-folder text-blue-400"></i> <span>New Folder</span>
@@ -8968,6 +9318,7 @@ function renderDock() {
 
     const groups = {};
     Object.values(windows).forEach(win => {
+        if (win.desktopId !== currentDesktopId) return; // Only show apps for current desktop
         if (!groups[win.appId]) groups[win.appId] = [];
         groups[win.appId].push(win);
     });
@@ -9265,34 +9616,194 @@ function createCustomDragGhost(e, count) {
 }
 
 /**
- * STEP (v) & (vi): Final Move Logic with Synchronization & Safety
+ * Simulated Loading Engine for File Transfers
+ */
+function simulateFileOperation(action, count, sourceId, targetId, onComplete) {
+    const dialog = document.getElementById('file-transfer-dialog');
+    const title = document.getElementById('ft-title');
+    const icon = document.getElementById('ft-icon');
+    const fromText = document.getElementById('ft-from');
+    const toText = document.getElementById('ft-to');
+    const progressBar = document.getElementById('ft-progress-bar');
+    const percentText = document.getElementById('ft-percentage');
+    const detailsText = document.getElementById('ft-details');
+
+    if (!dialog) {
+        onComplete();
+        return;
+    }
+
+    icon.className = action === 'Copying' ? 'fa-solid fa-copy text-blue-400' : 'fa-solid fa-file-export text-accent-400';
+    title.innerText = `${action} ${count} item${count > 1 ? 's' : ''}...`;
+    
+    const getFolderName = (id) => {
+        if(id === 'desktop') return 'Desktop';
+        if(id === 'root') return 'OS Drive';
+        if(id === 'bin') return 'Recycle Bin';
+        const f = fileSystem.find(f => f.id === id);
+        return f ? f.name : 'Unknown';
+    };
+
+    fromText.innerText = `From: ${getFolderName(sourceId)}`;
+    toText.innerText = `To: ${getFolderName(targetId)}`;
+    progressBar.style.width = '0%';
+    percentText.innerText = '0%';
+    detailsText.innerText = 'Starting...';
+
+    // Show Dialog
+    dialog.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        dialog.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+        dialog.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+    });
+
+    // Animate Progress Bar
+    let progress = 0;
+    // Calculate realistic looking transfer time (minimum 600ms, maximum 2500ms based on item count)
+    const totalTime = Math.min(Math.max(count * 300, 600), 2500); 
+    const intervalTime = 40;
+    const step = (100 / (totalTime / intervalTime));
+
+    const interval = setInterval(() => {
+        progress += step + (Math.random() * (step * 0.5)); // Random variance for realistic staggering
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            
+            progressBar.style.width = '100%';
+            percentText.innerText = '100%';
+            detailsText.innerText = 'Finishing up...';
+
+            setTimeout(() => {
+                // Hide Dialog
+                dialog.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                dialog.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                setTimeout(() => {
+                    dialog.classList.add('hidden');
+                    onComplete(); // Execute actual filesystem data modification
+                }, 300);
+            }, 300);
+        } else {
+            progressBar.style.width = `${progress}%`;
+            percentText.innerText = `${Math.floor(progress)}%`;
+            detailsText.innerText = `Transferring files...`;
+        }
+    }, intervalTime);
+}
+
+/**
+ * STEP (v) & (vi): Final Move Logic with Synchronization & Loading Indicator
  */
 function moveItems(itemIds, targetParentId, optionalCoords) {
-    let movedCount = 0;
-    let errorCount = 0;
-    const affectedWindowIds = new Set(); 
-    let needsDesktopRefresh = false;
-    let shortcutsModified = false;
+    if (!itemIds || itemIds.length === 0) return;
 
-    itemIds.forEach((id, index) => {
-        const item = fileSystem.find(f => f.id === id);
+    // Fast bypass if we are just rearranging items on the desktop natively (no loading screen needed)
+    const isJustRearranging = targetParentId === 'desktop' && itemIds.every(id => {
+        const f = fileSystem.find(x => x.id === id);
+        return (f && f.parentId === 'desktop') || desktopAppShortcuts.some(s => s.id === id) || id === 'bin-shortcut';
+    });
+
+    if (isJustRearranging) {
+        executeMove();
+    } else {
+        // Find source directory from the first item to display in the UI
+        const firstItem = fileSystem.find(f => f.id === itemIds[0]);
+        const sourceId = firstItem ? firstItem.parentId : 'Unknown';
         
-        if (!item) {
-            // Handle dragging App Shortcuts and the Recycle Bin
-            let shortcutItem = desktopAppShortcuts.find(s => s.id === id);
-            let isBin = (id === 'bin-shortcut');
+        // Call the loading engine. Once it reaches 100%, it will run executeMove()
+        simulateFileOperation('Moving', itemIds.length, sourceId, targetParentId, executeMove);
+    }
+
+    // Actual Data Operations
+    function executeMove() {
+        let movedCount = 0;
+        let errorCount = 0;
+        const affectedWindowIds = new Set(); 
+        let needsDesktopRefresh = false;
+        let shortcutsModified = false;
+
+        itemIds.forEach((id, index) => {
+            const item = fileSystem.find(f => f.id === id);
             
-            if (shortcutItem || isBin) {
+            if (!item) {
+                // Handle dragging App Shortcuts and the Recycle Bin
+                let shortcutItem = desktopAppShortcuts.find(s => s.id === id);
+                let isBin = (id === 'bin-shortcut');
+                
+                if (shortcutItem || isBin) {
+                    if (targetParentId === 'desktop' && optionalCoords) {
+                        movedCount++;
+                        needsDesktopRefresh = true;
+                        
+                        let targetObj = isBin ? (settings.binPosition = settings.binPosition || {}) : shortcutItem;
+                        
+                        if (settings.autoArrange) {
+                            delete targetObj.x;
+                            delete targetObj.y;
+                        } else {
+                            let newX = optionalCoords.x + (index * 10); 
+                            let newY = optionalCoords.y + (index * 10);
+
+                            if (settings.alignGrid) {
+                                let cellW = 96, cellH = 112; 
+                                if (settings.iconSize === 'small') { cellW = 80; cellH = 96; }
+                                if (settings.iconSize === 'large') { cellW = 112; cellH = 128; }
+                                const startX = 16;
+                                const startY = settings.layout === 'macos' ? 48 : 16;
+                                newX = Math.round((newX - startX) / cellW) * cellW + startX;
+                                newY = Math.round((newY - startY) / cellH) * cellH + startY;
+                            }
+                            targetObj.x = newX;
+                            targetObj.y = newY;
+                        }
+                        
+                        if (shortcutItem) shortcutsModified = true;
+                    } else if (targetParentId !== 'desktop') {
+                        pushNotification('Action Not Supported', 'App shortcuts cannot be moved into folders.');
+                    }
+                }
+                return;
+            }
+
+            const isIslandTarget = (targetParentId === 'island-internal' || targetParentId === 'desktop');
+            const isJustRearrangingLocal = (needsDesktopRefresh && !affectedWindowIds.size && targetParentId === 'desktop');
+
+            // --- NEW: SYSTEM FOLDER PROTECTION ---
+            const protectedFolders = ['root', 'bin', 'desktop', 'docs', 'imgs'];
+            if (protectedFolders.includes(item.id)) {
+                errorCount++;
+                return;
+            }
+
+            // Safety Check for standard folders
+            if (item.type === 'folder') {
+                if (isCircularMove(item.id, targetParentId)) {
+                    errorCount++;
+                    return;
+                }
+            }
+
+            if (item.parentId === 'desktop') needsDesktopRefresh = true;
+            else {
+                Object.keys(windows).forEach(wid => {
+                    if (windows[wid].appId === 'files' && windows[wid].fsState.currentFolder === item.parentId) {
+                        affectedWindowIds.add(wid);
+                    }
+                });
+            }
+
+            // Move Logic
+            if (item.parentId !== targetParentId || (targetParentId === 'desktop' && optionalCoords)) {
+                item.parentId = targetParentId;
+                movedCount++;
+                
+                // --- UPDATED COORDINATE LOGIC ---
                 if (targetParentId === 'desktop' && optionalCoords) {
-                    movedCount++;
-                    needsDesktopRefresh = true;
-                    
-                    let targetObj = isBin ? (settings.binPosition = settings.binPosition || {}) : shortcutItem;
-                    
                     if (settings.autoArrange) {
-                        delete targetObj.x;
-                        delete targetObj.y;
+                        delete item.x;
+                        delete item.y;
                     } else {
+                        // Calculate exact drop position
                         let newX = optionalCoords.x + (index * 10); 
                         let newY = optionalCoords.y + (index * 10);
 
@@ -9300,122 +9811,51 @@ function moveItems(itemIds, targetParentId, optionalCoords) {
                             let cellW = 96, cellH = 112; 
                             if (settings.iconSize === 'small') { cellW = 80; cellH = 96; }
                             if (settings.iconSize === 'large') { cellW = 112; cellH = 128; }
+                            
                             const startX = 16;
                             const startY = settings.layout === 'macos' ? 48 : 16;
+                            
                             newX = Math.round((newX - startX) / cellW) * cellW + startX;
                             newY = Math.round((newY - startY) / cellH) * cellH + startY;
                         }
-                        targetObj.x = newX;
-                        targetObj.y = newY;
+
+                        item.x = newX;
+                        item.y = newY;
                     }
-                    
-                    if (shortcutItem) shortcutsModified = true;
-                } else if (targetParentId !== 'desktop') {
-                    pushNotification('Action Not Supported', 'App shortcuts cannot be moved into folders.');
-                }
-            }
-            return;
-        }
-
-const isIslandTarget = (targetParentId === 'island-internal' || targetParentId === 'desktop');
-const isJustRearranging = (needsDesktopRefresh && !affectedWindowIds.size && targetParentId === 'desktop');
-
-
-        // --- NEW: SYSTEM FOLDER PROTECTION ---
-        const protectedFolders = ['root', 'bin', 'desktop', 'docs', 'imgs'];
-        if (protectedFolders.includes(item.id)) {
-            errorCount++;
-            return;
-        }
-
-        // Safety Check for standard folders
-        if (item.type === 'folder') {
-            if (isCircularMove(item.id, targetParentId)) {
-                errorCount++;
-                return;
-            }
-        }
-        
-        // Safety Check
-        if (item.type === 'folder') {
-            if (isCircularMove(item.id, targetParentId)) {
-                errorCount++;
-                return;
-            }
-        }
-
-        if (item.parentId === 'desktop') needsDesktopRefresh = true;
-        else {
-            Object.keys(windows).forEach(wid => {
-                if (windows[wid].appId === 'files' && windows[wid].fsState.currentFolder === item.parentId) {
-                    affectedWindowIds.add(wid);
-                }
-            });
-        }
-
-        // Move Logic
-        if (item.parentId !== targetParentId || (targetParentId === 'desktop' && optionalCoords)) {
-            item.parentId = targetParentId;
-            movedCount++;
-            
-            // --- UPDATED COORDINATE LOGIC ---
-            if (targetParentId === 'desktop' && optionalCoords) {
-                if (settings.autoArrange) {
+                } else {
+                    // Moving into a folder, clear coords
                     delete item.x;
                     delete item.y;
-                } else {
-                    // Calculate exact drop position
-                    let newX = optionalCoords.x + (index * 10); 
-                    let newY = optionalCoords.y + (index * 10);
-
-                    if (settings.alignGrid) {
-                        let cellW = 96, cellH = 112; 
-                        if (settings.iconSize === 'small') { cellW = 80; cellH = 96; }
-                        if (settings.iconSize === 'large') { cellW = 112; cellH = 128; }
-                        
-                        const startX = 16;
-                        const startY = settings.layout === 'macos' ? 48 : 16;
-                        
-                        newX = Math.round((newX - startX) / cellW) * cellW + startX;
-                        newY = Math.round((newY - startY) / cellH) * cellH + startY;
-                    }
-
-                    item.x = newX;
-                    item.y = newY;
                 }
-            } else {
-                // Moving into a folder, clear coords
-                delete item.x;
-                delete item.y;
+            }
+        });
+
+        if (movedCount > 0) {
+            if (targetParentId === 'desktop') needsDesktopRefresh = true;
+            else {
+                Object.keys(windows).forEach(wid => {
+                    if (windows[wid].appId === 'files' && windows[wid].fsState.currentFolder === targetParentId) {
+                        affectedWindowIds.add(wid);
+                    }
+                });
+            }
+
+            saveFileSystem();
+            if (shortcutsModified) localStorage.setItem('gemini_desktop_shortcuts', JSON.stringify(desktopAppShortcuts));
+            saveSettings(); 
+            
+            if (needsDesktopRefresh) renderDesktopIcons();
+            affectedWindowIds.forEach(wid => renderFileView(wid));
+
+            const isJustRearrangingLocal = (needsDesktopRefresh && !affectedWindowIds.size && targetParentId === 'desktop');
+            if (!isJustRearrangingLocal) {
+                pushNotification('File System', `Moved ${movedCount} item(s).`);
             }
         }
-    });
 
-    if (movedCount > 0) {
-        if (targetParentId === 'desktop') needsDesktopRefresh = true;
-        else {
-            Object.keys(windows).forEach(wid => {
-                if (windows[wid].appId === 'files' && windows[wid].fsState.currentFolder === targetParentId) {
-                    affectedWindowIds.add(wid);
-                }
-            });
+        if (errorCount > 0) {
+            pushNotification('Error', `Cannot move/modify system folders or perform circular moves.`);
         }
-
-        saveFileSystem();
-        if (shortcutsModified) localStorage.setItem('gemini_desktop_shortcuts', JSON.stringify(desktopAppShortcuts));
-        saveSettings(); // Ensure binPosition changes are saved if any
-        
-        if (needsDesktopRefresh) renderDesktopIcons();
-        affectedWindowIds.forEach(wid => renderFileView(wid));
-
-        const isJustRearranging = (needsDesktopRefresh && !affectedWindowIds.size && targetParentId === 'desktop');
-        if (!isJustRearranging) {
-            pushNotification('File System', `Moved ${movedCount} item(s).`);
-        }
-    }
-
-    if (errorCount > 0) {
-        pushNotification('Error', `Cannot move/modify system folders or perform circular moves.`);
     }
 } 
 
@@ -9645,11 +10085,21 @@ function isCircularMove(movingItemId, targetFolderId) {
                 if (matchedFiles.length > 0) {
                     html += `<div class="text-[10px] font-bold text-ui-400 mb-2 mt-4 pl-2">Files</div>`;
                     html += matchedFiles.map(f => {
-                        const iconClass = f.type === 'folder' ? 'fa-folder text-blue-400' : 'fa-file-lines text-gray-400';
+                        let iconHtml = `<i class="fa-solid ${f.type === 'folder' ? 'fa-folder text-blue-400' : 'fa-file-lines text-gray-400'} text-sm"></i>`;
+                        if (f.type === 'folder') {
+                            const emblemIcon = getFolderEmblem(f.id);
+                            if (emblemIcon) {
+                                iconHtml = `
+                                <div class="relative flex items-center justify-center">
+                                    <i class="fa-solid fa-folder text-blue-400 text-sm"></i>
+                                    <i class="fa-solid ${emblemIcon} absolute text-[6px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>
+                                </div>`;
+                            }
+                        }
                         const clickAction = f.type === 'folder' ? `addToRecent({id:'${f.id}', type:'folder', title:'${f.name}', icon:'fa-folder', color:'text-blue-400'}); openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100)` : `openFile({id:'${f.id}', name:'${f.name}', type:'${f.type}', content:'${f.content || ''}'})`;
                         return `
                         <button onclick="${clickAction}; toggleStartMenu(false)" class="flex items-center p-2 hover:bg-white/10 rounded transition gap-3 w-full text-left">
-                                <div class="w-6 flex justify-center"><i class="fa-solid ${iconClass} text-sm"></i></div>
+                                <div class="w-6 flex justify-center">${iconHtml}</div>
                                 <span class="text-xs text-ui-100">${f.name}</span>
                         </button>
                     `}).join('');
@@ -9688,30 +10138,38 @@ function isCircularMove(movingItemId, targetFolderId) {
                 let clickAction = '';
                 let iconClass = '';
                 let colorClass = item.color || '';
+                let customIconHtml = null;
                 
                 if (item.type === 'app') {
                     clickAction = `openApp('${item.id}')`;
                     iconClass = item.icon.includes('fa-') ? item.icon : `fa-${item.icon}`; 
                 } else if (item.type === 'folder') {
-                    // --- NEW: Folder Click Logic ---
-                    // Opens Files app, waits 100ms, then navigates the specific window to the folder
                     clickAction = `openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.currentFolder='${item.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100)`;
                     iconClass = 'fa-folder';
                     if(!colorClass) colorClass = 'text-blue-400';
-                } else {
-                    // File logic
-                    const fullFile = fileSystem.find(f => f.id === item.id);
-                    if(fullFile) {
-                        clickAction = `openFile({id:'${fullFile.id}', name:'${fullFile.name}', type:'${fullFile.type}', content:'${fullFile.content || ''}'})`;
-                    } else {
-                        clickAction = "alert('File not found')";
+                    
+                    const emblemIcon = getFolderEmblem(item.id);
+                    if (emblemIcon) {
+                        customIconHtml = `
+                        <div class="relative flex items-center justify-center w-6 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-folder text-blue-400 text-lg"></i>
+                            <i class="fa-solid ${emblemIcon} absolute text-[8px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>
+                        </div>`;
                     }
+                } else {
+                    const fullFile = fileSystem.find(f => f.id === item.id);
+                    if(fullFile) clickAction = `openFile({id:'${fullFile.id}', name:'${fullFile.name}', type:'${fullFile.type}', content:'${fullFile.content || ''}'})`;
+                    else clickAction = "alert('File not found')";
                     iconClass = item.icon; 
+                }
+
+                if (!customIconHtml) {
+                    customIconHtml = `<i class="fa-solid ${iconClass} ${colorClass} text-lg w-6 text-center group-hover:scale-110 transition-transform"></i>`;
                 }
 
                 return `
                     <button onclick="${clickAction}; toggleStartMenu(false)" class="flex items-center p-2 hover:bg-white/10 rounded transition gap-3 text-left w-full group">
-                        <i class="fa-solid ${iconClass} ${colorClass} text-lg w-6 text-center group-hover:scale-110 transition-transform"></i>
+                        ${customIconHtml}
                         <div class="flex flex-col overflow-hidden">
                             <span class="text-xs font-medium text-ui-100 truncate">${item.title}</span>
                             <span class="text-[9px] text-ui-400 truncate capitalize">${item.type === 'app' ? 'Application' : item.type}</span>
@@ -9948,19 +10406,50 @@ function renderFlyoutContent(folderId) {
         html += `<div class="${isGrid ? 'flyout-grid' : 'flyout-list'} max-h-[300px] overflow-y-auto custom-scrollbar">`;
         
         items.forEach(item => {
-            const icon = item.type === 'folder' ? 'fa-folder text-blue-400' : 'fa-file-lines text-gray-400';
-            
+            let iconHtml = '';
+            if (item.type === 'folder') {
+                const emblemIcon = getFolderEmblem(item.id);
+                if (isGrid) {
+                    if (emblemIcon) {
+                        iconHtml = `
+                        <div class="relative flex items-center justify-center mb-1">
+                            <i class="fa-solid fa-folder text-blue-400 text-2xl"></i>
+                            <i class="fa-solid ${emblemIcon} absolute text-[10px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>
+                        </div>`;
+                    } else {
+                        iconHtml = `<i class="fa-solid fa-folder text-blue-400 text-2xl mb-1"></i>`;
+                    }
+                } else {
+                    if (emblemIcon) {
+                        iconHtml = `
+                        <div class="relative flex items-center justify-center w-5">
+                            <i class="fa-solid fa-folder text-blue-400 text-sm"></i>
+                            <i class="fa-solid ${emblemIcon} absolute text-[6px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>
+                        </div>`;
+                    } else {
+                        iconHtml = `<i class="fa-solid fa-folder text-blue-400 text-sm w-5 text-center"></i>`;
+                    }
+                }
+            } else {
+                const baseIcon = getFileIcon(item.type);
+                if (isGrid) {
+                    iconHtml = `<i class="fa-solid ${baseIcon} text-2xl mb-1"></i>`;
+                } else {
+                    iconHtml = `<i class="fa-solid ${baseIcon} text-sm w-5 text-center"></i>`;
+                }
+            }
+
             if (isGrid) {
                 html += `
                     <div class="flyout-grid-item hover:bg-white/10" onclick="openFromFlyout('${item.id}', '${item.type}')">
-                        <i class="fa-solid ${icon} text-2xl mb-1"></i>
+                        ${iconHtml}
                         <span class="text-[10px] text-center w-full truncate text-ui-100">${item.name}</span>
                     </div>
                 `;
             } else {
                 html += `
                     <div class="flyout-list-item hover:bg-white/10" onclick="openFromFlyout('${item.id}', '${item.type}')">
-                        <i class="fa-solid ${icon} text-sm w-5 text-center"></i>
+                        ${iconHtml}
                         <span class="text-xs text-ui-100 truncate flex-1">${item.name}</span>
                     </div>
                 `;
@@ -10506,14 +10995,13 @@ function saveLockScreenPassword(wid) {
 function handlePasswordToggle(e, wid) {
     e.preventDefault(); // Stop the toggle from visually flipping instantly
     
-    const isCurrentlyChecked = e.target.checked;
-    const intendedState = !isCurrentlyChecked;
+    // Rely on the system settings state instead of the DOM checkbox state
+    const intendedState = !settings.requirePassword;
     
     showModal("Enter Current Password to Confirm:", "", (pass) => {
         if (pass === settings.lockScreenPassword) {
-            e.target.checked = intendedState; // Visual update
             setLockScreenSetting('requirePassword', intendedState);
-            refreshSettingsUI(); // Ensure UI opens/closes the password boxes
+            refreshSettingsUI(); // Ensure UI updates perfectly
             pushNotification("Security", intendedState ? "Password enabled." : "Password disabled.");
         } else {
             pushNotification("Error", "Incorrect password.");
@@ -10839,8 +11327,13 @@ function factoryResetSystem() {
 // Function for Titlebar Style Selection
 function setTitlebarStyle(style) {
     settings.titlebarStyle = style;
-    if(style === 'mac') settings.titlebarButtonOrder = 'close,min,max';
-    else settings.titlebarButtonOrder = 'min,max,close';
+    if(style === 'mac') {
+        settings.titlebarButtonOrder = 'close,min,max';
+        settings.titlebarButtonAlign = 'left';
+    } else {
+        settings.titlebarButtonOrder = 'min,max,close';
+        settings.titlebarButtonAlign = 'right';
+    }
     saveSettings();
     refreshAllTitlebars();
     refreshSettingsUI();
@@ -10853,6 +11346,49 @@ function setTitlebarOrder(order) {
     refreshAllTitlebars();
 }
 
+// Function for Titlebar Alignment Selection
+function setTitlebarAlign(align) {
+    settings.titlebarButtonAlign = align;
+    saveSettings();
+    refreshAllTitlebars();
+    refreshSettingsUI();
+}
+
+// Helper: Get classes for the titlebar based on settings
+function getTitlebarClasses() {
+    const tbarStyle = settings.titlebarStyle || 'mac';
+    const align = settings.titlebarButtonAlign || (tbarStyle === 'mac' ? 'left' : 'right');
+    let padClass = 'px-3';
+    if (tbarStyle === 'windows') {
+        padClass = align === 'right' ? 'pl-3 pr-0' : 'pl-0 pr-3';
+    }
+    return `title-bar relative h-8 bg-ui-800 flex items-center justify-between ${padClass} select-none border-b border-ui-border`;
+}
+
+// Helper: Generate inner HTML for the titlebar based on layout settings
+function getTitlebarInner(app, wid) {
+    const tbarStyle = settings.titlebarStyle || 'mac';
+    const align = settings.titlebarButtonAlign || (tbarStyle === 'mac' ? 'left' : 'right');
+    const btns = generateTitlebarButtonsHTML(wid);
+    const titleGroup = `<div class="flex items-center gap-2 z-10 pointer-events-none"><i class="fa-solid ${app.icon} ${app.color} text-xs"></i><span class="text-[11px] font-semibold opacity-80">${app.title}</span></div>`;
+    const centerTitle = `<div class="absolute inset-0 flex items-center justify-center pointer-events-none gap-2"><i class="fa-solid ${app.icon} ${app.color} text-xs"></i><span class="text-[11px] font-semibold opacity-80">${app.title}</span></div>`;
+
+    if (tbarStyle === 'mac') {
+        if (align === 'left') {
+            return `<div class="flex items-center gap-3 z-10">${btns}</div>${centerTitle}`;
+        } else {
+            return `<div class="flex-1"></div>${centerTitle}<div class="flex items-center gap-3 z-10">${btns}</div>`;
+        }
+    } else {
+        // Windows style
+        if (align === 'left') {
+            return `<div class="z-10 flex items-center h-full">${btns}</div> <div class="flex items-center gap-2 z-10 ml-auto">${titleGroup}</div>`;
+        } else {
+            return `<div class="flex items-center gap-2 z-10">${titleGroup}</div> <div class="z-10 flex items-center h-full">${btns}</div>`;
+        }
+    }
+}
+
 // Applies changes live to all open windows
 function refreshAllTitlebars() {
     Object.keys(windows).forEach(wid => {
@@ -10860,24 +11396,8 @@ function refreshAllTitlebars() {
         const tb = winEl.querySelector('.title-bar');
         if(tb) {
             const app = apps[windows[wid].appId];
-            const tbarStyle = settings.titlebarStyle || 'mac';
-            
-            tb.className = `title-bar relative h-8 bg-ui-800 flex items-center justify-between ${tbarStyle === 'windows' ? 'pl-3 pr-0' : 'px-3'} select-none border-b border-ui-border`;
-
-            if (tbarStyle === 'mac') {
-                tb.innerHTML = `
-                    <div class="flex items-center gap-3 z-10">${generateTitlebarButtonsHTML(wid)}</div>
-                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none gap-2">
-                        <i class="fa-solid ${app.icon} ${app.color} text-xs"></i>
-                        <span class="text-[11px] font-semibold opacity-80">${app.title}</span>
-                    </div>
-                `;
-            } else {
-                tb.innerHTML = `
-                    <div class="flex items-center gap-2 z-10"><i class="fa-solid ${app.icon} ${app.color} text-xs"></i><span class="text-[11px] font-semibold opacity-80">${app.title}</span></div>
-                    <div class="z-10">${generateTitlebarButtonsHTML(wid)}</div>
-                `;
-            }
+            tb.className = getTitlebarClasses();
+            tb.innerHTML = getTitlebarInner(app, wid);
         }
     });
 }
@@ -10945,11 +11465,21 @@ function renderTaskbarSearch(query) {
         if (matchedFiles.length > 0) {
             html += `<div class="text-[10px] font-bold text-ui-400 mb-2 mt-4 pl-2">Files</div>`;
             html += matchedFiles.map(f => {
-                const iconClass = f.type === 'folder' ? 'fa-folder text-blue-400' : 'fa-file-lines text-gray-400';
+                let iconHtml = `<i class="fa-solid ${f.type === 'folder' ? 'fa-folder text-blue-400' : 'fa-file-lines text-gray-400'} text-sm"></i>`;
+                if (f.type === 'folder') {
+                    const emblemIcon = getFolderEmblem(f.id);
+                    if (emblemIcon) {
+                        iconHtml = `
+                        <div class="relative flex items-center justify-center">
+                            <i class="fa-solid fa-folder text-blue-400 text-sm"></i>
+                            <i class="fa-solid ${emblemIcon} absolute text-[6px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>
+                        </div>`;
+                    }
+                }
                 const clickAction = f.type === 'folder' ? `addToRecent({id:'${f.id}', type:'folder', title:'${f.name}', icon:'fa-folder', color:'text-blue-400'}); openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100)` : `openFile({id:'${f.id}', name:'${f.name}', type:'${f.type}', content:'${f.content || ''}'})`;
                 return `
                 <button onclick="${clickAction}; toggleTaskbarSearchPopup(false); document.getElementById('taskbar-search-input').value=''" class="flex items-center p-2 hover:bg-white/10 rounded transition gap-3 w-full text-left">
-                        <div class="w-6 flex justify-center"><i class="fa-solid ${iconClass} text-sm"></i></div>
+                        <div class="w-6 flex justify-center">${iconHtml}</div>
                         <span class="text-xs text-ui-100">${f.name}</span>
                 </button>
             `}).join('');
@@ -11049,10 +11579,24 @@ function toggleSetting(key, value) {
                 
                 el.className = `flex flex-col items-center gap-2 p-2 rounded cursor-pointer border transition ${isSelected ? 'bg-accent-500/20 border-accent-500 shadow-inner' : 'border-transparent hover:bg-white/5'}`;
                 
-                const iconClass = item.type === 'folder' ? 'fa-folder text-blue-400' : 'fa-file-lines text-gray-400';
+                let iconHtml = '';
+                if (item.type === 'folder') {
+                    const emblemIcon = getFolderEmblem(item.id);
+                    if (emblemIcon) {
+                        iconHtml = `
+                        <div class="relative flex items-center justify-center drop-shadow-md pointer-events-none">
+                            <i class="fa-solid fa-folder text-blue-400 text-3xl"></i>
+                            <i class="fa-solid ${emblemIcon} absolute text-[12px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>
+                        </div>`;
+                    } else {
+                        iconHtml = `<i class="fa-solid fa-folder text-blue-400 text-3xl drop-shadow-md pointer-events-none"></i>`;
+                    }
+                } else {
+                    iconHtml = `<i class="fa-solid ${getFileIcon(item.type)} text-3xl drop-shadow-md pointer-events-none"></i>`;
+                }
                 
                 el.innerHTML = `
-                    <i class="fa-solid ${iconClass} text-3xl drop-shadow-md pointer-events-none"></i>
+                    ${iconHtml}
                     <span class="text-[10px] text-center break-all line-clamp-2 select-none pointer-events-none w-full text-ui-100">${item.name}</span>
                 `;
 
@@ -11526,7 +12070,7 @@ function toggleSetting(key, value) {
 // --- DYNAMIC CURSOR GENERATOR & NEON GLOW ---
 const cursorPaths = {
     default: { d: "M4.5 3.5 L 4.5 19.5 L 8.5 15.5 L 12 23 L 14.5 22 L 11 14.5 L 17.5 14.5 Z", hs: "8 7" },
-    pointer: { d: "M8.5 12V3.5C8.5 2.12 9.62 1 11 1C12.38 1 13.5 2.12 13.5 3.5V9.5C13.5 9.5 14.5 8.5 15.5 8.5C16.6 8.5 17.5 9.4 17.5 10.5V11.5C17.5 11.5 18.5 10.5 19.5 10.5C20.6 10.5 21.5 11.4 21.5 12.5V16C21.5 19.87 18.37 23 14.5 23H10C6.13 23 3 19.87 3 16V13L4.5 11.5C5.3 10.7 6.7 10.7 7.5 11.5L8.5 12.5V12Z", hs: "15 5" },
+    pointer: { d: "M10 11V8.99c0-.88.59-1.64 1.44-1.86h.05A1.99 1.99 0 0 1 14 9.05V12v-2c0-.88.6-1.65 1.46-1.87h.05A1.98 1.98 0 0 1 18 10.06V13v-1.94a2 2 0 0 1 1.51-1.94h0A2 2 0 0 1 22 11.06V14c0 .6-.08 1.27-.21 1.97a7.96 7.96 0 0 1-7.55 6.48 54.98 54.98 0 0 1-4.48 0 7.96 7.96 0 0 1-7.55-6.48C2.08 15.27 2 14.59 2 14v-1.49c0-1.11.9-2.01 2.01-2.01h0a2 2 0 0 1 2.01 2.03l-.01.97v-10c0-1.1.9-2 2-2h0a2 2 0 0 1 2 2V11Z", hs: "14 5" },
     text: { d: "M12 4V20M8 4H16M8 20H16", hs: "16 16", isStrokeOnly: true },
     ns: { d: "M12 2 L8 6 H11 V18 H8 L12 22 L16 18 H13 V6 H16 Z", hs: "16 16" },
     ew: { d: "M2 12 L6 8 V11 H18 V8 L22 12 L18 16 V13 H6 V16 Z", hs: "16 16" },
@@ -12625,6 +13169,9 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         if (e.repeat) return; // FIX: Prevents rapid-toggling when holding down the keys
         
+        // Prevent activation if disabled in settings
+        if (settings.omniSearchEnabled === false) return;
+        
         if (omniActive) closeOmni();
         else openOmni();
     }
@@ -12699,7 +13246,7 @@ async function fetchOmniWeather(city) {
         const geoData = await geoRes.json();
         
         if (!geoData.results || geoData.results.length === 0) {
-            wrapper.innerHTML = `<div class="px-5 py-4 text-ui-400 text-sm italic text-center w-full">Cannot find weather for "${city}"</div>`;
+            wrapper.innerHTML = `<div class="px-5 py-4 text-gray-400 text-sm italic text-center w-full">Cannot find weather for "${city}"</div>`;
             return;
         }
         
@@ -12716,23 +13263,23 @@ async function fetchOmniWeather(city) {
         const cond = getWeatherCondition(wData.current.weather_code);
         
         wrapper.innerHTML = `
-            <div class="px-5 py-4 flex items-center justify-between bg-ui-700/30 rounded-xl mx-3 my-2 border border-ui-border shadow-inner group">
+            <div class="px-5 py-4 flex items-center justify-between bg-gray-700/30 rounded-xl mx-3 my-2 border border-white/10 shadow-inner group">
                 <div class="flex items-center gap-4">
                     <i class="fa-solid ${cond.icon} ${cond.color} text-5xl drop-shadow-md"></i>
                     <div>
-                        <div class="text-xl font-bold text-ui-100 tracking-tight">${loc.name}${loc.country ? ', ' + loc.country : ''}</div>
-                        <div class="text-sm text-ui-400">${cond.text}</div>
+                        <div class="text-xl font-bold text-gray-100 tracking-tight">${loc.name}${loc.country ? ', ' + loc.country : ''}</div>
+                        <div class="text-sm text-gray-400">${cond.text}</div>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="text-right">
                         <!-- NEW: Displays °C or °F based on preference -->
-                        <div class="text-4xl font-bold text-ui-100 tracking-tighter">${Math.round(wData.current.temperature_2m)}°${unit}</div>
-                        <div class="text-xs text-ui-400 mt-1">Wind: ${Math.round(wData.current.wind_speed_10m)} km/h</div>
+                        <div class="text-4xl font-bold text-gray-100 tracking-tighter">${Math.round(wData.current.temperature_2m)}°${unit}</div>
+                        <div class="text-xs text-gray-400 mt-1">Wind: ${Math.round(wData.current.wind_speed_10m)} km/h</div>
                     </div>
-                    <!-- NEW: Hover-to-reveal toggle button -->
-                    <button onclick="toggleOmniWeatherUnit('${city.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-full bg-ui-800 hover:bg-ui-600 border border-ui-border flex items-center justify-center transition shadow opacity-0 group-hover:opacity-100" title="Switch to ${unit === 'C' ? 'Fahrenheit' : 'Celsius'}">
-                        <i class="fa-solid fa-temperature-half text-ui-400"></i>
+                    <!-- BUTTON: Specifically retains system ui-* colors to flip based on theme -->
+                    <button onclick="toggleOmniWeatherUnit('${city.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-full bg-ui-800 hover:bg-ui-600 border border-ui-border flex items-center justify-center transition shadow opacity-0 group-hover:opacity-100 text-ui-400" title="Switch to ${unit === 'C' ? 'Fahrenheit' : 'Celsius'}">
+                        <i class="fa-solid fa-temperature-half"></i>
                     </button>
                 </div>
             </div>
@@ -12774,10 +13321,10 @@ function handleOmniInput(e) {
     if (mathResult !== null && !isNaN(mathResult) && query.match(/[+\-*/]/)) {
         resultsHTML += `
             <div class="px-5 py-3 hover:bg-white/10 cursor-pointer flex items-center gap-4 transition omni-result-item" onclick="navigator.clipboard.writeText('${mathResult}'); closeOmni(); showToast('Calculator', 'Copied result to clipboard!');">
-                <div class="w-12 h-12 rounded-xl bg-ui-700 flex items-center justify-center text-2xl text-cyan-400 border border-ui-border shadow-inner"><i class="fa-solid fa-calculator"></i></div>
+                <div class="w-12 h-12 rounded-xl bg-gray-700 flex items-center justify-center text-2xl text-cyan-400 border border-white/10 shadow-inner"><i class="fa-solid fa-calculator"></i></div>
                 <div>
-                    <div class="text-2xl font-bold text-ui-100 leading-none">${mathResult}</div>
-                    <div class="text-xs text-ui-400 mt-1">${query}</div>
+                    <div class="text-2xl font-bold text-gray-100 leading-none">${mathResult}</div>
+                    <div class="text-xs text-gray-400 mt-1">${query}</div>
                 </div>
             </div>`;
         hasResults = true;
@@ -12788,7 +13335,7 @@ function handleOmniInput(e) {
     if (weatherMatch) {
         const city = weatherMatch[1].trim();
         if (city.length > 1) {
-            resultsHTML += `<div id="omni-weather-wrapper" class="w-full"><div class="px-5 py-4 text-ui-400 text-sm flex items-center w-full justify-center"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Fetching weather for ${city}...</div></div>`;
+            resultsHTML += `<div id="omni-weather-wrapper" class="w-full"><div class="px-5 py-4 text-gray-400 text-sm flex items-center w-full justify-center"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Fetching weather for ${city}...</div></div>`;
             hasResults = true;
             
             clearTimeout(omniWeatherDebounce);
@@ -12801,23 +13348,23 @@ function handleOmniInput(e) {
     
     if (['dark', 'dark mode', 'darkmode'].includes(lowerQuery)) {
         resultsHTML += `
-            <div class="px-5 py-2 text-[10px] font-bold text-ui-400 uppercase tracking-widest mt-1 w-full">System Action</div>
+            <div class="px-5 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 w-full">System Action</div>
             <div class="px-5 py-3 hover:bg-white/10 cursor-pointer flex items-center gap-4 transition group omni-result-item" onclick="setTheme('dark'); closeOmni(); showToast('Theme', 'Switched to Dark Mode');">
-                <div class="w-12 h-12 rounded-xl bg-ui-700 flex items-center justify-center text-2xl text-white border border-ui-border shadow-inner shrink-0"><i class="fa-solid fa-moon group-hover:scale-110 transition-transform"></i></div>
+                <div class="w-12 h-12 rounded-xl bg-gray-700 flex items-center justify-center text-2xl text-white border border-white/10 shadow-inner shrink-0"><i class="fa-solid fa-moon group-hover:scale-110 transition-transform"></i></div>
                 <div>
-                    <div class="text-sm font-bold text-ui-100 leading-none">Switch to Dark Mode</div>
-                    <div class="text-xs text-ui-400 mt-1">Enable dark appearance</div>
+                    <div class="text-sm font-bold text-gray-100 leading-none">Switch to Dark Mode</div>
+                    <div class="text-xs text-gray-400 mt-1">Enable dark appearance</div>
                 </div>
             </div>`;
         hasResults = true;
     } else if (['light', 'light mode', 'lightmode'].includes(lowerQuery)) {
         resultsHTML += `
-            <div class="px-5 py-2 text-[10px] font-bold text-ui-400 uppercase tracking-widest mt-1 w-full">System Action</div>
+            <div class="px-5 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 w-full">System Action</div>
             <div class="px-5 py-3 hover:bg-white/10 cursor-pointer flex items-center gap-4 transition group omni-result-item" onclick="setTheme('light'); closeOmni(); showToast('Theme', 'Switched to Light Mode');">
-                <div class="w-12 h-12 rounded-xl bg-ui-700 flex items-center justify-center text-2xl text-yellow-500 border border-ui-border shadow-inner shrink-0"><i class="fa-solid fa-sun group-hover:scale-110 transition-transform"></i></div>
+                <div class="w-12 h-12 rounded-xl bg-gray-700 flex items-center justify-center text-2xl text-yellow-500 border border-white/10 shadow-inner shrink-0"><i class="fa-solid fa-sun group-hover:scale-110 transition-transform"></i></div>
                 <div>
-                    <div class="text-sm font-bold text-ui-100 leading-none">Switch to Light Mode</div>
-                    <div class="text-xs text-ui-400 mt-1">Enable light appearance</div>
+                    <div class="text-sm font-bold text-gray-100 leading-none">Switch to Light Mode</div>
+                    <div class="text-xs text-gray-400 mt-1">Enable light appearance</div>
                 </div>
             </div>`;
         hasResults = true;
@@ -12828,13 +13375,13 @@ function handleOmniInput(e) {
     // Index Apps
     const matchedApps = Object.keys(apps).filter(k => apps[k].title.toLowerCase().includes(lowerQuery));
     if (matchedApps.length > 0) {
-        resultsHTML += `<div class="px-5 py-2 text-[10px] font-bold text-ui-400 uppercase tracking-widest mt-1 w-full">Applications</div>`;
+        resultsHTML += `<div class="px-5 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 w-full">Applications</div>`;
         matchedApps.forEach(id => {
             const app = apps[id];
             resultsHTML += `
                 <div class="px-5 py-3 hover:bg-white/10 cursor-pointer flex items-center w-full gap-4 transition group omni-result-item" onclick="openApp('${id}'); closeOmni();">
-                    <div class="w-10 h-10 rounded-xl bg-ui-700 group-hover:bg-white/20 border border-ui-border flex items-center justify-center shadow-inner shrink-0"><i class="fa-solid ${app.icon} ${app.color} text-xl group-hover:scale-110 transition-transform"></i></div>
-                    <span class="text-sm font-medium text-ui-100 flex-1">${app.title}</span>
+                    <div class="w-10 h-10 rounded-xl bg-gray-700 group-hover:bg-white/20 border border-white/10 flex items-center justify-center shadow-inner shrink-0"><i class="fa-solid ${app.icon} ${app.color} text-xl group-hover:scale-110 transition-transform"></i></div>
+                    <span class="text-sm font-medium text-gray-100 flex-1">${app.title}</span>
                 </div>
             `;
         });
@@ -12844,9 +13391,22 @@ function handleOmniInput(e) {
     // Index Files & Folders
     const matchedFiles = fileSystem.filter(f => f.id !== 'root' && f.name.toLowerCase().includes(lowerQuery));
     if (matchedFiles.length > 0) {
-        resultsHTML += `<div class="px-5 py-2 text-[10px] font-bold text-ui-400 uppercase tracking-widest mt-1 w-full">Files & Folders</div>`;
+        resultsHTML += `<div class="px-5 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 w-full">Files & Folders</div>`;
         matchedFiles.forEach(f => {
-            const fullIconClass = f.type === 'folder' ? 'fa-folder text-blue-400' : getFileIcon(f.type);
+            let fullIconHtml = `<i class="fa-solid ${getFileIcon(f.type)} text-xl group-hover:scale-110 transition-transform"></i>`;
+            if (f.type === 'folder') {
+                const emblemIcon = getFolderEmblem(f.id);
+                if (emblemIcon) {
+                    fullIconHtml = `
+                    <div class="relative flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-folder text-blue-400 text-xl"></i>
+                        <i class="fa-solid ${emblemIcon} absolute text-[8px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>
+                    </div>`;
+                } else {
+                    fullIconHtml = `<i class="fa-solid fa-folder text-blue-400 text-xl group-hover:scale-110 transition-transform"></i>`;
+                }
+            }
+
             const action = f.type === 'folder' 
                 ? `openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100);` 
                 : `openFile({id:'${f.id}', name:'${f.name}', type:'${f.type}', content:'${f.content || ''}'})`;
@@ -12855,10 +13415,10 @@ function handleOmniInput(e) {
 
             resultsHTML += `
                 <div class="px-5 py-3 hover:bg-white/10 cursor-pointer flex items-center w-full gap-4 transition group omni-result-item" onclick="${action}; closeOmni();">
-                    <div class="w-10 h-10 rounded-xl bg-ui-700 group-hover:bg-white/20 border border-ui-border flex items-center justify-center shadow-inner shrink-0"><i class="fa-solid ${fullIconClass} text-xl group-hover:scale-110 transition-transform"></i></div>
+                    <div class="w-10 h-10 rounded-xl bg-gray-700 group-hover:bg-white/20 border border-white/10 flex items-center justify-center shadow-inner shrink-0">${fullIconHtml}</div>
                     <div class="flex flex-col min-w-0 flex-1">
-                        <span class="text-sm font-medium text-ui-100 truncate">${f.name}</span>
-                        <span class="text-[10px] text-ui-400 truncate opacity-80">${path}</span>
+                        <span class="text-sm font-medium text-gray-100 truncate">${f.name}</span>
+                        <span class="text-[10px] text-gray-400 truncate opacity-80">${path}</span>
                     </div>
                 </div>
             `;
@@ -12868,7 +13428,7 @@ function handleOmniInput(e) {
 
     // No Results Output
     if (!hasResults && !weatherMatch && mathResult === null) {
-        resultsHTML = `<div class="px-5 py-8 text-center text-ui-400 italic text-sm w-full">No results found for "${query}"</div>`;
+        resultsHTML = `<div class="px-5 py-8 text-center text-gray-400 italic text-sm w-full">No results found for "${query}"</div>`;
     }
 
     resultsContainer.innerHTML = resultsHTML;
@@ -13128,6 +13688,318 @@ function initDockMagnification() {
             if(label) label.style.bottom = '100%';
         });
     });
+}
+
+/* --- FILE SYSTEM SIDEBAR ENGINE --- */
+
+function renderFilesSidebar(wid) {
+    const sidebar = document.getElementById(`fs-sidebar-${wid}`);
+    if (!sidebar) return;
+    const state = windows[wid]?.fsState;
+    const currentFolder = state ? state.currentFolder : null;
+
+    const makeItem = (id, name, icon, isSystem = false) => {
+        const isActive = id === currentFolder ? 'bg-white/10 font-medium text-ui-100' : 'text-ui-400 hover:bg-white/10';
+        const contextMenuAttr = !isSystem ? `oncontextmenu="showSidebarContextMenu(event, '${id}')"` : '';
+
+        return `
+            <div onclick="fsNavigateTo('${wid}', '${id}')" 
+                 ondragover="handleDragOver(event, false)" ondragleave="handleDragLeave(event, false)" ondrop="handleDrop(event, '${id}')" 
+                 class="px-4 py-1.5 text-xs cursor-pointer flex items-center justify-between transition-colors fs-sidebar-item group ${isActive}" 
+                 data-folder="${id}" ${contextMenuAttr}>
+                <div class="flex items-center gap-3 overflow-hidden pointer-events-none">
+                    <i class="fa-solid ${icon} w-4 text-center"></i> 
+                    <span class="truncate">${name}</span>
+                </div>
+                ${!isSystem ? `<i class="fa-solid fa-xmark opacity-0 group-hover:opacity-100 hover:text-red-400 p-1" onclick="event.stopPropagation(); toggleSidebarPin('${id}')"></i>` : ''}
+            </div>
+        `;
+    };
+
+    let html = `<div class="text-[10px] font-bold text-ui-400 uppercase tracking-widest px-4 mb-1 mt-2">System</div>`;
+    html += makeItem('root', 'OS Drive', 'fa-hard-drive', true);
+    html += makeItem('desktop', 'Desktop', 'fa-desktop text-blue-400', true);
+    html += makeItem('docs', 'Documents', 'fa-file-lines text-blue-400', true);
+    html += makeItem('imgs', 'Images', 'fa-image text-orange-400', true);
+    html += makeItem('bin', 'Trash', 'fa-trash-can text-ui-400', true);
+
+    if (pinnedSidebarFolders.length > 0) {
+        html += `<div class="text-[10px] font-bold text-ui-400 uppercase tracking-widest px-4 mb-1 mt-4">Pinned</div>`;
+        pinnedSidebarFolders.forEach(folderId => {
+            const f = fileSystem.find(item => item.id === folderId);
+            if (f) html += makeItem(f.id, f.name, 'fa-folder text-blue-400');
+        });
+    }
+    
+    // Empty drop zone indicator at bottom to catch dragging pins
+    html += `<div class="flex-1 mt-4 p-4 min-h-[50px] border-2 border-transparent border-dashed rounded-lg mx-2 transition-colors duration-200" id="fs-sidebar-dropzone-${wid}"></div>`;
+    sidebar.innerHTML = html;
+}
+
+function toggleSidebarPin(folderId) {
+    const index = pinnedSidebarFolders.indexOf(folderId);
+    if(index > -1) {
+        pinnedSidebarFolders.splice(index, 1);
+        pushNotification("Sidebar", "Folder unpinned.");
+    } else {
+        pinnedSidebarFolders.push(folderId);
+        pushNotification("Sidebar", "Folder pinned to sidebar.");
+    }
+    saveSidebarFolders();
+    
+    // Refresh all open sidebars
+    Object.keys(windows).forEach(wid => {
+        if (windows[wid].appId === 'files') renderFilesSidebar(wid);
+    });
+}
+
+function handleSidebarDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropzone = e.currentTarget.querySelector('[id^="fs-sidebar-dropzone-"]');
+    if (dropzone) dropzone.classList.add('border-accent-500', 'bg-white/5');
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function handleSidebarDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropzone = e.currentTarget.querySelector('[id^="fs-sidebar-dropzone-"]');
+    if (dropzone) dropzone.classList.remove('border-accent-500', 'bg-white/5');
+}
+
+function handleSidebarDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const dropzone = e.currentTarget.querySelector('[id^="fs-sidebar-dropzone-"]');
+    if (dropzone) dropzone.classList.remove('border-accent-500', 'bg-white/5');
+
+    try {
+        const data = e.dataTransfer.getData('application/json');
+        if (!data) return;
+        const payload = JSON.parse(data);
+        
+        let pinnedCount = 0;
+        payload.items.forEach(id => {
+            const isSystemFolder = ['root', 'bin', 'desktop', 'docs', 'imgs'].includes(id);
+            const item = fileSystem.find(f => f.id === id);
+            if (item && item.type === 'folder' && !isSystemFolder && !pinnedSidebarFolders.includes(id)) {
+                pinnedSidebarFolders.push(id);
+                pinnedCount++;
+            }
+        });
+        
+        if (pinnedCount > 0) {
+            saveSidebarFolders();
+            Object.keys(windows).forEach(wid => {
+                if (windows[wid].appId === 'files') renderFilesSidebar(wid);
+            });
+            pushNotification("Sidebar", `Pinned ${pinnedCount} folder(s).`);
+        } else if (payload.items.length > 0) {
+            pushNotification("Notice", "Only folders can be pinned here.");
+        }
+    } catch (err) {
+        console.error("Sidebar pin drop failed:", err);
+    }
+}
+
+function showSidebarContextMenu(e, folderId) {
+    e.preventDefault();
+    e.stopPropagation();
+    const ctxMenu = document.getElementById('desktop-ctx-menu');
+    ctxMenu.innerHTML = `
+        <div class="ctx-item" onclick="toggleSidebarPin('${folderId}'); hideDesktopContextMenu()">
+            <i class="fa-solid fa-link-slash text-ui-400"></i> 
+            <span>Unpin from Sidebar</span>
+        </div>
+    `;
+    ctxMenu.style.left = `${e.clientX}px`;
+    ctxMenu.style.top = `${e.clientY}px`;
+    ctxMenu.style.display = 'block';
+    
+    const closeMenu = (ev) => {
+        if(!ctxMenu.contains(ev.target)) {
+            hideDesktopContextMenu();
+            document.removeEventListener('click', closeMenu);
+        }
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 0);
+}
+
+// --- VIRTUAL DESKTOPS LOGIC ---
+
+function toggleTaskView() {
+    const overlay = document.getElementById('task-view-overlay');
+    const isHidden = overlay.classList.contains('hidden');
+    
+    closeAllPanels(); // Ensure Start menu, etc are closed
+    
+    if (isHidden) {
+        renderTaskView();
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        requestAnimationFrame(() => overlay.classList.remove('opacity-0'));
+    } else {
+        overlay.classList.add('opacity-0');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }, 300);
+    }
+}
+
+function createNewDesktop() {
+    const newId = nextDesktopId++;
+    desktops.push({ id: newId, name: `Desktop ${desktops.length + 1}` });
+    switchDesktop(newId);
+}
+
+function switchDesktop(id) {
+    currentDesktopId = id;
+    
+    // Hide/Show windows based on the newly selected desktop
+    Object.keys(windows).forEach(wid => {
+        const win = windows[wid];
+        if (win.desktopId === currentDesktopId) {
+            if (!win.element.classList.contains('minimized')) {
+                win.element.style.display = 'flex';
+                win.element.style.opacity = '1';
+                win.element.style.pointerEvents = 'auto';
+            }
+        } else {
+            win.element.style.display = 'none'; // Hide windows from other desktops
+        }
+    });
+    
+    updateTaskbar();
+    updateStageManager();
+    renderTaskView(); 
+}
+
+function closeDesktop(e, id) {
+    e.stopPropagation();
+    if (desktops.length <= 1) return; // Can't close last remaining desktop
+    
+    // Reassign windows to the first available desktop
+    const targetDesktopId = desktops[0].id === id ? desktops[1].id : desktops[0].id;
+    
+    Object.keys(windows).forEach(wid => {
+        if (windows[wid].desktopId === id) {
+            windows[wid].desktopId = targetDesktopId;
+        }
+    });
+    
+    desktops = desktops.filter(d => d.id !== id);
+    
+    // Rename remaining desktops to maintain chronological order
+    desktops.forEach((d, i) => d.name = `Desktop ${i + 1}`);
+    
+    if (currentDesktopId === id) {
+        switchDesktop(targetDesktopId);
+    } else {
+        renderTaskView();
+        updateTaskbar();
+    }
+}
+
+let taskViewHoverTimer = null;
+
+function renderTaskView() {
+    renderTaskViewDesktops();
+    renderTaskViewWindows(currentDesktopId);
+}
+
+function renderTaskViewDesktops() {
+    const desktopsContainer = document.getElementById('task-view-desktops');
+    if (!desktopsContainer) return;
+    
+    desktopsContainer.innerHTML = desktops.map(d => `
+        <div class="relative group"
+             ondragover="handleDesktopDragOver(event)" 
+             ondragleave="handleDesktopDragLeave(event)" 
+             ondrop="handleDesktopDrop(event, ${d.id})"
+             onmouseenter="taskViewHoverTimer = setTimeout(() => renderTaskViewWindows(${d.id}), 150)"
+             onmouseleave="clearTimeout(taskViewHoverTimer); renderTaskViewWindows(currentDesktopId)">
+            <div onclick="switchDesktop(${d.id}); toggleTaskView()" class="h-32 w-48 rounded-xl border-2 transition-all cursor-pointer bg-ui-800/80 hover:bg-ui-700 bg-cover bg-center overflow-hidden flex flex-col ${currentDesktopId === d.id ? 'border-accent-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] scale-105' : 'border-ui-border hover:border-ui-400'}" style="background-image: url('${settings.wallpaper}');">
+                <div class="absolute inset-0 bg-black/40 pointer-events-none"></div>
+                <div class="absolute bottom-2 left-0 right-0 text-center text-sm font-bold text-white drop-shadow-md z-10 pointer-events-none">${d.name}</div>
+            </div>
+            ${desktops.length > 1 ? `
+            <button onclick="closeDesktop(event, ${d.id})" class="absolute -top-3 -right-3 w-6 h-6 bg-red-500 hover:bg-red-400 rounded-full text-white text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-lg z-20">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            ` : ''}
+        </div>
+    `).join('');
+}
+
+function renderTaskViewWindows(desktopId) {
+    const windowsContainer = document.getElementById('task-view-windows');
+    if (!windowsContainer) return;
+    
+    const currentWindows = Object.entries(windows).filter(([wid, win]) => win.desktopId === desktopId);
+    
+    if (currentWindows.length === 0) {
+        windowsContainer.innerHTML = '<div class="text-ui-400 text-xl font-light pointer-events-none">No open windows on this desktop</div>';
+    } else {
+        windowsContainer.innerHTML = currentWindows.map(([wid, win]) => {
+            const app = apps[win.appId];
+            return `
+                <div draggable="true" 
+                     ondragstart="handleTaskViewDragStart(event, '${wid}')"
+                     onclick="switchDesktop(${desktopId}); restoreWindow('${wid.replace('window-', '')}'); toggleTaskView()" 
+                     class="w-64 h-48 bg-ui-900 rounded-xl border border-ui-border hover:border-accent-500 hover:scale-105 transition cursor-pointer flex flex-col overflow-hidden shadow-2xl relative group">
+                    <div class="bg-ui-800 p-2 flex items-center gap-2 border-b border-ui-border pointer-events-none">
+                        <i class="fa-solid ${app.icon} ${app.color} text-xs"></i>
+                        <span class="text-xs font-bold text-ui-100 truncate">${app.title}</span>
+                    </div>
+                    <div class="flex-1 flex items-center justify-center p-4 bg-ui-900/50 pointer-events-none">
+                        <i class="fa-solid ${app.icon} ${app.color} text-5xl opacity-50"></i>
+                    </div>
+                    <button onclick="event.stopPropagation(); closeApp('${wid.replace('window-', '')}'); renderTaskView();" class="absolute top-1.5 right-2 w-5 h-5 bg-red-500 hover:bg-red-400 rounded-full text-white text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-lg z-20">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+function handleTaskViewDragStart(e, wid) {
+    e.dataTransfer.setData('text/plain', wid);
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDesktopDragOver(e) {
+    e.preventDefault();
+    const bgDiv = e.currentTarget.querySelector('.rounded-xl');
+    if (bgDiv) bgDiv.classList.add('border-accent-400', 'scale-110');
+}
+
+function handleDesktopDragLeave(e) {
+    const bgDiv = e.currentTarget.querySelector('.rounded-xl');
+    if (bgDiv) bgDiv.classList.remove('border-accent-400', 'scale-110');
+    renderTaskViewDesktops();
+}
+
+function handleDesktopDrop(e, targetDesktopId) {
+    e.preventDefault();
+    const wid = e.dataTransfer.getData('text/plain');
+    if (wid && windows[wid]) {
+        windows[wid].desktopId = targetDesktopId;
+        
+        // Ensure standard UI synchronization 
+        if (targetDesktopId !== currentDesktopId) {
+            windows[wid].element.style.display = 'none';
+        } else {
+            windows[wid].element.style.display = 'flex';
+        }
+        
+        updateTaskbar();
+        updateStageManager();
+        renderTaskView();
+    }
 }
 
 </script>
