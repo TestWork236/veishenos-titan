@@ -2,6 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script>
+        const savedFirmware = localStorage.getItem('gemini_firmware');
+        const isInjected = document.querySelector('meta[name="firmware-injected"]');
+        if (savedFirmware && !isInjected) {
+            document.open();
+            document.write(savedFirmware);
+            document.close();
+            window.stop();
+        } else if (!savedFirmware) {
+            fetch(window.location.href.split('#')[0].split('?')[0])
+                .then(res => res.text())
+                .then(html => {
+                    html = html.replace('<head>', '<head><meta name="firmware-injected" content="true">');
+                    localStorage.setItem('gemini_firmware', html);
+                });
+        }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VeishenOS - Titan</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14029,17 +14046,17 @@ async function checkSystemUpdates(wid) {
         if (!rawRes.ok) throw new Error("Not Found");
         
         latestFetchedHTML = await rawRes.text();
-        
-        const currentRes = await fetch(window.location.href.split('#')[0].split('?')[0] + '?t=' + Date.now());
-        const currentHTML = await currentRes.text();
+        const currentFirmware = localStorage.getItem('gemini_firmware') || "";
 
         const sanitize = (html) => {
+            if(!html) return "";
             return html.replace(/<script[^>]*src=["'][^"']*vercel[^"']*["'][^>]*><\/script>/gi, '')
+                       .replace(/<meta name="firmware-injected" content="true">/gi, '')
                        .replace(/<!--.*?-->/gs, '')
                        .replace(/\s+/g, '');
         };
 
-        if (sanitize(latestFetchedHTML) !== sanitize(currentHTML)) {
+        if (sanitize(latestFetchedHTML) !== sanitize(currentFirmware)) {
             statusEl.innerHTML = "<span class='text-green-400'>Update available!</span>";
             installBtn.classList.remove('hidden');
         } else {
@@ -14047,7 +14064,7 @@ async function checkSystemUpdates(wid) {
             installBtn.classList.add('hidden');
         }
     } catch (error) {
-        statusEl.innerHTML = "<span class='text-red-400'>Failed to connect. Make sure your GitHub Repo is public.</span>";
+        statusEl.innerHTML = "<span class='text-red-400'>Failed to connect.</span>";
     } finally {
         btnEl.disabled = false;
     }
@@ -14056,9 +14073,14 @@ async function checkSystemUpdates(wid) {
 function installSystemUpdate(wid) {
     document.getElementById(`update-status-${wid}`).innerText = "Installing update...";
     localStorage.setItem('gemini_show_changelog', 'true');
-    const newWindow = document.open('text/html', 'replace');
-    newWindow.write(latestFetchedHTML);
-    newWindow.close();
+    
+    let newFirmware = latestFetchedHTML;
+    newFirmware = newFirmware.replace('<head>', '<head><meta name="firmware-injected" content="true">');
+    localStorage.setItem('gemini_firmware', newFirmware);
+    
+    document.open('text/html', 'replace');
+    document.write(newFirmware);
+    document.close();
 }
 
 async function fetchChangelog(wid) {
