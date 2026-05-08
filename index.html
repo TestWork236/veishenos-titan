@@ -14031,10 +14031,16 @@ async function checkSystemUpdates(wid) {
         if (!versionRes.ok) throw new Error("Version file not found");
         
         const latestVersion = (await versionRes.text()).trim();
+        const installedVersion = localStorage.getItem('gemini_installed_version');
 
-        if (latestVersion !== SYSTEM_VERSION && latestVersion.length > 0) {
+        if (latestVersion === SYSTEM_VERSION) {
+            localStorage.removeItem('gemini_installed_version');
+        }
+
+        if (latestVersion !== SYSTEM_VERSION && latestVersion !== installedVersion && latestVersion.length > 0) {
             statusEl.innerHTML = `<span class='text-green-400'>Update available! (v${latestVersion})</span>`;
             installBtn.classList.remove('hidden');
+            installBtn.dataset.version = latestVersion;
             
             const rawRes = await fetch('https://raw.githubusercontent.com/TestWork236/veishenos-titan/main/index.html?t=' + Date.now());
             if (rawRes.ok) latestFetchedHTML = await rawRes.text();
@@ -14055,6 +14061,11 @@ function installSystemUpdate(wid) {
     document.getElementById(`update-status-${wid}`).innerText = "Installing update...";
     localStorage.setItem('gemini_show_changelog', 'true');
     
+    const installBtn = document.getElementById(`install-btn-${wid}`);
+    if (installBtn && installBtn.dataset.version) {
+        localStorage.setItem('gemini_installed_version', installBtn.dataset.version);
+    }
+    
     const parser = new DOMParser();
     const newDoc = parser.parseFromString(latestFetchedHTML, 'text/html');
     
@@ -14067,6 +14078,10 @@ function installSystemUpdate(wid) {
         newScript.appendChild(document.createTextNode(oldScript.innerHTML));
         oldScript.parentNode.replaceChild(newScript, oldScript);
     });
+
+    setTimeout(() => {
+        window.location.href = window.location.pathname + '?v=' + Date.now();
+    }, 1500);
 }
 
 async function fetchChangelog(wid) {
