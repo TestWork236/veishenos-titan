@@ -2402,6 +2402,7 @@ body.music-playing #dynamic-island::before {
     </div>
 
     <script>
+	const SYSTEM_VERSION = "1.4.25";
         let zIndexCounter = 100;
         let windows = {};
         let instanceCounts = {}; 
@@ -14026,24 +14027,17 @@ async function checkSystemUpdates(wid) {
     btnEl.disabled = true;
 
     try {
-        const rawRes = await fetch('https://raw.githubusercontent.com/TestWork236/veishenos-titan/main/index.html?t=' + Date.now());
-        if (!rawRes.ok) throw new Error("Not Found");
+        const versionRes = await fetch('https://raw.githubusercontent.com/TestWork236/veishenos-titan/main/version.txt?t=' + Date.now());
+        if (!versionRes.ok) throw new Error("Version file not found");
         
-        latestFetchedHTML = await rawRes.text();
-        
-        const currentRes = await fetch(window.location.href.split('#')[0].split('?')[0] + '?t=' + Date.now());
-        const currentHTML = await currentRes.text();
+        const latestVersion = (await versionRes.text()).trim();
 
-        const sanitize = (html) => {
-            if(!html) return "";
-            return html.replace(/<script[^>]*src=["'][^"']*vercel[^"']*["'][^>]*><\/script>/gi, '')
-                       .replace(/<!--.*?-->/gs, '')
-                       .replace(/\s+/g, '');
-        };
-
-        if (sanitize(latestFetchedHTML) !== sanitize(currentHTML)) {
-            statusEl.innerHTML = "<span class='text-green-400'>Update available!</span>";
+        if (latestVersion !== SYSTEM_VERSION && latestVersion.length > 0) {
+            statusEl.innerHTML = `<span class='text-green-400'>Update available! (v${latestVersion})</span>`;
             installBtn.classList.remove('hidden');
+            
+            const rawRes = await fetch('https://raw.githubusercontent.com/TestWork236/veishenos-titan/main/index.html?t=' + Date.now());
+            if (rawRes.ok) latestFetchedHTML = await rawRes.text();
         } else {
             statusEl.innerText = "System is up to date.";
             installBtn.classList.add('hidden');
@@ -14056,6 +14050,8 @@ async function checkSystemUpdates(wid) {
 }
 
 function installSystemUpdate(wid) {
+    if (!latestFetchedHTML) return;
+    
     document.getElementById(`update-status-${wid}`).innerText = "Installing update...";
     localStorage.setItem('gemini_show_changelog', 'true');
     
