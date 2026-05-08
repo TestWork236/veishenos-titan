@@ -2,23 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <script>
-        const savedFirmware = localStorage.getItem('gemini_firmware');
-        const isInjected = document.querySelector('meta[name="firmware-injected"]');
-        if (savedFirmware && !isInjected) {
-            document.open();
-            document.write(savedFirmware);
-            document.close();
-            window.stop();
-        } else if (!savedFirmware) {
-            fetch(window.location.href.split('#')[0].split('?')[0])
-                .then(res => res.text())
-                .then(html => {
-                    html = html.replace('<head>', '<head><meta name="firmware-injected" content="true">');
-                    localStorage.setItem('gemini_firmware', html);
-                });
-        }
-    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VeishenOS - Titan</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1990,7 +1973,7 @@ body.music-playing #dynamic-island::before {
         <div class="text-6xl mb-4 bg-clip-text text-transparent bg-gradient-to-r from-accent-400 to-purple-600 font-bold tracking-tighter">
             <i class="fa-solid fa-moon text-accent-400 mr-4"></i>VeishenOS
         </div>
-        <div class="text-gray-500 tracking-[0.5em] text-sm mb-12">TITANULLU</div>
+        <div class="text-gray-500 tracking-[0.5em] text-sm mb-12">TITAN</div>
         <div class="w-64 h-1 bg-gray-800 rounded-full overflow-hidden">
             <div id="boot-loader" class="h-full bg-accent-500 loader-bar"></div>
         </div>
@@ -8826,6 +8809,7 @@ let fsClipboard = { action: null, items: [] };
 
 	
 window.onload = () => {
+    localStorage.removeItem('gemini_firmware');
     console.log('🚀 Window loaded, initializing...');
     
     toggleDynamicIsland(settings.dynamicIsland);
@@ -14046,17 +14030,18 @@ async function checkSystemUpdates(wid) {
         if (!rawRes.ok) throw new Error("Not Found");
         
         latestFetchedHTML = await rawRes.text();
-        const currentFirmware = localStorage.getItem('gemini_firmware') || "";
+        
+        const currentRes = await fetch(window.location.href.split('#')[0].split('?')[0] + '?t=' + Date.now());
+        const currentHTML = await currentRes.text();
 
         const sanitize = (html) => {
             if(!html) return "";
             return html.replace(/<script[^>]*src=["'][^"']*vercel[^"']*["'][^>]*><\/script>/gi, '')
-                       .replace(/<meta name="firmware-injected" content="true">/gi, '')
                        .replace(/<!--.*?-->/gs, '')
                        .replace(/\s+/g, '');
         };
 
-        if (sanitize(latestFetchedHTML) !== sanitize(currentFirmware)) {
+        if (sanitize(latestFetchedHTML) !== sanitize(currentHTML)) {
             statusEl.innerHTML = "<span class='text-green-400'>Update available!</span>";
             installBtn.classList.remove('hidden');
         } else {
@@ -14064,7 +14049,7 @@ async function checkSystemUpdates(wid) {
             installBtn.classList.add('hidden');
         }
     } catch (error) {
-        statusEl.innerHTML = "<span class='text-red-400'>Failed to connect.</span>";
+        statusEl.innerHTML = "<span class='text-red-400'>Failed to connect to update server.</span>";
     } finally {
         btnEl.disabled = false;
     }
@@ -14074,13 +14059,18 @@ function installSystemUpdate(wid) {
     document.getElementById(`update-status-${wid}`).innerText = "Installing update...";
     localStorage.setItem('gemini_show_changelog', 'true');
     
-    let newFirmware = latestFetchedHTML;
-    newFirmware = newFirmware.replace('<head>', '<head><meta name="firmware-injected" content="true">');
-    localStorage.setItem('gemini_firmware', newFirmware);
+    const parser = new DOMParser();
+    const newDoc = parser.parseFromString(latestFetchedHTML, 'text/html');
     
-    document.open('text/html', 'replace');
-    document.write(newFirmware);
-    document.close();
+    document.documentElement.replaceWith(newDoc.documentElement);
+    
+    const newScripts = document.querySelectorAll('script');
+    newScripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
 }
 
 async function fetchChangelog(wid) {
