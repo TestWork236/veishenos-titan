@@ -2402,7 +2402,7 @@ body.music-playing #dynamic-island::before {
     </div>
 
     <script>
-	const SYSTEM_VERSION = "1.4.27";
+	const SYSTEM_VERSION = "1.4.25";
         let zIndexCounter = 100;
         let windows = {};
         let instanceCounts = {}; 
@@ -3425,7 +3425,7 @@ function saveWidgets() {
                     <div class="h-full flex flex-col items-center justify-center text-center p-8 bg-ui-900 text-ui-100">
                         <i class="fa-solid fa-moon text-6xl text-accent-400 mb-4"></i>
                         <h1 class="text-3xl font-bold mb-2">VeishenOS</h1>
-                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.4.27</span></p>
+                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.4.25</span></p>
                         <p class="text-sm text-ui-400 mb-8">Needs to be updated!</p>
                         <button onclick="closeApp('${wid}')" class="px-6 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded-lg shadow transition">Get Started</button>
                     </div>
@@ -3490,7 +3490,7 @@ function saveWidgets() {
                 content: (windowId) => `
                     <div class="h-full bg-black p-2 terminal-font text-sm flex flex-col" onclick="document.getElementById('term-input-${windowId}').focus()">
                         <div id="term-output-${windowId}" class="flex-1 overflow-y-auto p-2 text-green-400 font-mono relative">
-                            <div>VeishenOS Titan Kernel [Version 1.4.27]</div>
+                            <div>VeishenOS Titan Kernel [Version 1.4.25]</div>
                             <div>(c) Veishen Corp. All rights reserved.</div>
                             <br>
                             <div>Type 'help' for a list of commands.</div>
@@ -3647,7 +3647,7 @@ function saveWidgets() {
                     <div class="h-full p-6 bg-ui-900 text-ui-100">
                         <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-brands fa-linux"></i> System Specs</h2>
                         <div class="space-y-2 text-sm text-ui-400">
-                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.4.27</span></div>
+                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.4.25</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Kernel:</span> <span class="text-ui-100">Web-Kernel 5.4</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Memory:</span> <span id="sys-ram-${wid}" class="text-ui-100">Detecting...</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Processor:</span> <span class="text-ui-100">Veishen Quantum Core</span></div>
@@ -14018,6 +14018,18 @@ function handleDesktopDrop(e, targetDesktopId) {
 
 let latestFetchedHTML = "";
 
+function isNewerVersion(latest, current) {
+    const lParts = latest.split('.').map(Number);
+    const cParts = current.split('.').map(Number);
+    for (let i = 0; i < Math.max(lParts.length, cParts.length); i++) {
+        const l = lParts[i] || 0;
+        const c = cParts[i] || 0;
+        if (l > c) return true;
+        if (l < c) return false;
+    }
+    return false;
+}
+
 async function checkSystemUpdates(wid) {
     const statusEl = document.getElementById(`update-status-${wid}`);
     const btnEl = document.getElementById(`update-btn-${wid}`);
@@ -14033,17 +14045,14 @@ async function checkSystemUpdates(wid) {
         const latestVersion = (await versionRes.text()).trim();
         const installedVersion = localStorage.getItem('gemini_installed_version');
 
-        if (latestVersion === SYSTEM_VERSION) {
+        if (!isNewerVersion(installedVersion || "0.0.0", SYSTEM_VERSION)) {
             localStorage.removeItem('gemini_installed_version');
         }
 
-        if (latestVersion !== SYSTEM_VERSION && latestVersion !== installedVersion && latestVersion.length > 0) {
+        if (isNewerVersion(latestVersion, SYSTEM_VERSION) && latestVersion !== installedVersion) {
             statusEl.innerHTML = `<span class='text-green-400'>Update available! (v${latestVersion})</span>`;
             installBtn.classList.remove('hidden');
             installBtn.dataset.version = latestVersion;
-            
-            const rawRes = await fetch('https://raw.githubusercontent.com/TestWork236/veishenos-titan/main/index.html?t=' + Date.now());
-            if (rawRes.ok) latestFetchedHTML = await rawRes.text();
         } else {
             statusEl.innerText = "System is up to date.";
             installBtn.classList.add('hidden');
@@ -14056,31 +14065,19 @@ async function checkSystemUpdates(wid) {
 }
 
 function installSystemUpdate(wid) {
-    if (!latestFetchedHTML) return;
-    
-    document.getElementById(`update-status-${wid}`).innerText = "Installing update...";
-    localStorage.setItem('gemini_show_changelog', 'true');
-    
+    document.getElementById(`update-status-${wid}`).innerText = "Downloading & Installing update...";
     const installBtn = document.getElementById(`install-btn-${wid}`);
+    
     if (installBtn && installBtn.dataset.version) {
         localStorage.setItem('gemini_installed_version', installBtn.dataset.version);
     }
     
-    const parser = new DOMParser();
-    const newDoc = parser.parseFromString(latestFetchedHTML, 'text/html');
+    localStorage.setItem('gemini_show_changelog', 'true');
     
-    document.documentElement.replaceWith(newDoc.documentElement);
-    
-    const newScripts = document.querySelectorAll('script');
-    newScripts.forEach(oldScript => {
-        const newScript = document.createElement('script');
-        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-        oldScript.parentNode.replaceChild(newScript, oldScript);
-    });
-
     setTimeout(() => {
-        window.location.href = window.location.pathname + '?v=' + Date.now();
+        const url = new URL(window.location.href);
+        url.searchParams.set('update', Date.now());
+        window.location.href = url.toString();
     }, 1500);
 }
 
