@@ -1,1 +1,2 @@
-1.4.26 update check.
+1.1.1:
+1. Live Wallpapers can be applied through a video or .mp4 link.
