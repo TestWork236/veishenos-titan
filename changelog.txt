@@ -1,2 +1,9 @@
-1.1:
+v1.2:
+1. Fixed in light mode, the text written by the user was not white, it became blackish, making it look like it's not there amd camouflaging it.
+2. Fixed the Check for Updates button had white text in light mode, making it camouflage with the white button in the background.
+3. Added changing the colour of the dock superellipse, from 4 options, system(which changes based on light and dark mode), light, dark, and tainted.
+4. Added a subtle glow on the password field when selected and no glow when unselected.
+5. Added an option to remove the background from the menu bar in macOS UI Mode.
+
+v1.1:
 1. Live Wallpapers can be applied through a video or .mp4 link.
