@@ -2116,6 +2116,8 @@ body.music-playing #dynamic-island::before {
 <div id="toast-container" class="fixed bottom-16 right-4 z-[10000] flex flex-col gap-2 pointer-events-none"></div>
 
         <div id="bg-image" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop');"></div>
+        <video id="bg-video" autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-0 hidden transition-opacity duration-500 opacity-0 pointer-events-none"></video>
+        <iframe id="bg-youtube" class="absolute inset-0 w-full h-full z-0 hidden transition-opacity duration-500 opacity-0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="pointer-events: none;"></iframe>
 
         <div class="absolute top-0 left-0 p-4 grid grid-cols-1 gap-4 w-28 z-10" id="desktop-icons">
             
@@ -2402,7 +2404,7 @@ body.music-playing #dynamic-island::before {
     </div>
 
     <script>
-	const SYSTEM_VERSION = "1.4.26";
+	const SYSTEM_VERSION = "1.1.1";
         let zIndexCounter = 100;
         let windows = {};
         let instanceCounts = {}; 
@@ -3425,7 +3427,7 @@ function saveWidgets() {
                     <div class="h-full flex flex-col items-center justify-center text-center p-8 bg-ui-900 text-ui-100">
                         <i class="fa-solid fa-moon text-6xl text-accent-400 mb-4"></i>
                         <h1 class="text-3xl font-bold mb-2">VeishenOS</h1>
-                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.4.26</span></p>
+                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.1.1</span></p>
                         <p class="text-sm text-ui-400 mb-8">Needs to be updated!</p>
                         <button onclick="closeApp('${wid}')" class="px-6 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded-lg shadow transition">Get Started</button>
                     </div>
@@ -3490,7 +3492,7 @@ function saveWidgets() {
                 content: (windowId) => `
                     <div class="h-full bg-black p-2 terminal-font text-sm flex flex-col" onclick="document.getElementById('term-input-${windowId}').focus()">
                         <div id="term-output-${windowId}" class="flex-1 overflow-y-auto p-2 text-green-400 font-mono relative">
-                            <div>VeishenOS Titan Kernel [Version 1.4.26]</div>
+                            <div>VeishenOS Titan Kernel [Version 1.1.1]</div>
                             <div>(c) Veishen Corp. All rights reserved.</div>
                             <br>
                             <div>Type 'help' for a list of commands.</div>
@@ -3647,7 +3649,7 @@ function saveWidgets() {
                     <div class="h-full p-6 bg-ui-900 text-ui-100">
                         <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-brands fa-linux"></i> System Specs</h2>
                         <div class="space-y-2 text-sm text-ui-400">
-                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.4.26</span></div>
+                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.1.1</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Kernel:</span> <span class="text-ui-100">Web-Kernel 5.4</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Memory:</span> <span id="sys-ram-${wid}" class="text-ui-100">Detecting...</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Processor:</span> <span class="text-ui-100">Veishen Quantum Core</span></div>
@@ -4203,9 +4205,9 @@ content: (wid) => `
                 <input type="file" accept="image/*" onchange="handleWallpaperUpload(event)" class="block w-full text-xs text-ui-400 file:mr-2 file:py-2 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-ui-700 file:text-ui-100 hover:file:bg-ui-600 cursor-pointer"/>
             </div>
             <div class="mb-6">
-                <label class="block text-xs font-medium text-ui-400 mb-2">Or Paste Image URL</label>
+                <label class="block text-xs font-medium text-ui-400 mb-2">Or Paste Image/Video/YouTube URL</label>
                 <div class="flex flex-wrap gap-2">
-                    <input type="text" id="wallpaper-url-input-${wid}" placeholder="https://example.com/image.jpg" class="flex-1 min-w-[150px] bg-ui-700 border border-ui-border rounded px-3 py-2 text-xs text-ui-100 outline-none focus:border-accent-400 transition" onkeydown="if(event.key==='Enter') setWallpaperFromUrl('${wid}')">
+                    <input type="text" id="wallpaper-url-input-${wid}" placeholder="https://example.com/video.mp4 or YouTube URL" class="flex-1 min-w-[150px] bg-ui-700 border border-ui-border rounded px-3 py-2 text-xs text-ui-100 outline-none focus:border-accent-400 transition" onkeydown="if(event.key==='Enter') setWallpaperFromUrl('${wid}')">
                     <button onclick="setWallpaperFromUrl('${wid}')" class="px-4 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded text-xs transition">Apply</button>
                 </div>
             </div>
@@ -4620,7 +4622,7 @@ content: (wid) => `
             <i class="fa-solid fa-cloud-arrow-down text-4xl text-accent-500"></i>
             <div>
                 <div class="font-bold">VeishenOS Titan</div>
-                <div class="text-xs text-ui-400">Current version running</div>
+                <div class="text-xs text-ui-400">Current version running 1.1.1</div>
             </div>
         </div>
         <div class="flex items-center justify-between mt-6 border-t border-ui-border pt-4">
@@ -4918,12 +4920,53 @@ function showSettingsPage(pageId, wid) {
             }
         }
 
+        function getWallpaperThumbnail(url) {
+            const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+            if (ytMatch) return `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`;
+            if (url.match(/\.(mp4|webm|ogg)$/i)) return 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop';
+            return url;
+        }
+
         function changeWallpaper(url) {
-            const bg = document.getElementById('bg-image');
-            bg.style.opacity = '0';
+            const bgImg = document.getElementById('bg-image');
+            const bgVid = document.getElementById('bg-video');
+            const bgYt = document.getElementById('bg-youtube');
+            
+            bgImg.style.opacity = '0';
+            if (bgVid) bgVid.style.opacity = '0';
+            if (bgYt) bgYt.style.opacity = '0';
+
             setTimeout(() => {
-                bg.style.backgroundImage = `url('${url}')`;
-                bg.style.opacity = '1';
+                const isVideo = url.match(/\.(mp4|webm|ogg)$/i);
+                const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+
+                if (ytMatch) {
+                    bgImg.style.display = 'none';
+                    if(bgVid) { bgVid.classList.add('hidden'); bgVid.pause(); }
+                    if(bgYt) {
+                        bgYt.classList.remove('hidden');
+                        const ytId = ytMatch[1];
+                        bgYt.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${ytId}&modestbranding=1`;
+                        setTimeout(() => bgYt.style.opacity = '1', 50);
+                    }
+                } else if (isVideo) {
+                    bgImg.style.display = 'none';
+                    if(bgYt) { bgYt.classList.add('hidden'); bgYt.src = ''; }
+                    if(bgVid) {
+                        bgVid.classList.remove('hidden');
+                        bgVid.src = url;
+                        bgVid.play().catch(e => console.log('Autoplay blocked', e));
+                        setTimeout(() => bgVid.style.opacity = '1', 50);
+                    }
+                } else {
+                    if(bgVid) { bgVid.classList.add('hidden'); bgVid.pause(); }
+                    if(bgYt) { bgYt.classList.add('hidden'); bgYt.src = ''; }
+                    
+                    bgImg.style.display = 'block';
+                    bgImg.style.backgroundImage = `url('${url}')`;
+                    setTimeout(() => bgImg.style.opacity = '1', 50);
+                }
+
                 settings.wallpaper = url;
                 saveSettings();
                 refreshSettingsUI(); 
@@ -5478,13 +5521,13 @@ function formatAIResponse(text) {
 let lockScreenInterval;
 
 function initLockScreen() {
-    const lockScreen = document.getElementById('lock-screen');
-    const inputWrapper = document.getElementById('ls-password-wrapper');
-    const loginBtn = document.getElementById('ls-login-btn');
-    const input = document.getElementById('ls-password');
-    const wallpaper = settings.wallpaper;
+        const lockScreen = document.getElementById('lock-screen');
+        const inputWrapper = document.getElementById('ls-password-wrapper');
+        const loginBtn = document.getElementById('ls-login-btn');
+        const input = document.getElementById('ls-password');
+        const wallpaper = settings.wallpaper;
 
-        lockScreen.style.backgroundImage = `url('${wallpaper}')`;
+                lockScreen.style.backgroundImage = `url('${getWallpaperThumbnail(wallpaper)}')`;
     
         if (settings.requirePassword) {
         inputWrapper.classList.remove('hidden');
@@ -6825,7 +6868,7 @@ function startSelection(e, context) {
 
 function handleDesktopMouseDown(e) {
     
-    const isWallpaperClick = e.target.id === 'desktop' || e.target.id === 'bg-image';
+    const isWallpaperClick = e.target.id === 'desktop' || e.target.id === 'bg-image' || e.target.id === 'bg-video';
 
     if (isWallpaperClick) {
         
@@ -9891,7 +9934,7 @@ function handleDragOver(e, isIcon = false) {
     
     
     
-    if (target.id === 'desktop' || target.id === 'desktop-icons' || target.id === 'bg-image') {
+    if (target.id === 'desktop' || target.id === 'desktop-icons' || target.id === 'bg-image' || target.id === 'bg-video') {
         e.dataTransfer.dropEffect = 'move';
         return;
     }
@@ -9944,7 +9987,7 @@ function handleDragLeave(e, isIcon = false) {
     const target = e.currentTarget;
 
     
-    if (target.id === 'desktop' || target.id === 'desktop-icons' || target.id === 'bg-image') return;
+    if (target.id === 'desktop' || target.id === 'desktop-icons' || target.id === 'bg-image' || target.id === 'bg-video') return;
 
     if (isIcon) target.classList.remove('icon-drop-target');
     else target.classList.remove('drop-target-active');
@@ -9961,7 +10004,7 @@ function handleDrop(e, targetFolderId) {
     const target = e.currentTarget;
     
     
-    if (target.id !== 'desktop' && target.id !== 'desktop-icons' && target.id !== 'bg-image') {
+    if (target.id !== 'desktop' && target.id !== 'desktop-icons' && target.id !== 'bg-image' && target.id !== 'bg-video') {
         target.classList.remove('drop-target-active');
         target.classList.remove('icon-drop-target');
     }
@@ -10709,7 +10752,7 @@ function setWallpaperFromUrl(wid) {
     
     const url = input.value.trim();
     if (url) {
-        if (url.match(/\.(jpeg|jpg|gif|png|webp|bmp|svg)$/i) || url.startsWith('http')) {
+        if (url.match(/\.(jpeg|jpg|gif|png|webp|bmp|svg|mp4|webm|ogg)$/i) || url.startsWith('http')) {
             changeWallpaper(url);
             pushNotification('Settings', 'Wallpaper updated');
             input.value = ''; 
@@ -13941,7 +13984,7 @@ function renderTaskViewDesktops() {
              ondrop="handleDesktopDrop(event, ${d.id})"
              onmouseenter="taskViewHoverTimer = setTimeout(() => renderTaskViewWindows(${d.id}), 150)"
              onmouseleave="clearTimeout(taskViewHoverTimer); renderTaskViewWindows(currentDesktopId)">
-            <div onclick="switchDesktop(${d.id}); toggleTaskView()" class="h-32 w-48 rounded-xl border-2 transition-all cursor-pointer bg-ui-800/80 hover:bg-ui-700 bg-cover bg-center overflow-hidden flex flex-col ${currentDesktopId === d.id ? 'border-accent-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] scale-105' : 'border-ui-border hover:border-ui-400'}" style="background-image: url('${settings.wallpaper}');">
+            <div onclick="switchDesktop(${d.id}); toggleTaskView()" class="h-32 w-48 rounded-xl border-2 transition-all cursor-pointer bg-ui-800/80 hover:bg-ui-700 bg-cover bg-center overflow-hidden flex flex-col ${currentDesktopId === d.id ? 'border-accent-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] scale-105' : 'border-ui-border hover:border-ui-400'}" style="background-image: url('${getWallpaperThumbnail(settings.wallpaper)}');">
                 <div class="absolute inset-0 bg-black/40 pointer-events-none"></div>
                 <div class="absolute bottom-2 left-0 right-0 text-center text-sm font-bold text-white drop-shadow-md z-10 pointer-events-none">${d.name}</div>
             </div>
