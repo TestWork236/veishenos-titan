@@ -2366,7 +2366,7 @@ body.music-playing #dynamic-island::before {
 
                 
                 <div id="menubar-items" class="hidden items-center gap-4 ml-4 text-xs font-medium">
-                    <span class="font-bold">Desktop</span>
+                    <span class="font-bold">VeishenOS</span>
                     <span class="opacity-80 hover:opacity-100 cursor-pointer">File</span>
                     <span class="opacity-80 hover:opacity-100 cursor-pointer">Edit</span>
                     <span class="opacity-80 hover:opacity-100 cursor-pointer">View</span>
@@ -2409,7 +2409,7 @@ body.music-playing #dynamic-island::before {
     </div>
 
     <script>
-	const SYSTEM_VERSION = "1.2";
+	const SYSTEM_VERSION = "1.3";
         let zIndexCounter = 100;
         let windows = {};
         let instanceCounts = {}; 
@@ -3434,7 +3434,7 @@ function saveWidgets() {
                     <div class="h-full flex flex-col items-center justify-center text-center p-8 bg-ui-900 text-ui-100">
                         <i class="fa-solid fa-moon text-6xl text-accent-400 mb-4"></i>
                         <h1 class="text-3xl font-bold mb-2">VeishenOS</h1>
-                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.2</span></p>
+                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.3</span></p>
                         <p class="text-sm text-ui-400 mb-8">Needs to be updated!</p>
                         <button onclick="closeApp('${wid}')" class="px-6 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded-lg shadow transition">Get Started</button>
                     </div>
@@ -3499,7 +3499,7 @@ function saveWidgets() {
                 content: (windowId) => `
                     <div class="h-full bg-black p-2 terminal-font text-sm flex flex-col" onclick="document.getElementById('term-input-${windowId}').focus()">
                         <div id="term-output-${windowId}" class="flex-1 overflow-y-auto p-2 text-green-400 font-mono relative">
-                            <div>VeishenOS Titan Kernel [Version 1.2]</div>
+                            <div>VeishenOS Titan Kernel [Version 1.3]</div>
                             <div>(c) Veishen Corp. All rights reserved.</div>
                             <br>
                             <div>Type 'help' for a list of commands.</div>
@@ -3518,79 +3518,79 @@ function saveWidgets() {
                 color: 'text-yellow-500',
                 width: 600,
                 height: 500,
-                content: (windowId) => `
-                    <div class="h-full flex flex-col bg-ui-800 text-ui-100 relative" id="notes-app-${windowId}">
-                        
-                        <div class="flex items-center bg-ui-900 border-b border-ui-border px-1 text-[12px] select-none z-40 shadow-sm relative">
-                            
-                            <div class="relative notes-dropdown-wrapper">
-                                <div class="px-2 py-1.5 hover:bg-ui-700 cursor-pointer rounded" onclick="toggleNotesMenu(event, '${windowId}', 'file')">File</div>
-                                <div id="notes-menu-file-${windowId}" class="absolute top-full left-0 bg-ui-800 border border-ui-border shadow-2xl rounded py-1 hidden w-56 z-50 text-xs">
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'new-tab')"><span>New tab</span><span class="text-ui-400">Alt+N</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'new-window')"><span>New window</span><span class="text-ui-400">Alt+Shift+N</span></div>
-                                    <div class="border-t border-ui-border my-1"></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'open')"><span>Open</span><span class="text-ui-400">Ctrl+O</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer group/recent relative">
-                                        <span>Recent</span><i class="fa-solid fa-caret-right text-ui-400 mt-0.5"></i>
-                                        <div id="notes-recent-submenu-${windowId}" class="absolute left-[98%] -top-1 bg-ui-800 border border-ui-border shadow-2xl rounded py-1 hidden group-hover/recent:block w-48 max-h-48 overflow-y-auto">
-                                            
-                                        </div>
+                menuTemplate: (wid, isMac) => `
+                    <div class="flex items-center ${isMac ? 'text-xs h-full gap-4' : 'text-[12px]'} w-full">
+                        ${isMac ? `<span class="font-bold">Notes</span>` : ''}
+                        <div class="relative app-dropdown-wrapper ${isMac ? 'flex items-center h-full' : ''}">
+                            <div class="${isMac ? 'opacity-80 hover:opacity-100' : 'px-2 py-1.5 hover:bg-ui-700'} cursor-pointer rounded" onclick="toggleAppMenu(event, '${wid}', 'file')">File</div>
+                            <div id="app-menu-file-${wid}" class="absolute top-full left-0 bg-ui-800 border border-ui-border shadow-2xl rounded py-1 hidden w-56 z-[100000] text-xs font-normal text-ui-100">
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'new-tab')"><span>New tab</span><span class="text-ui-400">Alt+N</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'new-window')"><span>New window</span><span class="text-ui-400">Alt+Shift+N</span></div>
+                                <div class="border-t border-ui-border my-1"></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'open')"><span>Open</span><span class="text-ui-400">Ctrl+O</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer group/recent relative">
+                                    <span>Recent</span><i class="fa-solid fa-caret-right text-ui-400 mt-0.5"></i>
+                                    <div id="notes-recent-submenu-${wid}" class="absolute left-[98%] -top-1 bg-ui-800 border border-ui-border shadow-2xl rounded py-1 hidden group-hover/recent:block w-48 max-h-48 overflow-y-auto">
                                     </div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'save')"><span>Save</span><span class="text-ui-400">Ctrl+S</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'save-as')"><span>Save as</span><span class="text-ui-400">Ctrl+Shift+S</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'save-all')"><span>Save all</span><span class="text-ui-400">Ctrl+Alt+S</span></div>
-                                    <div class="border-t border-ui-border my-1"></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'close-tab')"><span>Close tab</span><span class="text-ui-400">Alt+W</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'close-window')"><span>Close window</span><span class="text-ui-400">Alt+Shift+W</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'exit')"><span>Exit</span></div>
                                 </div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'save')"><span>Save</span><span class="text-ui-400">Ctrl+S</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'save-as')"><span>Save as</span><span class="text-ui-400">Ctrl+Shift+S</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'save-all')"><span>Save all</span><span class="text-ui-400">Ctrl+Alt+S</span></div>
+                                <div class="border-t border-ui-border my-1"></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'close-tab')"><span>Close tab</span><span class="text-ui-400">Alt+W</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'close-window')"><span>Close window</span><span class="text-ui-400">Alt+Shift+W</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'exit')"><span>Exit</span></div>
                             </div>
-                            
-                            <div class="relative notes-dropdown-wrapper">
-                                <div class="px-2 py-1.5 hover:bg-ui-700 cursor-pointer rounded" onclick="toggleNotesMenu(event, '${windowId}', 'edit')">Edit</div>
-                                <div id="notes-menu-edit-${windowId}" class="absolute top-full left-0 bg-ui-800 border border-ui-border shadow-2xl rounded py-1 hidden w-56 z-50 text-xs">
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'undo')"><span>Undo</span><span class="text-ui-400">Ctrl+Z</span></div>
-                                    <div class="border-t border-ui-border my-1"></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'cut')"><span>Cut</span><span class="text-ui-400">Ctrl+X</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'copy')"><span>Copy</span><span class="text-ui-400">Ctrl+C</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'paste')"><span>Paste</span><span class="text-ui-400">Ctrl+V</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'delete')"><span>Delete</span><span class="text-ui-400">Del</span></div>
-                                    <div class="border-t border-ui-border my-1"></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'find')"><span>Find</span><span class="text-ui-400">Ctrl+F</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'find-next')"><span>Find next</span><span class="text-ui-400">F3</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'find-prev')"><span>Find previous</span><span class="text-ui-400">Shift+F3</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'replace')"><span>Replace</span><span class="text-ui-400">Alt+H</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'goto')"><span>Go to</span><span class="text-ui-400">Alt+G</span></div>
-                                    <div class="border-t border-ui-border my-1"></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'select-all')"><span>Select all</span><span class="text-ui-400">Ctrl+A</span></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'time-date')"><span>Time/Date</span><span class="text-ui-400">F5</span></div>
-                                    <div class="border-t border-ui-border my-1"></div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${windowId}', 'font')"><span>Font</span></div>
+                        </div>
+                        <div class="relative app-dropdown-wrapper ${isMac ? 'flex items-center h-full' : ''}">
+                            <div class="${isMac ? 'opacity-80 hover:opacity-100' : 'px-2 py-1.5 hover:bg-ui-700'} cursor-pointer rounded" onclick="toggleAppMenu(event, '${wid}', 'edit')">Edit</div>
+                            <div id="app-menu-edit-${wid}" class="absolute top-full left-0 bg-ui-800 border border-ui-border shadow-2xl rounded py-1 hidden w-56 z-[100000] text-xs font-normal text-ui-100">
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'undo')"><span>Undo</span><span class="text-ui-400">Ctrl+Z</span></div>
+                                <div class="border-t border-ui-border my-1"></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'cut')"><span>Cut</span><span class="text-ui-400">Ctrl+X</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'copy')"><span>Copy</span><span class="text-ui-400">Ctrl+C</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'paste')"><span>Paste</span><span class="text-ui-400">Ctrl+V</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'delete')"><span>Delete</span><span class="text-ui-400">Del</span></div>
+                                <div class="border-t border-ui-border my-1"></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'find')"><span>Find</span><span class="text-ui-400">Ctrl+F</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'find-next')"><span>Find next</span><span class="text-ui-400">F3</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'find-prev')"><span>Find previous</span><span class="text-ui-400">Shift+F3</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'replace')"><span>Replace</span><span class="text-ui-400">Alt+H</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'goto')"><span>Go to</span><span class="text-ui-400">Alt+G</span></div>
+                                <div class="border-t border-ui-border my-1"></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'select-all')"><span>Select all</span><span class="text-ui-400">Ctrl+A</span></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'time-date')"><span>Time/Date</span><span class="text-ui-400">F5</span></div>
+                                <div class="border-t border-ui-border my-1"></div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer" onclick="notesAction('${wid}', 'font')"><span>Font</span></div>
+                            </div>
+                        </div>
+                        <div class="relative app-dropdown-wrapper ${isMac ? 'flex items-center h-full' : ''}">
+                            <div class="${isMac ? 'opacity-80 hover:opacity-100' : 'px-2 py-1.5 hover:bg-ui-700'} cursor-pointer rounded" onclick="toggleAppMenu(event, '${wid}', 'view')">View</div>
+                            <div id="app-menu-view-${wid}" class="absolute top-full left-0 bg-ui-800 border border-ui-border shadow-2xl rounded py-1 hidden w-56 z-[100000] text-xs font-normal text-ui-100">
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer group/zoom relative">
+                                    <span>Zoom</span><i class="fa-solid fa-caret-right text-ui-400 mt-0.5"></i>
+                                    <div class="absolute left-[98%] -top-1 bg-ui-800 border border-ui-border shadow-2xl rounded py-1 hidden group-hover/zoom:block w-48">
+                                        <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between" onclick="notesAction('${wid}', 'zoom-in')"><span>Zoom in</span><span class="text-ui-400">Alt+Plus</span></div>
+                                        <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between" onclick="notesAction('${wid}', 'zoom-out')"><span>Zoom out</span><span class="text-ui-400">Alt+Minus</span></div>
+                                        <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between" onclick="notesAction('${wid}', 'zoom-restore')"><span>Restore default zoom</span><span class="text-ui-400">Alt+0</span></div>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="relative notes-dropdown-wrapper">
-                                <div class="px-2 py-1.5 hover:bg-ui-700 cursor-pointer rounded" onclick="toggleNotesMenu(event, '${windowId}', 'view')">View</div>
-                                <div id="notes-menu-view-${windowId}" class="absolute top-full left-0 bg-ui-800 border border-ui-border shadow-2xl rounded py-1 hidden w-56 z-50 text-xs">
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between cursor-pointer group/zoom relative">
-                                        <span>Zoom</span><i class="fa-solid fa-caret-right text-ui-400 mt-0.5"></i>
-                                        <div class="absolute left-[98%] -top-1 bg-ui-800 border border-ui-border shadow-2xl rounded py-1 hidden group-hover/zoom:block w-48">
-                                            <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between" onclick="notesAction('${windowId}', 'zoom-in')"><span>Zoom in</span><span class="text-ui-400">Alt+Plus</span></div>
-                                            <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between" onclick="notesAction('${windowId}', 'zoom-out')"><span>Zoom out</span><span class="text-ui-400">Alt+Minus</span></div>
-                                            <div class="px-4 py-1.5 hover:bg-accent-600 flex justify-between" onclick="notesAction('${windowId}', 'zoom-restore')"><span>Restore default zoom</span><span class="text-ui-400">Alt+0</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex items-center gap-3 cursor-pointer" onclick="notesAction('${windowId}', 'toggle-statusbar')">
-                                        <i id="notes-check-statusbar-${windowId}" class="fa-solid fa-check text-ui-100 text-[10px] w-3"></i> <span>Status bar</span>
-                                    </div>
-                                    <div class="px-4 py-1.5 hover:bg-accent-600 flex items-center gap-3 cursor-pointer" onclick="notesAction('${windowId}', 'toggle-wordwrap')">
-                                        <i id="notes-check-wordwrap-${windowId}" class="fa-solid fa-check text-ui-100 text-[10px] w-3"></i> <span>Word wrap</span>
-                                    </div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex items-center gap-3 cursor-pointer" onclick="notesAction('${wid}', 'toggle-statusbar')">
+                                    <i id="notes-check-statusbar-${wid}" class="fa-solid fa-check text-ui-100 text-[10px] w-3"></i> <span>Status bar</span>
+                                </div>
+                                <div class="px-4 py-1.5 hover:bg-accent-600 flex items-center gap-3 cursor-pointer" onclick="notesAction('${wid}', 'toggle-wordwrap')">
+                                    <i id="notes-check-wordwrap-${wid}" class="fa-solid fa-check text-ui-100 text-[10px] w-3"></i> <span>Word wrap</span>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                `,
+                content: (windowId) => `
+                    <div class="h-full flex flex-col bg-ui-800 text-ui-100 relative" id="notes-app-${windowId}">
+                        <div class="app-local-menu-bar flex items-center bg-ui-900 border-b border-ui-border px-1 select-none z-40 shadow-sm relative" id="local-menu-window-${windowId}">
+                            <!-- Menus injected here in Windows mode -->
+                        </div>
 
-                        
                         <div id="notes-find-bar-${windowId}" class="hidden flex-col bg-ui-800 border-b border-ui-border p-2 gap-2 text-xs shadow-inner">
                             <div class="flex items-center justify-between gap-2">
                                 <div class="flex items-center gap-2">
@@ -3609,12 +3609,9 @@ function saveWidgets() {
                             </div>
                         </div>
 
-                        
                         <div class="bg-ui-900 flex items-center overflow-x-auto border-b border-ui-border flex-shrink-0" id="notes-tab-bar-${windowId}"></div>
                         
-                        
                         <textarea id="notes-area-${windowId}" class="flex-1 bg-transparent text-ui-100 p-4 resize-none outline-none font-mono text-sm whitespace-pre-wrap transition-all" placeholder="Start typing..." onkeydown="handleNotesKey(event, '${windowId}')" onkeyup="updateNotesStatus('${windowId}')" onclick="updateNotesStatus('${windowId}')"></textarea>
-                        
                         
                         <div id="notes-statusbar-${windowId}" class="bg-ui-800 border-t border-ui-border px-4 py-1 text-[10px] text-ui-400 flex justify-between flex-shrink-0 items-center">
                             <div><span id="notes-status-cursor-${windowId}">Ln 1, Col 1</span></div>
@@ -3656,7 +3653,7 @@ function saveWidgets() {
                     <div class="h-full p-6 bg-ui-900 text-ui-100">
                         <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-brands fa-linux"></i> System Specs</h2>
                         <div class="space-y-2 text-sm text-ui-400">
-                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.2</span></div>
+                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.3</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Kernel:</span> <span class="text-ui-100">Web-Kernel 5.4</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Memory:</span> <span id="sys-ram-${wid}" class="text-ui-100">Detecting...</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Processor:</span> <span class="text-ui-100">Veishen Quantum Core</span></div>
@@ -4661,7 +4658,7 @@ content: (wid) => `
             <i class="fa-solid fa-cloud-arrow-down text-4xl text-accent-500"></i>
             <div>
                 <div class="font-bold">VeishenOS Titan</div>
-                <div class="text-xs text-ui-400">Current version running v1.2</div>
+                <div class="text-xs text-ui-400">Current version running v1.3</div>
             </div>
         </div>
         <div class="flex items-center justify-between mt-6 border-t border-ui-border pt-4">
@@ -4990,7 +4987,7 @@ function showSettingsPage(pageId, wid) {
                     }
                 } else if (isVideo) {
                     bgImg.style.display = 'none';
-                    if(bgYt) { bgYt.classList.add('hidden'); bgYt.src = ''; }
+                    if(bgYt) { bgYt.classList.add('hidden'); bgYt.removeAttribute('src'); }
                     if(bgVid) {
                         bgVid.classList.remove('hidden');
                         bgVid.src = url;
@@ -4999,7 +4996,7 @@ function showSettingsPage(pageId, wid) {
                     }
                 } else {
                     if(bgVid) { bgVid.classList.add('hidden'); bgVid.pause(); }
-                    if(bgYt) { bgYt.classList.add('hidden'); bgYt.src = ''; }
+                    if(bgYt) { bgYt.classList.add('hidden'); bgYt.removeAttribute('src'); }
                     
                     bgImg.style.display = 'block';
                     bgImg.style.backgroundImage = `url('${url}')`;
@@ -5153,6 +5150,8 @@ function generateTitlebarButtonsHTML(wid) {
     		switchMusicTab(windowId, 'search');
 	    }
 	    if (appId === 'photos') renderPhotos(windowId);
+            if (appId === 'changelog') setTimeout(() => fetchChangelog(windowId), 100);
+            updateMenuBar();
         }
 
         function initSysInfo(wid) {
@@ -5334,7 +5333,7 @@ function generateTitlebarButtonsHTML(wid) {
             const activeTab = state.tabs.find(t => t.id === state.activeTab);
             if (activeTab) {
                 const iframe = document.getElementById(activeTab.iframeId);
-                if(iframe) iframe.src = iframe.src;
+                if(iframe) iframe.src = activeTab.url;
             }
         }
 
@@ -5765,18 +5764,20 @@ function setLockScreenSetting(key, val) {
 
         function setGeminiKey() {
             const currentKey = localStorage.getItem('gemini_api_key') || '';
-            const newKey = prompt("Enter your Gemini API Key:", currentKey);
-            if (newKey !== null) {
-                localStorage.setItem('gemini_api_key', newKey.trim());
-                alert("API Key saved!");
-            }
+            showModal("Enter your Gemini API Key:", currentKey, (newKey) => {
+                if (newKey !== null) {
+                    localStorage.setItem('gemini_api_key', newKey.trim());
+                    pushNotification('Veishen Assistant', 'API Key saved successfully!');
+                }
+            });
         }
 
         function clearAIChat(wid) {
-            if(confirm("Clear chat history?")) {
+            showConfirmModal("Clear Chat", "Are you sure you want to clear your chat history?", () => {
                 localStorage.removeItem('gemini_chat_history');
                 initAI(wid); 
-            }
+                pushNotification('Veishen Assistant', 'Chat history cleared.');
+            });
         }
 
         async function triggerAISend(wid) {
@@ -5899,6 +5900,7 @@ function setLockScreenSetting(key, val) {
             updateTaskbar(); 
             updateStageManager(); 
             checkStageManagerCollision(); 
+            updateMenuBar();
         }, 200);
     }
 }
@@ -5912,6 +5914,7 @@ function setLockScreenSetting(key, val) {
          
          const remaining = Object.keys(windows).filter(k => k !== windowId && !windows[k].element.classList.contains('minimized'));
          if(remaining.length > 0) focusWindow(remaining[remaining.length-1]);
+         else updateMenuBar();
     }
 
     updateTaskbar();
@@ -5991,6 +5994,7 @@ function setLockScreenSetting(key, val) {
             el.style.pointerEvents = 'auto';
         }
     }
+    updateMenuBar();
 }
 
         
@@ -6917,7 +6921,8 @@ function handleDesktopMouseDown(e) {
         if (e.button === 2) { 
             showDesktopContextMenu(e); 
         } else {
-            
+            activeWindow = null;
+            updateMenuBar();
             startSelection(e, 'desktop');
         }
     }
@@ -9431,6 +9436,7 @@ function applyLayout(mode) {
     updateTaskbar();
     checkDockCollision();
     refreshSettingsUI();
+    updateMenuBar();
 }
 
 function renderDock() {
@@ -11824,35 +11830,85 @@ function toggleSetting(key, value) {
 
         
         
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.notes-dropdown-wrapper')) {
-                document.querySelectorAll('[id^="notes-menu-"]').forEach(menu => {
-                    menu.classList.add('hidden');
-                });
-            }
-        });
+        const desktopMenuHTML = `
+    <span class="font-bold">VeishenOS</span>
+    <span class="opacity-80 hover:opacity-100 cursor-pointer">File</span>
+    <span class="opacity-80 hover:opacity-100 cursor-pointer">Edit</span>
+    <span class="opacity-80 hover:opacity-100 cursor-pointer">View</span>
+    <span class="opacity-80 hover:opacity-100 cursor-pointer">Go</span>
+    <span class="opacity-80 hover:opacity-100 cursor-pointer">Window</span>
+    <span class="opacity-80 hover:opacity-100 cursor-pointer">Help</span>
+`;
 
-        function toggleNotesMenu(e, wid, menu) {
-            e.stopPropagation();
-            const allMenus = document.querySelectorAll(`[id^="notes-menu-"][id$="-${wid}"]`);
-            const targetMenu = document.getElementById(`notes-menu-${menu}-${wid}`);
-            
-            
-            if (menu === 'file') {
-                const submenu = document.getElementById(`notes-recent-submenu-${wid}`);
-                const recentTextFiles = recentApps.filter(r => r.type === 'file' && (r.title.endsWith('.txt') || r.title.endsWith('.md')));
-                if (recentTextFiles.length === 0) {
-                    submenu.innerHTML = `<div class="px-4 py-1.5 text-ui-400 italic">No recent files</div>`;
-                } else {
-                    submenu.innerHTML = recentTextFiles.map(f => `<div class="px-4 py-1.5 hover:bg-accent-600 cursor-pointer truncate" onclick="loadNoteFile('${wid}', '${f.id}')">${f.title}</div>`).join('');
+function updateMenuBar() {
+    const menuItems = document.getElementById('menubar-items');
+    if (!menuItems) return;
+
+    if (settings.layout !== 'macos') {
+        Object.keys(windows).forEach(wid => {
+            const localMenu = document.getElementById(`local-menu-window-${wid}`);
+            if (localMenu) {
+                const app = apps[windows[wid].appId];
+                if (app.menuTemplate) {
+                    localMenu.innerHTML = app.menuTemplate(wid.replace('window-', ''), false);
+                    localMenu.style.display = 'flex';
                 }
             }
-            
-            const isHidden = targetMenu.classList.contains('hidden');
-            allMenus.forEach(m => m.classList.add('hidden')); 
-            
-            if (isHidden) targetMenu.classList.remove('hidden');
+        });
+        menuItems.innerHTML = desktopMenuHTML;
+        return;
+    }
+
+    Object.keys(windows).forEach(wid => {
+        const localMenu = document.getElementById(`local-menu-window-${wid}`);
+        if (localMenu) {
+            localMenu.style.display = 'none';
+            localMenu.innerHTML = ''; 
         }
+    });
+
+    if (activeWindow && windows[activeWindow] && !windows[activeWindow].element.classList.contains('minimized')) {
+        const app = apps[windows[activeWindow].appId];
+        if (app.menuTemplate) {
+            menuItems.innerHTML = app.menuTemplate(activeWindow, true);
+        } else {
+            menuItems.innerHTML = `<span class="font-bold">${app.title}</span>`;
+        }
+    } else {
+        menuItems.innerHTML = desktopMenuHTML;
+    }
+}
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.app-dropdown-wrapper')) {
+        document.querySelectorAll('[id^="app-menu-"]').forEach(menu => {
+            menu.classList.add('hidden');
+        });
+    }
+});
+
+function toggleAppMenu(e, wid, menu) {
+    e.stopPropagation();
+    const allMenus = document.querySelectorAll(`[id^="app-menu-"][id$="-${wid}"]`);
+    const targetMenu = document.getElementById(`app-menu-${menu}-${wid}`);
+    
+    if (menu === 'file' && apps[windows[wid]?.appId]?.title === 'Notes') {
+        const submenu = document.getElementById(`notes-recent-submenu-${wid}`);
+        if (submenu) {
+            const recentTextFiles = recentApps.filter(r => r.type === 'file' && (r.title.endsWith('.txt') || r.title.endsWith('.md')));
+            if (recentTextFiles.length === 0) {
+                submenu.innerHTML = `<div class="px-4 py-1.5 text-ui-400 italic">No recent files</div>`;
+            } else {
+                submenu.innerHTML = recentTextFiles.map(f => `<div class="px-4 py-1.5 hover:bg-accent-600 cursor-pointer truncate" onclick="loadNoteFile('${wid}', '${f.id}')">${f.title}</div>`).join('');
+            }
+        }
+    }
+    
+    const isHidden = targetMenu.classList.contains('hidden');
+    allMenus.forEach(m => m.classList.add('hidden')); 
+    
+    if (isHidden) targetMenu.classList.remove('hidden');
+}
 
         function updateNotesStatus(wid) {
             const area = document.getElementById(`notes-area-${wid}`);
@@ -11997,7 +12053,7 @@ function toggleSetting(key, value) {
             if (!state.zoom) state.zoom = 100;
             
             
-            document.querySelectorAll(`[id^="notes-menu-"][id$="-${wid}"]`).forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll(`[id^="app-menu-"][id$="-${wid}"]`).forEach(m => m.classList.add('hidden'));
 
             switch(action) {
                 case 'new-tab': addNoteTab(wid); break;
@@ -14137,6 +14193,21 @@ function isNewerVersion(latest, current) {
     }
     return false;
 }
+
+async function autoCheckUpdates() {
+    try {
+        const versionRes = await fetch('https://raw.githubusercontent.com/TestWork236/veishenos-titan/main/version.txt?t=' + Date.now());
+        if (!versionRes.ok) return;
+        const latestVersion = (await versionRes.text()).trim();
+        const installedVersion = localStorage.getItem('gemini_installed_version');
+        if (isNewerVersion(latestVersion, SYSTEM_VERSION) && latestVersion !== installedVersion) {
+            pushNotification('System Update', `Version ${latestVersion} is available! Go to Settings > System Update to install.`);
+        }
+    } catch (e) {}
+}
+
+setInterval(autoCheckUpdates, 30 * 60 * 1000);
+setTimeout(autoCheckUpdates, 60000);
 
 async function checkSystemUpdates(wid) {
     const statusEl = document.getElementById(`update-status-${wid}`);
