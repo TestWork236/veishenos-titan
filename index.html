@@ -1133,7 +1133,7 @@ body[data-icon-style="glass"][data-icon-theme="tainted"] #desktop-widgets .fa-br
             cursor: var(--cursor-pointer) !important;
         }
         
-        input, textarea, .cursor-text, .terminal-font, [contenteditable="true"] {
+        input, textarea, .os-window input, .os-window textarea, input[onclick], textarea[onclick], .cursor-text, .terminal-font, [contenteditable="true"] {
             cursor: var(--cursor-text) !important;
         }
 
@@ -1895,14 +1895,14 @@ body.music-playing #dynamic-island::before {
         <div class="relative group">
             <div class="w-20 h-20 rounded-full p-[2px] bg-gradient-to-b from-white/40 to-white/10 shadow-2xl backdrop-blur-sm">
                 <div class="w-full h-full rounded-full bg-black/20 flex items-center justify-center overflow-hidden border-2 border-transparent">
-                    <div class="w-full h-full bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-2xl font-bold text-white shadow-inner">U</div>
+                    <div id="ls-avatar-display" class="w-full h-full bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-2xl font-bold text-white shadow-inner">U</div>
                 </div>
             </div>
         </div>
 
         
         <div class="flex flex-col items-center gap-2">
-            <div class="text-lg font-semibold drop-shadow-md tracking-wide text-white/90">Admin User</div>
+            <div id="ls-username-display" class="text-lg font-semibold drop-shadow-md tracking-wide text-white/90">Admin User</div>
             
             
             <div id="ls-input-area" class="w-48 flex flex-col items-center transition-all">
@@ -1974,6 +1974,36 @@ body.music-playing #dynamic-island::before {
         </div>
     </div>
 </div>
+
+<div id="setup-screen" class="fixed inset-0 z-[6000] hidden bg-cover bg-center text-white overflow-hidden transition-all duration-1000" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop');" onclick="document.getElementById('pfp-popover')?.classList.add('hidden')">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-md"></div>
+    <div class="relative z-10 w-full h-full flex flex-col items-center justify-center animate-[fadeInUp_1s_ease-out]">
+        
+        <div class="relative cursor-pointer mb-6 group" onclick="event.stopPropagation(); document.getElementById('pfp-popover').classList.toggle('hidden')">
+            <div id="setup-avatar-preview" class="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-4xl text-white shadow-2xl shadow-blue-500/50 overflow-hidden border-2 border-white/20 transition-all">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="absolute bottom-0 right-0 bg-ui-800 rounded-full w-8 h-8 flex items-center justify-center border border-ui-border text-xs text-white opacity-80 group-hover:opacity-100 transition-opacity shadow-lg">
+                <i class="fa-solid fa-pen"></i>
+            </div>
+            
+            <div id="pfp-popover" class="hidden absolute top-full mt-4 left-1/2 -translate-x-1/2 bg-ui-800/95 backdrop-blur-xl border border-ui-border rounded-xl p-3 shadow-2xl w-64 z-50 cursor-default" onclick="event.stopPropagation()">
+                <div class="text-[10px] text-ui-400 mb-2 font-bold uppercase tracking-wider text-center">Select Avatar</div>
+                <div class="flex flex-wrap gap-2 justify-center" id="pfp-options">
+                </div>
+            </div>
+        </div>
+
+        <h1 class="text-3xl font-bold mb-2">Welcome to VeishenOS</h1>
+        <p class="text-white/60 mb-8 text-sm">Let's create your local account</p>
+        <div class="w-64 flex flex-col gap-4">
+            <input type="text" id="setup-username" placeholder="Username" class="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-xl py-3 px-4 text-sm text-white placeholder-white/50 outline-none focus:bg-white/20 focus:border-white transition-all text-center" onkeydown="if(event.key==='Enter') document.getElementById('setup-password').focus()" autocomplete="off" oninput="updateSetupPfpInitial()">
+            <input type="password" id="setup-password" placeholder="Password (Optional)" class="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-xl py-3 px-4 text-sm text-white placeholder-white/50 outline-none focus:bg-white/20 focus:border-white transition-all text-center" onkeydown="if(event.key==='Enter') createAccount()">
+            <button onclick="createAccount()" class="w-full mt-2 py-3 bg-accent-600 hover:bg-accent-500 rounded-xl text-sm font-bold transition-all shadow-lg shadow-accent-600/30">Create Account</button>
+        </div>
+    </div>
+</div>
+
     <div id="boot-screen" class="absolute inset-0 flex flex-col items-center justify-center">
         <div class="text-6xl mb-4 bg-clip-text text-transparent bg-gradient-to-r from-accent-400 to-purple-600 font-bold tracking-tighter">
             <i class="fa-solid fa-moon text-accent-400 mr-4"></i>VeishenOS
@@ -2219,8 +2249,8 @@ body.music-playing #dynamic-island::before {
             
             <div class="p-4 border-t border-ui-border bg-ui-900/30 flex items-center justify-between rounded-b-xl relative">
                 <div class="flex items-center gap-3 hover:bg-white/5 p-2 rounded cursor-pointer transition" onclick="openApp('settings'); toggleStartMenu(false); showSettingsPage('lockscreen')">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center font-bold text-xs text-white border border-white/20">U</div>
-                    <div class="text-xs font-medium text-ui-100">Admin User</div>
+                    <div id="sm-avatar-display" class="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center font-bold text-xs text-white border border-white/20">U</div>
+<div id="sm-username-display" class="text-xs font-medium text-ui-100">Admin User</div>
                 </div>
                 
                 
@@ -2409,7 +2439,7 @@ body.music-playing #dynamic-island::before {
     </div>
 
     <script>
-	const SYSTEM_VERSION = "1.3";
+	const SYSTEM_VERSION = "1.4";
         let zIndexCounter = 100;
         let windows = {};
         let instanceCounts = {}; 
@@ -2805,7 +2835,12 @@ function fmtTime(seconds) {
             localStorage.setItem('gemini_fs', JSON.stringify(fileSystem));
         }
 
-                let pinnedApps = JSON.parse(localStorage.getItem('gemini_pinned_apps')) || ['terminal', 'browser', 'notes', 'music', 'photos', 'settings', 'bin'];
+                let pinnedApps = JSON.parse(localStorage.getItem('gemini_pinned_apps')) || ['terminal', 'browser', 'notes', 'music', 'photos', 'settings'];
+let pinnedTaskbarApps = JSON.parse(localStorage.getItem('gemini_taskbar_pins')) || ['terminal', 'browser', 'notes', 'music', 'photos', 'settings', 'bin'];
+
+function saveTaskbarPins() {
+    localStorage.setItem('gemini_taskbar_pins', JSON.stringify(pinnedTaskbarApps));
+}
 
 let pinnedSidebarFolders = JSON.parse(localStorage.getItem('gemini_sidebar_folders')) || [];
         function saveSidebarFolders() {
@@ -2854,6 +2889,7 @@ let pinnedSidebarFolders = JSON.parse(localStorage.getItem('gemini_sidebar_folde
     omniSearchEnabled: true
 };
 
+if(settings.username === undefined) settings.username = null;
 if(settings.omniSearchEnabled === undefined) settings.omniSearchEnabled = true;
 if(settings.taskbarLayout === undefined) settings.taskbarLayout = 'monolith';
 if(settings.taskbarSegmentation === undefined) settings.taskbarSegmentation = 'connected';
@@ -3434,7 +3470,7 @@ function saveWidgets() {
                     <div class="h-full flex flex-col items-center justify-center text-center p-8 bg-ui-900 text-ui-100">
                         <i class="fa-solid fa-moon text-6xl text-accent-400 mb-4"></i>
                         <h1 class="text-3xl font-bold mb-2">VeishenOS</h1>
-                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.3</span></p>
+                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.4</span></p>
                         <p class="text-sm text-ui-400 mb-8">Needs to be updated!</p>
                         <button onclick="closeApp('${wid}')" class="px-6 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded-lg shadow transition">Get Started</button>
                     </div>
@@ -3499,7 +3535,7 @@ function saveWidgets() {
                 content: (windowId) => `
                     <div class="h-full bg-black p-2 terminal-font text-sm flex flex-col" onclick="document.getElementById('term-input-${windowId}').focus()">
                         <div id="term-output-${windowId}" class="flex-1 overflow-y-auto p-2 text-green-400 font-mono relative">
-                            <div>VeishenOS Titan Kernel [Version 1.3]</div>
+                            <div>VeishenOS Titan Kernel [Version 1.4]</div>
                             <div>(c) Veishen Corp. All rights reserved.</div>
                             <br>
                             <div>Type 'help' for a list of commands.</div>
@@ -3653,7 +3689,7 @@ function saveWidgets() {
                     <div class="h-full p-6 bg-ui-900 text-ui-100">
                         <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-brands fa-linux"></i> System Specs</h2>
                         <div class="space-y-2 text-sm text-ui-400">
-                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.3</span></div>
+                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.4</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Kernel:</span> <span class="text-ui-100">Web-Kernel 5.4</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Memory:</span> <span id="sys-ram-${wid}" class="text-ui-100">Detecting...</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Processor:</span> <span class="text-ui-100">Veishen Quantum Core</span></div>
@@ -4658,7 +4694,7 @@ content: (wid) => `
             <i class="fa-solid fa-cloud-arrow-down text-4xl text-accent-500"></i>
             <div>
                 <div class="font-bold">VeishenOS Titan</div>
-                <div class="text-xs text-ui-400">Current version running v1.3</div>
+                <div class="text-xs text-ui-400">Current version running v1.4</div>
             </div>
         </div>
         <div class="flex items-center justify-between mt-6 border-t border-ui-border pt-4">
@@ -5558,16 +5594,145 @@ function formatAIResponse(text) {
 
 let lockScreenInterval;
 
-function initLockScreen() {
-        const lockScreen = document.getElementById('lock-screen');
-        const inputWrapper = document.getElementById('ls-password-wrapper');
-        const loginBtn = document.getElementById('ls-login-btn');
-        const input = document.getElementById('ls-password');
-        const wallpaper = settings.wallpaper;
+let pendingPfp = { type: 'icon', value: 'fa-user', bg: 'from-blue-500 to-cyan-400' };
 
-                lockScreen.style.backgroundImage = `url('${getWallpaperThumbnail(wallpaper)}')`;
+const pfpPresets = [
+    { type: 'emoji', value: '😎', bg: 'from-yellow-400 to-orange-500' },
+    { type: 'emoji', value: '🚀', bg: 'from-purple-500 to-indigo-500' },
+    { type: 'emoji', value: '👽', bg: 'from-gray-700 to-gray-900' },
+    { type: 'emoji', value: '👻', bg: 'from-green-400 to-emerald-600' },
+    { type: 'emoji', value: '🤖', bg: 'from-teal-400 to-cyan-600' },
+    { type: 'emoji', value: '🐱', bg: 'from-amber-200 to-yellow-400' },
+    { type: 'image', value: 'https://thumbs.dreamstime.com/b/sea-themed-turquoise-blue-square-background-painted-rustic-wooden-boards-decorated-border-draped-fishing-net-39391102.jpg?w=200&h=200&fit=crop', bg: '' },
+    { type: 'image', value: 'https://thumbs.dreamstime.com/b/red-poppies-blue-sky-23966050.jpg?w=200&h=200&fit=crop', bg: '' }
+];
+
+function renderPfpOptions() {
+    const container = document.getElementById('pfp-options');
+    if(!container) return;
+    container.innerHTML = pfpPresets.map((p, i) => {
+        if(p.type === 'image') {
+            return `<div onclick="selectSetupPfp(${i})" class="w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform overflow-hidden border border-white/20"><img src="${p.value}" class="w-full h-full object-cover"></div>`;
+        } else {
+            return `<div onclick="selectSetupPfp(${i})" class="w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform flex items-center justify-center text-lg bg-gradient-to-tr ${p.bg} border border-white/20 shadow-inner">${p.value}</div>`;
+        }
+    }).join('');
     
-        if (settings.requirePassword) {
+    container.innerHTML += `<div onclick="selectSetupPfp(-1)" class="w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform flex items-center justify-center text-sm bg-ui-700 border border-white/20 font-bold" title="Initials">Ab</div>`;
+}
+
+function selectSetupPfp(index) {
+    if(index === -1) {
+        pendingPfp = { type: 'text', value: '', bg: 'from-blue-500 to-cyan-400' };
+        updateSetupPfpInitial();
+    } else {
+        pendingPfp = pfpPresets[index];
+        applyPfpToPreview(pendingPfp, 'setup-avatar-preview');
+    }
+}
+
+function updateSetupPfpInitial() {
+    if(pendingPfp.type === 'text') {
+        const user = document.getElementById('setup-username').value.trim() || 'U';
+        pendingPfp.value = user.charAt(0).toUpperCase();
+        applyPfpToPreview(pendingPfp, 'setup-avatar-preview');
+    }
+}
+
+function applyPfpToPreview(pfp, elementId) {
+    const el = document.getElementById(elementId);
+    if(!el) return;
+    
+    let sizeClass = '';
+    if(elementId === 'setup-avatar-preview') sizeClass = 'text-4xl';
+    else if(elementId === 'ls-avatar-display') sizeClass = 'text-3xl';
+    else if(elementId === 'sm-avatar-display') sizeClass = 'text-sm';
+    
+    const baseClasses = el.className.split(' ').filter(c => !c.startsWith('bg-gradient') && !c.startsWith('from-') && !c.startsWith('to-') && !c.startsWith('bg-ui-') && !c.startsWith('bg-black')).join(' ');
+    
+    if(pfp.type !== 'image') {
+        el.className = `${baseClasses} bg-gradient-to-tr ${pfp.bg}`;
+    } else {
+        el.className = `${baseClasses} bg-ui-800`;
+    }
+
+    if(pfp.type === 'image') {
+        el.innerHTML = `<img src="${pfp.value}" class="w-full h-full object-cover rounded-full">`;
+    } else if(pfp.type === 'icon') {
+        el.innerHTML = `<i class="fa-solid ${pfp.value} ${sizeClass}"></i>`;
+    } else if(pfp.type === 'emoji') {
+        el.innerHTML = `<span class="${sizeClass} drop-shadow-md leading-none">${pfp.value}</span>`;
+    } else {
+        el.innerHTML = `<span class="${sizeClass} font-bold leading-none">${pfp.value}</span>`;
+    }
+}
+
+function createAccount() {
+    const user = document.getElementById('setup-username').value.trim();
+    const pass = document.getElementById('setup-password').value;
+    if(!user) {
+        document.getElementById('setup-username').classList.add('shake-input', 'border-red-500');
+        setTimeout(() => document.getElementById('setup-username').classList.remove('shake-input', 'border-red-500'), 400);
+        return;
+    }
+    settings.username = user;
+    settings.lockScreenPassword = pass;
+    settings.requirePassword = pass.length > 0;
+    
+    if (pendingPfp.type === 'text') pendingPfp.value = user.charAt(0).toUpperCase();
+    settings.pfp = pendingPfp;
+    
+    saveSettings();
+
+    document.getElementById('setup-screen').classList.add('opacity-0');
+    setTimeout(() => {
+        document.getElementById('setup-screen').classList.add('hidden');
+        initLockScreen();
+    }, 1000);
+}
+
+function updateProfileDisplays() {
+    const user = settings.username || 'Admin User';
+    const initial = user.charAt(0).toUpperCase();
+    
+    if(!settings.pfp) settings.pfp = { type: 'text', value: initial, bg: 'from-blue-500 to-cyan-400' };
+    if(settings.pfp.type === 'text') settings.pfp.value = initial;
+
+    const lsUser = document.getElementById('ls-username-display');
+    if(lsUser) lsUser.innerText = user;
+    applyPfpToPreview(settings.pfp, 'ls-avatar-display');
+
+    const smUser = document.getElementById('sm-username-display');
+    if(smUser) smUser.innerText = user;
+    applyPfpToPreview(settings.pfp, 'sm-avatar-display');
+}
+
+function initLockScreen() {
+    if(!settings.username) {
+        const setupScreen = document.getElementById('setup-screen');
+        setupScreen.style.backgroundImage = `url('${getWallpaperThumbnail(settings.wallpaper)}')`;
+        setupScreen.classList.remove('hidden');
+        setupScreen.classList.remove('opacity-0');
+        
+        document.getElementById('desktop').classList.add('hidden');
+        document.getElementById('taskbar').classList.add('hidden');
+        document.getElementById('mac-dock-container').classList.add('hidden');
+        
+        setTimeout(() => document.getElementById('setup-username').focus(), 500);
+        return;
+    }
+
+    updateProfileDisplays();
+
+    const lockScreen = document.getElementById('lock-screen');
+    const inputWrapper = document.getElementById('ls-password-wrapper');
+    const loginBtn = document.getElementById('ls-login-btn');
+    const input = document.getElementById('ls-password');
+    const wallpaper = settings.wallpaper;
+
+    lockScreen.style.backgroundImage = `url('${getWallpaperThumbnail(wallpaper)}')`;
+    
+    if (settings.requirePassword) {
         inputWrapper.classList.remove('hidden');
         loginBtn.classList.add('hidden');
         input.value = '';
@@ -5577,13 +5742,13 @@ function initLockScreen() {
         loginBtn.classList.remove('hidden');
     }
 
-        updateLockScreenClock();
+    updateLockScreenClock();
     lockScreenInterval = setInterval(updateLockScreenClock, 1000);
 
-        lockScreen.classList.remove('hidden');
+    lockScreen.classList.remove('hidden');
     lockScreen.classList.remove('opacity-0');
     
-        document.getElementById('desktop').classList.add('hidden');
+    document.getElementById('desktop').classList.add('hidden');
     document.getElementById('taskbar').classList.add('hidden');
     document.getElementById('mac-dock-container').classList.add('hidden');
 }
@@ -5697,7 +5862,7 @@ function attemptLogin() {
             
         }, 800); 
 
-        pushNotification('System', 'Welcome back, Admin.');
+        pushNotification('System', `Welcome back, ${settings.username}.`);
         renderWidgets();
 
         
@@ -6002,24 +6167,21 @@ function setLockScreenSetting(key, val) {
         let hideTimers = {}; 
 
         function togglePin(appId) {
-            const index = pinnedApps.indexOf(appId);
-            if(index > -1) {
-                pinnedApps.splice(index, 1);
-            } else {
-                pinnedApps.push(appId);
-            }
-            localStorage.setItem('gemini_pinned_apps', JSON.stringify(pinnedApps));
-            updateTaskbar();
-            hideContextMenu();
-	    renderStartMenu();
-        }
+    const index = pinnedTaskbarApps.indexOf(appId);
+    if(index > -1) {
+        pinnedTaskbarApps.splice(index, 1);
+    } else {
+        pinnedTaskbarApps.push(appId);
+    }
+    saveTaskbarPins();
+    updateTaskbar();
+    hideContextMenu();
+}
 
-        function showContextMenu(e, appId) {
+function showContextMenu(e, appId) {
     e.preventDefault();
     const ctxMenu = document.getElementById('taskbar-ctx-menu');
-    const isPinned = pinnedApps.includes(appId);
-    
-    
+    const isPinned = pinnedTaskbarApps.includes(appId);
     const pinLocation = settings.layout === 'macos' ? 'Dock' : 'Taskbar';
     
     ctxMenu.innerHTML = `
@@ -6039,7 +6201,6 @@ function setLockScreenSetting(key, val) {
     ctxMenu.style.bottom = `${window.innerHeight - rect.top + 5}px`;
     ctxMenu.style.display = 'block';
 
-    
     const closeMenu = (ev) => {
         if(!ctxMenu.contains(ev.target)) {
             hideContextMenu();
@@ -6569,7 +6730,7 @@ function renderTaskbarWindows() {
     const appItems = [];
     const folderItems = [];
 
-    pinnedApps.forEach(id => {
+    pinnedTaskbarApps.forEach(id => {
         if (id === 'bin') return; 
         if (apps[id]) appItems.push(id);
         else if (fileSystem.find(f => f.id === id && f.type === 'folder')) folderItems.push(id);
@@ -6577,7 +6738,7 @@ function renderTaskbarWindows() {
 
     Object.keys(groups).forEach(id => {
         if (id === 'bin') return;
-        if (!pinnedApps.includes(id) && apps[id]) appItems.push(id);
+        if (!pinnedTaskbarApps.includes(id) && apps[id]) appItems.push(id);
     });
 
     const createSeparator = () => {
@@ -8963,6 +9124,7 @@ document.getElementById('dynamic-island').classList.toggle('island-light', islan
     initDockMagnification();
 
     
+    renderPfpOptions();
     startBootSequence();
     
 
@@ -9453,7 +9615,7 @@ function renderDock() {
     const appItems = [];
     const folderItems = [];
 
-    pinnedApps.forEach(id => {
+    pinnedTaskbarApps.forEach(id => {
         if (id === 'bin') return;
         if (apps[id]) appItems.push(id);
         else if (fileSystem.find(f => f.id === id && f.type === 'folder')) folderItems.push(id);
@@ -9461,7 +9623,7 @@ function renderDock() {
 
     Object.keys(groups).forEach(id => {
         if (id === 'bin') return;
-        if (!pinnedApps.includes(id) && apps[id]) appItems.push(id);
+        if (!pinnedTaskbarApps.includes(id) && apps[id]) appItems.push(id);
     });
 
     const createDockSeparator = () => {
@@ -10335,58 +10497,63 @@ function isCircularMove(movingItemId, targetFolderId) {
 }
 
 function showStartContextMenu(e, appId, isPinnedSection) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const ctxMenu = document.getElementById('desktop-ctx-menu');
-            const isPinned = pinnedApps.includes(appId);
-            const isOnDesktop = desktopAppShortcuts.some(s => s.id === appId);
-            
-            ctxMenu.innerHTML = `
-                <div class="ctx-item" onclick="openApp('${appId}'); hideDesktopContextMenu(); toggleStartMenu(false)">
-                    <i class="fa-solid fa-arrow-up-right-from-square text-ui-400"></i>
-                    <span>Open</span>
-                </div>
-                <div class="border-t border-ui-border my-1"></div>
-                <div class="ctx-item" onclick="togglePinStart('${appId}'); hideDesktopContextMenu()">
-                    <i class="fa-solid fa-thumbtack ${isPinned ? 'text-accent-400' : 'text-ui-400'}"></i>
-                    <span>${isPinned ? 'Unpin from Start' : 'Pin to Start'}</span>
-                </div>
-                <div class="ctx-item" onclick="addToDesktop('${appId}'); hideDesktopContextMenu(); toggleStartMenu(false)">
-                    <i class="fa-solid fa-desktop ${isOnDesktop ? 'text-accent-400' : 'text-ui-400'}"></i>
-                    <span>Create Desktop Shortcut</span>
-                </div>
-            `;
-            
-            let x = e.clientX;
-            let y = e.clientY;
-            if (y > window.innerHeight - 150) y -= 150;
-            
-            ctxMenu.style.left = `${x}px`;
-            ctxMenu.style.top = `${y}px`;
-            ctxMenu.style.display = 'block';
-            
-            const closeMenu = (ev) => {
-                if(!ctxMenu.contains(ev.target)) {
-                    hideDesktopContextMenu();
-                    document.removeEventListener('click', closeMenu);
-                }
-            };
-            setTimeout(() => document.addEventListener('click', closeMenu), 0);
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const ctxMenu = document.getElementById('desktop-ctx-menu');
+    const isStartPinned = pinnedApps.includes(appId);
+    const isTaskbarPinned = pinnedTaskbarApps.includes(appId);
+    const isOnDesktop = desktopAppShortcuts.some(s => s.id === appId);
+    const pinLocation = settings.layout === 'macos' ? 'Dock' : 'Taskbar';
+    
+    ctxMenu.innerHTML = `
+        <div class="ctx-item" onclick="openApp('${appId}'); hideDesktopContextMenu(); toggleStartMenu(false)">
+            <i class="fa-solid fa-arrow-up-right-from-square text-ui-400"></i>
+            <span>Open</span>
+        </div>
+        <div class="border-t border-ui-border my-1"></div>
+        <div class="ctx-item" onclick="togglePinStart('${appId}'); hideDesktopContextMenu()">
+            <i class="fa-solid fa-thumbtack ${isStartPinned ? 'text-accent-400' : 'text-ui-400'}"></i>
+            <span>${isStartPinned ? 'Unpin from Start' : 'Pin to Start'}</span>
+        </div>
+        <div class="ctx-item" onclick="togglePin('${appId}'); hideDesktopContextMenu()">
+            <i class="fa-solid fa-anchor ${isTaskbarPinned ? 'text-accent-400' : 'text-ui-400'}"></i>
+            <span>${isTaskbarPinned ? `Unpin from ${pinLocation}` : `Pin to ${pinLocation}`}</span>
+        </div>
+        <div class="border-t border-ui-border my-1"></div>
+        <div class="ctx-item" onclick="addToDesktop('${appId}'); hideDesktopContextMenu(); toggleStartMenu(false)">
+            <i class="fa-solid fa-desktop ${isOnDesktop ? 'text-accent-400' : 'text-ui-400'}"></i>
+            <span>Create Desktop Shortcut</span>
+        </div>
+    `;
+    
+    let x = e.clientX;
+    let y = e.clientY;
+    if (y > window.innerHeight - 200) y -= 200;
+    
+    ctxMenu.style.left = `${x}px`;
+    ctxMenu.style.top = `${y}px`;
+    ctxMenu.style.display = 'block';
+    
+    const closeMenu = (ev) => {
+        if(!ctxMenu.contains(ev.target)) {
+            hideDesktopContextMenu();
+            document.removeEventListener('click', closeMenu);
         }
+    };
+    setTimeout(() => document.addEventListener('click', closeMenu), 0);
+}
 
-        function togglePinStart(appId) {
-            const index = pinnedApps.indexOf(appId);
-            if(index > -1) {
-                pinnedApps.splice(index, 1);
-            } else {
-                pinnedApps.push(appId);
-            }
-            localStorage.setItem('gemini_pinned_apps', JSON.stringify(pinnedApps));
-            
-            renderStartMenu(); 
-            updateTaskbar();   
-        }
+function togglePinStart(appId) {
+    const index = pinnedApps.indexOf(appId);
+    if(index > -1) {
+        pinnedApps.splice(index, 1);
+    } else {
+        pinnedApps.push(appId);
+    }
+    localStorage.setItem('gemini_pinned_apps', JSON.stringify(pinnedApps));
+    renderStartMenu(); 
+}
 
 window.addEventListener('resize', () => {
     
