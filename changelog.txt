@@ -1,3 +1,9 @@
+v1.4:
+1. Added local account creation, with avatar customization. No more need to guess the "password" password and having your name in the system.
+2. Fixed pinning app on start pinned it to the dock/taskbar too.
+3. Added a separate option in the "All apps" section in the right click context menu of the apps to pin the app to the dock/taskbar.
+4. Fixed in the notes app's writing area, the mouse turned to the normal cursor instead of being the text cursor, which was an inconsistency.
+
 v1.3:
 1. Fixed after an update was done, the changelog appeared, and if you closed the changelog app and opened it again, it said "Loading changelog..." instead of showing the changelog again.
 2. Added auto check for updates every 30 minutes.
