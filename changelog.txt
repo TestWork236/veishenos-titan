@@ -6,6 +6,7 @@ v1.5:
 5. Fixed pinned folders stopped showing on the dock/taskbar after last update.
 6. Added a time and calendar when clicking on the time on the taskbar/menu bar.
 7. Changed the control center coming up when the wifi or battery icon is clicked rather than the clock.
+8. Increased blur on blurry things for more efficient and less CPU and GPU usage.
 
 v1.4:
 1. Added local account creation, with avatar customization. No more need to guess the "password" password and having your name in the system.
