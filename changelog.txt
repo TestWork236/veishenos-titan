@@ -4,7 +4,8 @@ v1.6:
 3. Added thumbnails for image files in the Files app.
 4. Removed the 3 weird backticks "```" from the top left of the screen.
 5. Added an error sound effect for system errors.
-6. Added CodeMirror support to App Studio, so now the coding experience is way better with highlighted and coloured text.
+6. Added CodeMirror support to App Studio, so the coding experience is way better with highlighted and coloured text.
+7. Added support for .mp3 and .mp4 files which were uploaded locally.
 
 v1.5:
 1. Added an option to change colour of items on the menu bar.
