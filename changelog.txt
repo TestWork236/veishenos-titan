@@ -3,6 +3,8 @@ v1.6:
 2. Made an app studio that lets you make custom apps using HTML, CSS, and JS, with split files and single file modes available, created apps are bundled to get .sha(Standard HTML Application) files and they can be turned into installers by bundling them into .hai(HTML Application Installer) files, which can be installed into the system.
 3. Added thumbnails for image files in the Files app.
 4. Removed the 3 weird backticks "```" from the top left of the screen.
+5. Added an error sound effect for system errors.
+6. Added CodeMirror support to App Studio, so now the coding experience is way better with highlighted and coloured text.
 
 v1.5:
 1. Added an option to change colour of items on the menu bar.
