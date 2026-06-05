@@ -8,6 +8,7 @@ v1.6:
 7. Added support for .mp3 and .mp4 files which were uploaded locally.
 8. Removed the hardcoded 0:30 timestamp in the Music app so that if a local file is loaded which is more than 30 seconds, it would show its true length.
 9. Added new icons for .mp3 and .mp4 files.
+10. Added lyrics support for locally uploaded songs.
 
 v1.5:
 1. Added an option to change colour of items on the menu bar.
