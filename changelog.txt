@@ -9,6 +9,9 @@ v1.6:
 8. Removed the hardcoded 0:30 timestamp in the Music app so that if a local file is loaded which is more than 30 seconds, it would show its true length.
 9. Added new icons for .mp3 and .mp4 files.
 10. Added lyrics support for locally uploaded songs.
+11. Added navigation buttons like forward page and backward page in the Files app, like "Back to [this]" and "Forward to [this]."
+12. Added custom controls for videos in the Gallery app.
+13. Added keyboard support for various things in the video controls, like up and down arrows to increase and decrease the sound respectively, left and right arrows to reverse and forward the video respectively, "M" for mute, "F" for fullscreen, spacebar for playing/pausing the video.
 
 v1.5:
 1. Added an option to change colour of items on the menu bar.
