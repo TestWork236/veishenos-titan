@@ -14,6 +14,7 @@ v1.6:
 13. Added keyboard support for various things in the video controls, like up and down arrows to increase and decrease the sound respectively, left and right arrows to reverse and forward the video respectively, "M" for mute, "F" for fullscreen, spacebar for playing/pausing the video.
 14. Added tabs in the Files app.
 15. Fixed the right click context menu of the apps in the start menu appeared behind the start menu, making them inaccessible.
+16. Fixed some toggles' animations not working.
 
 v1.5:
 1. Added an option to change colour of items on the menu bar.
