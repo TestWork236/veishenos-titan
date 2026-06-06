@@ -12,6 +12,7 @@ v1.6:
 11. Added navigation buttons like forward page and backward page in the Files app, like "Back to [this]" and "Forward to [this]."
 12. Added custom controls for videos in the Gallery app.
 13. Added keyboard support for various things in the video controls, like up and down arrows to increase and decrease the sound respectively, left and right arrows to reverse and forward the video respectively, "M" for mute, "F" for fullscreen, spacebar for playing/pausing the video.
+14. Added tabs in the Files app.
 
 v1.5:
 1. Added an option to change colour of items on the menu bar.
