@@ -15,6 +15,10 @@ v1.6:
 14. Added tabs in the Files app.
 15. Fixed the right click context menu of the apps in the start menu appeared behind the start menu, making them inaccessible.
 16. Fixed some toggles' animations not working.
+17. Added Music and Videos system folder in the Files app.
+18. Added previous song button in the Music app.
+19. Fixed when searching for files other than text files in the search bar or the start menu, they showed the .txt file thumbnail instead of their own thumbnails.
+20. Added tabs reordering in all apps with tabs.
 
 v1.5:
 1. Added an option to change colour of items on the menu bar.
