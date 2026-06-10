@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VeishenOS - Titan</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
 
     <script>
       tailwind.config = {
@@ -366,17 +367,14 @@
       #taskbar-ctx-menu,
       #desktop-ctx-menu {
         position: absolute;
-
-        /* Glass Background matching #folder-flyout */
         background: rgba(20, 20, 30, 0.7);
         backdrop-filter: blur(30px) saturate(180%);
         -webkit-backdrop-filter: blur(30px) saturate(180%);
-
         border: 1px solid var(--ui-border);
         border-radius: 0.5rem;
         padding: 0.25rem;
-        z-index: 10000;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5); /* Stronger shadow for depth */
+        z-index: 9999999;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
         min-width: 140px;
         display: none;
       }
@@ -797,10 +795,26 @@
       }
 
       body.has-menubar-color .mac-menubar-mode .app-dropdown-wrapper .absolute,
-      body.has-menubar-color .mac-menubar-mode .app-dropdown-wrapper .absolute i,
-      body.has-menubar-color .mac-menubar-mode .app-dropdown-wrapper .absolute span,
-      body.has-menubar-color .mac-menubar-mode .app-dropdown-wrapper .absolute div,
-      body.has-menubar-color .mac-menubar-mode .app-dropdown-wrapper .absolute button {
+      body.has-menubar-color
+        .mac-menubar-mode
+        .app-dropdown-wrapper
+        .absolute
+        i,
+      body.has-menubar-color
+        .mac-menubar-mode
+        .app-dropdown-wrapper
+        .absolute
+        span,
+      body.has-menubar-color
+        .mac-menubar-mode
+        .app-dropdown-wrapper
+        .absolute
+        div,
+      body.has-menubar-color
+        .mac-menubar-mode
+        .app-dropdown-wrapper
+        .absolute
+        button {
         color: var(--ui-100) !important;
         -webkit-text-fill-color: var(--ui-100) !important;
         -webkit-text-stroke: initial !important;
@@ -808,9 +822,23 @@
         filter: initial !important;
       }
 
-      body.has-menubar-color .mac-menubar-mode .app-dropdown-wrapper .absolute .text-ui-400,
-      body.has-menubar-color .mac-menubar-mode .app-dropdown-wrapper .absolute .text-ui-400 i,
-      body.has-menubar-color .mac-menubar-mode .app-dropdown-wrapper .absolute .text-ui-400 span {
+      body.has-menubar-color
+        .mac-menubar-mode
+        .app-dropdown-wrapper
+        .absolute
+        .text-ui-400,
+      body.has-menubar-color
+        .mac-menubar-mode
+        .app-dropdown-wrapper
+        .absolute
+        .text-ui-400
+        i,
+      body.has-menubar-color
+        .mac-menubar-mode
+        .app-dropdown-wrapper
+        .absolute
+        .text-ui-400
+        span {
         color: var(--ui-400) !important;
         -webkit-text-fill-color: var(--ui-400) !important;
       }
@@ -2313,7 +2341,7 @@
       }
 
       /* --- UNIFIED GLASSMORPHISM (Folder Flyout Effect) --- */
-      
+
       #desktop {
         overflow: visible !important;
         z-index: auto !important;
@@ -2366,7 +2394,26 @@
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
       }
+
+      .CodeMirror {
+        height: 100% !important;
+        font-family: "JetBrains Mono", monospace !important;
+        font-size: 12px;
+      }
     </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-darker.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
   </head>
   <body
     class="h-screen w-screen overflow-hidden relative"
@@ -2959,7 +3006,6 @@
         id="desktop-widgets"
         class="fixed top-16 right-4 z-[99999] flex flex-col gap-4 w-80 pointer-events-auto"
       ></div>
-      ```
 
       <div
         id="stage-manager-strip"
@@ -3293,10 +3339,12 @@
       >
         <div class="text-center mb-4">
           <div id="calendar-time" class="text-4xl font-bold">00:00 AM</div>
-          <div id="calendar-date" class="text-sm text-ui-400">Day, Month 00</div>
+          <div id="calendar-date" class="text-sm text-ui-400">
+            Day, Month 00
+          </div>
         </div>
         <div class="border-t border-ui-border pt-4">
-            <div id="calendar-grid-container"></div>
+          <div id="calendar-grid-container"></div>
         </div>
       </div>
       <div id="dock-indicator-line"></div>
@@ -3398,7 +3446,10 @@
             id="taskbar-tray-zone"
             class="flex items-center gap-2 text-xs font-medium h-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-auto px-2"
           >
-            <div onclick="toggleControlCenter(event)" class="flex items-center gap-3 px-2 h-full cursor-pointer hover:bg-ui-700/20 rounded-lg transition">
+            <div
+              onclick="toggleControlCenter(event)"
+              class="flex items-center gap-3 px-2 h-full cursor-pointer hover:bg-ui-700/20 rounded-lg transition"
+            >
               <i class="fa-solid fa-wifi text-[10px] opacity-80"></i>
               <i class="fa-solid fa-battery-full text-[10px] opacity-80"></i>
             </div>
@@ -3429,7 +3480,82 @@
     </div>
 
     <script>
-      const SYSTEM_VERSION = "1.5";
+      const SYSTEM_VERSION = "1.6";
+      const appStorage = {
+        cache: null,
+        isSandboxed: false,
+        async init() {
+          this.cache = {};
+          try {
+            // This will instantly trigger an error if we are in a restricted sandbox
+            let test = localStorage.length;
+
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i);
+              const v = localStorage.getItem(k);
+              if (k.startsWith("gemini_") || k.startsWith("widget-")) {
+                const lfValue = await localforage.getItem(k);
+                if (lfValue === null) {
+                  await localforage.setItem(k, v);
+                }
+              }
+            }
+            await localforage.iterate((value, key) => {
+              this.cache[key] = value;
+            });
+          } catch (e) {
+            console.warn(
+              "Nested OS Sandbox detected. Running in Volatile RAM mode.",
+            );
+            this.isSandboxed = true; // Flips the OS into a clean Virtual Machine state
+          }
+        },
+        getItem(key) {
+          if (this.cache && this.cache[key] !== undefined)
+            return this.cache[key];
+          if (this.isSandboxed) return null;
+          try {
+            return localStorage.getItem(key);
+          } catch (e) {
+            return null;
+          }
+        },
+        setItem(key, value) {
+          if (!this.cache) this.cache = {};
+          this.cache[key] = String(value);
+          if (!this.isSandboxed) {
+            try {
+              localforage.setItem(key, String(value));
+            } catch (e) {}
+            try {
+              localStorage.setItem(key, String(value));
+            } catch (e) {}
+          }
+        },
+        removeItem(key) {
+          if (this.cache) delete this.cache[key];
+          if (!this.isSandboxed) {
+            try {
+              localforage.removeItem(key);
+            } catch (e) {}
+            try {
+              localStorage.removeItem(key);
+            } catch (e) {}
+          }
+        },
+        get length() {
+          if (this.isSandboxed)
+            return this.cache ? Object.keys(this.cache).length : 0;
+          return this.cache
+            ? Object.keys(this.cache).length
+            : localStorage.length;
+        },
+        key(i) {
+          if (this.isSandboxed)
+            return this.cache ? Object.keys(this.cache)[i] : null;
+          return this.cache ? Object.keys(this.cache)[i] : localStorage.key(i);
+        },
+      };
       let zIndexCounter = 100;
       let windows = {};
       let instanceCounts = {};
@@ -3732,8 +3858,9 @@
         );
         const prog = document.getElementById("island-music-progress");
         const currText = document.getElementById("island-time-curr");
+        const totalText = document.getElementById("island-time-total");
 
-        if (audio && prog) {
+        if (audio && prog && audio.duration) {
           const pct = (audio.currentTime / audio.duration) * 100;
           prog.style.width = pct + "%";
           const mins = Math.floor(audio.currentTime / 60);
@@ -3741,6 +3868,14 @@
             .toString()
             .padStart(2, "0");
           if (currText) currText.innerText = `${mins}:${secs}`;
+
+          if (totalText && !isNaN(audio.duration)) {
+            const tmins = Math.floor(audio.duration / 60);
+            const tsecs = Math.floor(audio.duration % 60)
+              .toString()
+              .padStart(2, "0");
+            totalText.innerText = `${tmins}:${tsecs}`;
+          }
         }
         requestAnimationFrame(syncIslandProgress);
       }
@@ -3817,7 +3952,7 @@
                 </div>
                 <div class="flex justify-between text-[9px] text-white/40 mt-2 font-mono">
                     <span id="island-time-curr">0:00</span>
-                    <span id="island-time-total">${fmtTime(audio?.duration || 30)}</span>
+                    <span id="island-time-total">${fmtTime(audio?.duration)}</span>
                 </div>
             </div>
 
@@ -3840,7 +3975,7 @@
       }
 
       function fmtTime(seconds) {
-        if (!seconds) return "0:30";
+        if (!seconds || isNaN(seconds)) return "0:00";
         const m = Math.floor(seconds / 60);
         const s = Math.floor(seconds % 60)
           .toString()
@@ -3854,6 +3989,8 @@
         { id: "desktop", parentId: "root", name: "Desktop", type: "folder" },
         { id: "docs", parentId: "root", name: "Documents", type: "folder" },
         { id: "imgs", parentId: "root", name: "Images", type: "folder" },
+        { id: "music_sys", parentId: "root", name: "Music", type: "folder" },
+        { id: "vids_sys", parentId: "root", name: "Videos", type: "folder" },
         {
           id: "welcome",
           parentId: "docs",
@@ -3919,9 +4056,7 @@
         },
       ];
 
-      let storedNotes = JSON.parse(
-        localStorage.getItem("gemini_notes_data"),
-      ) || {
+      let storedNotes = JSON.parse(appStorage.getItem("gemini_notes_data")) || {
         tabs: [
           {
             id: 1,
@@ -3934,11 +4069,11 @@
       };
 
       function saveNotesData() {
-        localStorage.setItem("gemini_notes_data", JSON.stringify(storedNotes));
+        appStorage.setItem("gemini_notes_data", JSON.stringify(storedNotes));
       }
 
       let fileSystem =
-        JSON.parse(localStorage.getItem("gemini_fs")) || defaultFiles;
+        JSON.parse(appStorage.getItem("gemini_fs")) || defaultFiles;
 
       if (!fileSystem.find((f) => f.id === "desktop")) {
         console.log("Migrating File System: Adding Desktop Folder...");
@@ -3952,14 +4087,19 @@
       }
 
       function saveFileSystem() {
-        localStorage.setItem("gemini_fs", JSON.stringify(fileSystem));
+        appStorage.setItem("gemini_fs", JSON.stringify(fileSystem));
       }
 
-      let pinnedApps = JSON.parse(
-        localStorage.getItem("gemini_pinned_apps"),
-      ) || ["terminal", "browser", "notes", "music", "photos", "settings"];
+      let pinnedApps = JSON.parse(appStorage.getItem("gemini_pinned_apps")) || [
+        "terminal",
+        "browser",
+        "notes",
+        "music",
+        "photos",
+        "settings",
+      ];
       let pinnedTaskbarApps = JSON.parse(
-        localStorage.getItem("gemini_taskbar_pins"),
+        appStorage.getItem("gemini_taskbar_pins"),
       ) || [
         "terminal",
         "browser",
@@ -3971,16 +4111,16 @@
       ];
 
       function saveTaskbarPins() {
-        localStorage.setItem(
+        appStorage.setItem(
           "gemini_taskbar_pins",
           JSON.stringify(pinnedTaskbarApps),
         );
       }
 
       let pinnedSidebarFolders =
-        JSON.parse(localStorage.getItem("gemini_sidebar_folders")) || [];
+        JSON.parse(appStorage.getItem("gemini_sidebar_folders")) || [];
       function saveSidebarFolders() {
-        localStorage.setItem(
+        appStorage.setItem(
           "gemini_sidebar_folders",
           JSON.stringify(pinnedSidebarFolders),
         );
@@ -3988,13 +4128,13 @@
 
       if (!pinnedApps.includes("bin")) {
         pinnedApps.push("bin");
-        localStorage.setItem("gemini_pinned_apps", JSON.stringify(pinnedApps));
+        appStorage.setItem("gemini_pinned_apps", JSON.stringify(pinnedApps));
       }
       let recentApps =
-        JSON.parse(localStorage.getItem("gemini_recent_apps")) || [];
+        JSON.parse(appStorage.getItem("gemini_recent_apps")) || [];
       let isAllAppsView = false;
 
-      let settings = JSON.parse(localStorage.getItem("gemini_settings")) || {
+      let settings = JSON.parse(appStorage.getItem("gemini_settings")) || {
         layout: "windows",
         doubleClickToOpen: false,
         accentColor: null,
@@ -4154,7 +4294,7 @@
         dnd: false,
       };
       let activeWidgets =
-        JSON.parse(localStorage.getItem("gemini_widgets")) || [];
+        JSON.parse(appStorage.getItem("gemini_widgets")) || [];
       let widgetIntervals = {};
 
       const widgetLibrary = {
@@ -4245,10 +4385,10 @@
           width: "w-80",
           height: "h-auto",
           render: (id) => {
-            const savedLocation = localStorage.getItem(
+            const savedLocation = appStorage.getItem(
               `widget-weather-location-${id}`,
             );
-            const savedData = localStorage.getItem(`widget-weather-data-${id}`);
+            const savedData = appStorage.getItem(`widget-weather-data-${id}`);
 
             const wrapperStyle = `color: var(--widget-text);`;
 
@@ -4339,15 +4479,13 @@
             }
           },
           update: (id) => {
-            const savedLocation = localStorage.getItem(
+            const savedLocation = appStorage.getItem(
               `widget-weather-location-${id}`,
             );
             if (savedLocation) {
               fetchWeatherData(id, JSON.parse(savedLocation));
               widgetIntervals[id] = setInterval(() => {
-                const loc = localStorage.getItem(
-                  `widget-weather-location-${id}`,
-                );
+                const loc = appStorage.getItem(`widget-weather-location-${id}`);
                 if (loc) fetchWeatherData(id, JSON.parse(loc));
               }, 600000);
             }
@@ -4376,11 +4514,11 @@
           update: (id) => {
             const textarea = document.getElementById(`widget-notes-${id}`);
             const saved =
-              localStorage.getItem(`widget-notes-content-${id}`) || "";
+              appStorage.getItem(`widget-notes-content-${id}`) || "";
             if (textarea) {
               textarea.value = saved;
               textarea.oninput = () =>
-                localStorage.setItem(
+                appStorage.setItem(
                   `widget-notes-content-${id}`,
                   textarea.value,
                 );
@@ -4477,7 +4615,7 @@
             lon: result.longitude,
           };
 
-          localStorage.setItem(
+          appStorage.setItem(
             `widget-weather-location-${widgetId}`,
             JSON.stringify(location),
           );
@@ -4551,7 +4689,7 @@
           };
 
           console.log("Saving location:", location);
-          localStorage.setItem(
+          appStorage.setItem(
             `widget-weather-location-${widgetId}`,
             JSON.stringify(location),
           );
@@ -4572,7 +4710,7 @@
             lat: lat,
             lon: lon,
           };
-          localStorage.setItem(
+          appStorage.setItem(
             `widget-weather-location-${widgetId}`,
             JSON.stringify(location),
           );
@@ -4589,8 +4727,8 @@
           "Change Location",
           "Are you sure you want to change the weather location? Current settings will be removed.",
           () => {
-            localStorage.removeItem(`widget-weather-location-${widgetId}`);
-            localStorage.removeItem(`widget-weather-data-${widgetId}`);
+            appStorage.removeItem(`widget-weather-location-${widgetId}`);
+            appStorage.removeItem(`widget-weather-data-${widgetId}`);
             renderWidgets();
             pushNotification(
               "Weather",
@@ -4603,7 +4741,7 @@
       async function fetchWeatherData(widgetId, location) {
         try {
           const unit =
-            localStorage.getItem(`widget-weather-unit-${widgetId}`) || "C";
+            appStorage.getItem(`widget-weather-unit-${widgetId}`) || "C";
           const tempUnit =
             unit === "F"
               ? "temperature_unit=fahrenheit"
@@ -4628,7 +4766,7 @@
             unit: unit,
           };
 
-          localStorage.setItem(
+          appStorage.setItem(
             `widget-weather-data-${widgetId}`,
             JSON.stringify(weatherData),
           );
@@ -4662,11 +4800,11 @@
 
       function toggleWeatherUnit(widgetId) {
         const currentUnit =
-          localStorage.getItem(`widget-weather-unit-${widgetId}`) || "C";
+          appStorage.getItem(`widget-weather-unit-${widgetId}`) || "C";
         const newUnit = currentUnit === "C" ? "F" : "C";
-        localStorage.setItem(`widget-weather-unit-${widgetId}`, newUnit);
+        appStorage.setItem(`widget-weather-unit-${widgetId}`, newUnit);
 
-        const location = localStorage.getItem(
+        const location = appStorage.getItem(
           `widget-weather-location-${widgetId}`,
         );
         if (location) {
@@ -4726,7 +4864,7 @@
       }
 
       function saveWidgets() {
-        localStorage.setItem("gemini_widgets", JSON.stringify(activeWidgets));
+        appStorage.setItem("gemini_widgets", JSON.stringify(activeWidgets));
       }
 
       const wallpapers = [
@@ -4762,6 +4900,47 @@
       };
 
       const apps = {
+        appstudio: {
+          title: "App Studio",
+          icon: "fa-code",
+          color: "text-blue-400",
+          width: 700,
+          height: 500,
+          content: (wid) => `
+    <div class="h-full flex flex-col bg-ui-900 text-ui-100">
+        <div class="flex items-center gap-2 p-2 bg-ui-800 border-b border-ui-border">
+            <input type="text" id="as-id-${wid}" placeholder="App ID (e.g. custom)" class="bg-ui-900 border border-ui-border rounded px-2 py-1 text-xs outline-none w-24">
+            <input type="text" id="as-title-${wid}" placeholder="App Title" class="bg-ui-900 border border-ui-border rounded px-2 py-1 text-xs outline-none w-32">
+            <input type="text" id="as-icon-${wid}" placeholder="Icon (e.g. fa-box)" class="bg-ui-900 border border-ui-border rounded px-2 py-1 text-xs outline-none w-24">
+            <div class="flex-1"></div>
+            <button onclick="saveAsSha('${wid}')" class="px-3 py-1 bg-ui-700 hover:bg-ui-600 rounded text-xs transition">Build .sha</button>
+            <button onclick="saveAsHai('${wid}')" class="px-3 py-1 bg-accent-600 hover:bg-accent-500 text-white rounded text-xs transition">Export .hai</button>
+        </div>
+        <div class="flex items-center justify-between bg-ui-800 border-b border-ui-border pr-2">
+            <div class="flex items-center">
+                <button id="as-btn-html-${wid}" onclick="asSwitchTab('${wid}', 'html')" class="px-4 py-2 text-xs font-bold bg-ui-600 hover:bg-ui-700 transition">HTML</button>
+                <button id="as-btn-css-${wid}" onclick="asSwitchTab('${wid}', 'css')" class="px-4 py-2 text-xs font-bold hover:bg-ui-700 transition">CSS</button>
+                <button id="as-btn-js-${wid}" onclick="asSwitchTab('${wid}', 'js')" class="px-4 py-2 text-xs font-bold hover:bg-ui-700 transition">JS</button>
+                <button id="as-btn-single-${wid}" onclick="asSwitchTab('${wid}', 'single')" class="px-4 py-2 text-xs font-bold hover:bg-ui-700 transition">Single File</button>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-[10px] text-ui-400">Mode:</label>
+                <select id="as-mode-${wid}" class="bg-ui-900 border border-ui-border rounded px-2 py-1 text-[10px] outline-none text-ui-100">
+                    <option value="split">Split (HTML/CSS/JS)</option>
+                    <option value="single">Single File</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex-1 relative bg-[#212121]">
+            <div id="as-html-wrap-${wid}" class="absolute inset-0 w-full h-full"><textarea id="as-html-${wid}"><div id='my-app'>Hello World</div></textarea></div>
+            <div id="as-css-wrap-${wid}" class="absolute inset-0 w-full h-full hidden"><textarea id="as-css-${wid}">#my-app { color: red; }</textarea></div>
+            <div id="as-js-wrap-${wid}" class="absolute inset-0 w-full h-full hidden"><textarea id="as-js-${wid}">console.log('App loaded');</textarea></div>
+            <div id="as-single-wrap-${wid}" class="absolute inset-0 w-full h-full hidden"><textarea id="as-single-${wid}"><!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n\n<script>\n\n<\/script>\n</body>\n</html></textarea></div>
+        </div>
+    </div>
+    `,
+        },
+
         changelog: {
           title: "Changelog",
           icon: "fa-file-lines",
@@ -4786,7 +4965,7 @@
                     <div class="h-full flex flex-col items-center justify-center text-center p-8 bg-ui-900 text-ui-100">
                         <i class="fa-solid fa-moon text-6xl text-accent-400 mb-4"></i>
                         <h1 class="text-3xl font-bold mb-2">VeishenOS</h1>
-                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.5</span></p>
+                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.6</span></p>
                         <p class="text-sm text-ui-400 mb-8">Needs to be updated!</p>
                         <button onclick="closeApp('${wid}')" class="px-6 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded-lg shadow transition">Get Started</button>
                     </div>
@@ -4851,7 +5030,7 @@
           content: (windowId) => `
                     <div class="h-full bg-black p-2 terminal-font text-sm flex flex-col" onclick="document.getElementById('term-input-${windowId}').focus()">
                         <div id="term-output-${windowId}" class="flex-1 overflow-y-auto p-2 text-green-400 font-mono relative">
-                            <div>VeishenOS Titan Kernel [Version 1.5]</div>
+                            <div>VeishenOS Titan Kernel [Version 1.6]</div>
                             <div>(c) Veishen Corp. All rights reserved.</div>
                             <br>
                             <div>Type 'help' for a list of commands.</div>
@@ -4961,7 +5140,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-ui-900 flex items-center overflow-x-auto border-b border-ui-border flex-shrink-0" id="notes-tab-bar-${windowId}"></div>
+                        <div class="bg-ui-900 flex items-center overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-b border-ui-border flex-shrink-0" id="notes-tab-bar-${windowId}"></div>
                         
                         <textarea id="notes-area-${windowId}" class="flex-1 bg-transparent text-ui-100 p-4 resize-none outline-none font-mono text-sm whitespace-pre-wrap transition-all" placeholder="Start typing..." onkeydown="handleNotesKey(event, '${windowId}')" onkeyup="updateNotesStatus('${windowId}')" onclick="updateNotesStatus('${windowId}')"></textarea>
                         
@@ -4984,7 +5163,7 @@
           height: 600,
           content: (windowId) => `
                     <div class="h-full flex flex-col bg-ui-900">
-                        <div class="bg-ui-800 flex items-center px-1 pt-1 overflow-x-auto border-b border-ui-border" id="browser-tab-bar-${windowId}"></div>
+                        <div class="bg-ui-800 flex items-center px-1 pt-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-b border-ui-border" id="browser-tab-bar-${windowId}"></div>
                         <div class="flex items-center gap-2 p-2 bg-ui-700 border-b border-ui-border">
                             <i class="fa-solid fa-arrow-left text-ui-400 cursor-pointer hover:text-ui-100"></i>
                             <i class="fa-solid fa-arrow-right text-ui-400 cursor-pointer hover:text-ui-100"></i>
@@ -5005,7 +5184,7 @@
                     <div class="h-full p-6 bg-ui-900 text-ui-100">
                         <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-brands fa-linux"></i> System Specs</h2>
                         <div class="space-y-2 text-sm text-ui-400">
-                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.5</span></div>
+                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.6</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Kernel:</span> <span class="text-ui-100">Web-Kernel 5.4</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Memory:</span> <span id="sys-ram-${wid}" class="text-ui-100">Detecting...</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Processor:</span> <span class="text-ui-100">Veishen Quantum Core</span></div>
@@ -5123,20 +5302,21 @@
             </div>
             
             <div class="flex flex-col items-center gap-2">
-                <div class="flex items-center gap-8">
+                <div class="flex items-center gap-6">
                     <i id="player-repeat-btn-${wid}" class="fa-solid fa-repeat text-xs cursor-pointer text-ui-400 hover:text-white" onclick="toggleMusicRepeat('${wid}')"></i>
-                    <i id="player-like-btn-${wid}" class="fa-regular fa-heart cursor-pointer hover:text-pink-500"></i>
+                    <i class="fa-solid fa-backward-step cursor-pointer text-ui-400 hover:text-white" onclick="playPrevInQueue('${wid}')"></i>
                     <button onclick="toggleMusicPlayback('${wid}')" class="w-12 h-12 rounded-full bg-ui-100 text-ui-900 flex items-center justify-center hover:scale-110 transition active:scale-95">
                         <i id="player-btn-icon-${wid}" class="fa-solid fa-play ml-0.5 text-xl"></i>
                     </button>
                     <i class="fa-solid fa-forward-step cursor-pointer text-ui-400 hover:text-white" onclick="playNextInQueue('${wid}')"></i>
+                    <i id="player-like-btn-${wid}" class="fa-regular fa-heart cursor-pointer hover:text-pink-500"></i>
                 </div>
                 <div class="w-full flex items-center gap-3 px-4">
                     <span class="text-[9px] text-ui-400 w-8 text-right" id="music-time-curr-${wid}">0:00</span>
                     <div class="flex-1 h-1 bg-ui-700 rounded-full cursor-pointer relative" onmousedown="startMusicSeek(event, '${wid}')">
                         <div id="player-progress-${wid}" class="h-full bg-accent-500 w-0 rounded-full pointer-events-none"></div>
                     </div>
-                    <span class="text-[9px] text-ui-400 w-8" id="music-time-total-${wid}">0:30</span>
+                    <span class="text-[9px] text-ui-400 w-8" id="music-time-total-${wid}">0:00</span>
                 </div>
             </div>
 
@@ -5226,7 +5406,11 @@
             );
 
             setTimeout(() => {
-                if (settings.pfp) applyPfpToPreview(settings.pfp, `settings-avatar-preview-${wid}`);
+              if (settings.pfp)
+                applyPfpToPreview(
+                  settings.pfp,
+                  `settings-avatar-preview-${wid}`,
+                );
             }, 50);
 
             return `
@@ -5264,7 +5448,7 @@
                 <div class="flex-1">
                     <label class="block text-xs font-bold text-ui-400 mb-1">Username</label>
                     <div class="flex gap-2">
-                        <input type="text" id="settings-username-input-${wid}" value="${settings.username || 'Admin User'}" class="bg-ui-900 border border-ui-border rounded px-3 py-2 text-sm text-ui-100 outline-none focus:border-accent-400 flex-1">
+                        <input type="text" id="settings-username-input-${wid}" value="${settings.username || "Admin User"}" class="bg-ui-900 border border-ui-border rounded px-3 py-2 text-sm text-ui-100 outline-none focus:border-accent-400 flex-1">
                         <button onclick="saveAccountName('${wid}')" class="px-4 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded text-sm transition font-medium shrink-0">Save</button>
                     </div>
                 </div>
@@ -5273,13 +5457,15 @@
             <div class="p-4 bg-ui-700 rounded-xl">
                 <label class="block text-xs font-bold text-ui-400 mb-3">Choose Avatar</label>
                 <div class="flex flex-wrap gap-3">
-                    ${pfpPresets.map((p, i) => {
+                    ${pfpPresets
+                      .map((p, i) => {
                         if (p.type === "image") {
-                            return `<div onclick="updateAccountAvatar(${i}, '${wid}')" class="w-12 h-12 rounded-full cursor-pointer hover:scale-110 transition-transform overflow-hidden border border-white/20 shadow-md"><img src="${p.value}" class="w-full h-full object-cover"></div>`;
+                          return `<div onclick="updateAccountAvatar(${i}, '${wid}')" class="w-12 h-12 rounded-full cursor-pointer hover:scale-110 transition-transform overflow-hidden border border-white/20 shadow-md"><img src="${p.value}" class="w-full h-full object-cover"></div>`;
                         } else {
-                            return `<div onclick="updateAccountAvatar(${i}, '${wid}')" class="w-12 h-12 rounded-full cursor-pointer hover:scale-110 transition-transform flex items-center justify-center text-xl bg-gradient-to-tr ${p.bg} border border-white/20 shadow-inner drop-shadow-md">${p.value}</div>`;
+                          return `<div onclick="updateAccountAvatar(${i}, '${wid}')" class="w-12 h-12 rounded-full cursor-pointer hover:scale-110 transition-transform flex items-center justify-center text-xl bg-gradient-to-tr ${p.bg} border border-white/20 shadow-inner drop-shadow-md">${p.value}</div>`;
                         }
-                    }).join("")}
+                      })
+                      .join("")}
                     <div onclick="updateAccountAvatar(-1, '${wid}')" class="w-12 h-12 rounded-full cursor-pointer hover:scale-110 transition-transform flex items-center justify-center text-sm bg-ui-800 border border-white/20 font-bold shadow-md" title="Initials">Ab</div>
                 </div>
             </div>
@@ -5452,7 +5638,7 @@
                         <div class="text-xs text-ui-400">Show search bar on taskbar (Windows mode)</div>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                        <input type="checkbox" class="sr-only peer" ${settings.showTaskbarSearch ? "checked" : ""} onchange="toggleSetting('showTaskbarSearch', this.checked); applyLayout(settings.layout)">
+                        <input type="checkbox" class="sr-only peer" ${settings.showTaskbarSearch ? "checked" : ""} onchange="settings.showTaskbarSearch = this.checked; saveSettings(); setTimeout(() => applyLayout(settings.layout), 200)">
                         <div class="w-11 h-6 bg-ui-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-600"></div>
                     </label>
                 </div>
@@ -5511,7 +5697,7 @@
                         <div class="text-xs text-ui-400">Hide dock when windows touch it</div>
                     </div>
                     <label class="relative inline-flex items-center shrink-0 ${settings.layout === "macos" ? "cursor-pointer" : ""}">
-                        <input type="checkbox" class="sr-only peer" ${settings.autoHideDock ? "checked" : ""} ${settings.layout === "macos" ? "" : "disabled"} onchange="toggleDockAutoHide(this.checked); refreshSettingsUI()">
+                        <input type="checkbox" class="sr-only peer" ${settings.autoHideDock ? "checked" : ""} ${settings.layout === "macos" ? "" : "disabled"} onchange="toggleDockAutoHide(this.checked); setTimeout(() => refreshSettingsUI(), 200)">
                         <div class="w-11 h-6 bg-ui-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-600"></div>
                     </label>
                 </div>
@@ -5603,7 +5789,7 @@
                         <div class="text-xs text-ui-400">Organize active windows</div>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                        <input type="checkbox" class="sr-only peer" ${settings.stageManager ? "checked" : ""} onchange="toggleStageManager(this.checked); refreshSettingsUI()">
+                        <input type="checkbox" class="sr-only peer" ${settings.stageManager ? "checked" : ""} onchange="toggleStageManager(this.checked); setTimeout(() => refreshSettingsUI(), 200)">
                         <div class="w-11 h-6 bg-ui-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-600"></div>
                     </label>
                 </div>
@@ -5696,7 +5882,7 @@
                     <input type="color" class="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0 shadow-lg" 
                            oninput="document.documentElement.style.setProperty('--menubar-color', this.value)" 
                            onchange="changeMenubarColor(this.value)" 
-                           value="${settings.menubarColor || (settings.theme === 'light' ? '#000000' : '#ffffff')}">
+                           value="${settings.menubarColor || (settings.theme === "light" ? "#000000" : "#ffffff")}">
                 </div>
             </div>
             
@@ -6082,7 +6268,7 @@
             <i class="fa-solid fa-cloud-arrow-down text-4xl text-accent-500"></i>
             <div>
                 <div class="font-bold">VeishenOS Titan</div>
-                <div class="text-xs text-ui-400">Current version running v1.5</div>
+                <div class="text-xs text-ui-400">Current version running v1.6</div>
             </div>
         </div>
         <div class="flex items-center justify-between mt-6 border-t border-ui-border pt-4">
@@ -6116,15 +6302,18 @@
 
                         
                         <div class="flex-1 flex flex-col min-w-0 bg-ui-900">
-                            
+                            <div class="bg-ui-800 flex items-center px-1 pt-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-b border-ui-border flex-shrink-0" id="fs-tab-bar-${wid}"></div>
                             <div class="flex items-center gap-2 p-2 border-b border-ui-border bg-ui-800/50 backdrop-blur relative z-20">
                                 
+                                <button id="fs-back-${wid}" onclick="fsGoBack('${wid}')" class="p-1.5 rounded hover:bg-ui-700 text-ui-400 hover:text-white transition disabled:opacity-30 disabled:hover:bg-transparent" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
+                                <button id="fs-forward-${wid}" onclick="fsGoForward('${wid}')" class="p-1.5 rounded hover:bg-ui-700 text-ui-400 hover:text-white transition disabled:opacity-30 disabled:hover:bg-transparent" title="Forward"><i class="fa-solid fa-arrow-right"></i></button>
                                 <button onclick="fsNavigate('${wid}', 'up')" class="p-1.5 rounded hover:bg-ui-700 text-ui-400 hover:text-white transition" title="Up"><i class="fa-solid fa-arrow-up"></i></button>
                                 <div class="h-4 w-[1px] bg-ui-border mx-1"></div>
                                 
                                 
                                 <button onclick="fsCreateFolder('${wid}')" class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-ui-700 text-xs font-medium transition whitespace-nowrap"><i class="fa-solid fa-folder-plus text-blue-400"></i> <span class="hidden sm:inline">New Folder</span></button>
                                 <button onclick="fsCreateFile('${wid}')" class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-ui-700 text-xs font-medium transition whitespace-nowrap"><i class="fa-solid fa-file-circle-plus text-green-400"></i> <span class="hidden sm:inline">New File</span></button>
+                                <button onclick="fsUploadFile('${wid}')" class="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-ui-700 text-xs font-medium transition whitespace-nowrap"><i class="fa-solid fa-file-arrow-up text-purple-400"></i> <span class="hidden sm:inline">Upload</span></button>
                                 
                                 
                                 <div class="h-4 w-[1px] bg-ui-border mx-1 hidden sm:block"></div>
@@ -6135,7 +6324,7 @@
                                     <div class="absolute left-8 flex items-center h-full opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                                         <button onclick="fsSetClipboard('cut', '${wid}')" class="w-6 h-full hover:bg-white/10 flex items-center justify-center text-ui-400 hover:text-white transition" title="Cut"><i class="fa-solid fa-scissors text-[10px]"></i></button>
                                         <button onclick="fsSetClipboard('copy', '${wid}')" class="w-7 h-full hover:bg-white/10 flex items-center justify-center text-ui-400 hover:text-white transition" title="Copy"><i class="fa-solid fa-copy text-[10px]"></i></button>
-                                        <button onclick="fsPaste(windows['${wid}'].fsState.currentFolder, '${wid}')" class="w-7 h-full hover:bg-white/10 flex items-center justify-center text-ui-400 hover:text-white transition" title="Paste"><i class="fa-solid fa-paste text-[10px]"></i></button>
+                                        <button onclick="fsPaste(windows['${wid}'].fsState.tabs.find(t=>t.id===windows['${wid}'].fsState.activeTab).currentFolder, '${wid}')" class="w-7 h-full hover:bg-white/10 flex items-center justify-center text-ui-400 hover:text-white transition" title="Paste"><i class="fa-solid fa-paste text-[10px]"></i></button>
                                     </div>
                                 </div>
                                 
@@ -6217,7 +6406,7 @@
       }
 
       function saveSettings() {
-        localStorage.setItem("gemini_settings", JSON.stringify(settings));
+        appStorage.setItem("gemini_settings", JSON.stringify(settings));
       }
 
       function parseTimeInput(timeStr) {
@@ -6300,7 +6489,7 @@
         }
 
         saveSettings();
-        refreshSettingsUI();
+        setTimeout(() => refreshSettingsUI(), 200);
       }
 
       function setAutoSetting(key, val) {
@@ -6364,7 +6553,7 @@
         refreshSettingsUI();
       }
 
-function changeMenubarColor(color) {
+      function changeMenubarColor(color) {
         settings.menubarColor = color;
         saveSettings();
         if (color) {
@@ -6441,7 +6630,7 @@ function changeMenubarColor(color) {
         );
         if (ytMatch)
           return `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`;
-        if (url.match(/\.(mp4|webm|ogg)$/i))
+        if (url.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i))
           return "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop";
         return url;
       }
@@ -6456,7 +6645,7 @@ function changeMenubarColor(color) {
         if (bgYt) bgYt.style.opacity = "0";
 
         setTimeout(() => {
-          const isVideo = url.match(/\.(mp4|webm|ogg)$/i);
+          const isVideo = url.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i);
           const ytMatch = url.match(
             /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i,
           );
@@ -6589,7 +6778,18 @@ function changeMenubarColor(color) {
         }
 
         if (appId === "files") {
-          appState = { currentFolder: "root", selected: new Set() };
+          appState = {
+            tabs: [
+              {
+                id: 1,
+                currentFolder: "root",
+                selected: new Set(),
+                history: ["root"],
+                historyIndex: 0,
+              },
+            ],
+            activeTab: 1,
+          };
         }
 
         if (appId === "calculator") {
@@ -6672,6 +6872,8 @@ function changeMenubarColor(color) {
           switchMusicTab(windowId, "search");
         }
         if (appId === "photos") renderPhotos(windowId);
+        if (appId === "appstudio")
+          setTimeout(() => initAppStudio(windowId), 50);
         if (appId === "changelog")
           setTimeout(() => fetchChangelog(windowId), 100);
         updateMenuBar();
@@ -6688,6 +6890,41 @@ function changeMenubarColor(color) {
               ? navigator.deviceMemory + " GB"
               : "N/A";
         }, 100);
+      }
+
+      function handleTabDrop(e, targetWid, targetTabId, appType) {
+        e.preventDefault();
+        try {
+          const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+          if (data.wid !== targetWid || data.app !== appType) return;
+
+          const sourceTabId = data.id;
+          if (sourceTabId === targetTabId) return;
+
+          let state;
+          if (appType === "notes") state = windows[targetWid].state;
+          else if (appType === "browser") state = windows[targetWid].state;
+          else if (appType === "files") state = windows[targetWid].fsState;
+
+          const tabs = state.tabs;
+          const sourceIndex = tabs.findIndex((t) => t.id === sourceTabId);
+          const targetIndex = tabs.findIndex((t) => t.id === targetTabId);
+
+          if (sourceIndex > -1 && targetIndex > -1) {
+            const [movedTab] = tabs.splice(sourceIndex, 1);
+            tabs.splice(targetIndex, 0, movedTab);
+
+            if (appType === "notes") {
+              storedNotes = state;
+              saveNotesData();
+              renderNoteTabs(targetWid);
+            } else if (appType === "browser") {
+              renderBrowserTabs(targetWid);
+            } else if (appType === "files") {
+              renderFsTabs(targetWid);
+            }
+          }
+        } catch (err) {}
       }
 
       function getNextNoteId(wid) {
@@ -6787,6 +7024,14 @@ function changeMenubarColor(color) {
           const tabEl = document.createElement("div");
           tabEl.className = `px-3 py-2 text-xs flex items-center gap-2 cursor-pointer transition-colors ${isActive ? "bg-ui-800 text-ui-100 border-r border-ui-border" : "text-ui-400 hover:bg-ui-700/50"}`;
           tabEl.onclick = () => switchNoteTab(wid, tab.id);
+          tabEl.draggable = true;
+          tabEl.ondragstart = (e) =>
+            e.dataTransfer.setData(
+              "text/plain",
+              JSON.stringify({ wid, id: tab.id, app: "notes" }),
+            );
+          tabEl.ondragover = (e) => e.preventDefault();
+          tabEl.ondrop = (e) => handleTabDrop(e, wid, tab.id, "notes");
 
           tabEl.innerHTML = `
                     <span class="truncate max-w-[120px]">${tab.title}</span>
@@ -6906,6 +7151,14 @@ function changeMenubarColor(color) {
           const tabEl = document.createElement("div");
           tabEl.className = `px-3 py-1.5 text-xs flex items-center gap-2 cursor-pointer transition-colors relative top-[1px] ${isActive ? "bg-ui-900 text-ui-100 rounded-t-lg border-t border-l border-r border-ui-border" : "text-ui-400 hover:bg-ui-700/50"}`;
           tabEl.onclick = () => switchBrowserTab(wid, tab.id);
+          tabEl.draggable = true;
+          tabEl.ondragstart = (e) =>
+            e.dataTransfer.setData(
+              "text/plain",
+              JSON.stringify({ wid, id: tab.id, app: "browser" }),
+            );
+          tabEl.ondragover = (e) => e.preventDefault();
+          tabEl.ondrop = (e) => handleTabDrop(e, wid, tab.id, "browser");
 
           tabEl.innerHTML = `
                     <span class="truncate max-w-[80px]">${tab.title}</span>
@@ -7365,6 +7618,7 @@ function changeMenubarColor(color) {
 
         if (settings.requirePassword) {
           if (input.value !== settings.lockScreenPassword) {
+            playErrorSound();
             input.classList.add("shake-input");
             hint.style.opacity = "1";
             setTimeout(() => {
@@ -7426,8 +7680,8 @@ function changeMenubarColor(color) {
           pushNotification("System", `Welcome back, ${settings.username}.`);
           renderWidgets();
 
-          if (!localStorage.getItem("gemini_welcome_shown")) {
-            localStorage.setItem("gemini_welcome_shown", "true");
+          if (!appStorage.getItem("gemini_welcome_shown")) {
+            appStorage.setItem("gemini_welcome_shown", "true");
 
             setTimeout(() => {
               openApp("welcome");
@@ -7443,7 +7697,7 @@ function changeMenubarColor(color) {
 
       function initAI(wid) {
         const history = JSON.parse(
-          localStorage.getItem("gemini_chat_history") || "[]",
+          appStorage.getItem("gemini_chat_history") || "[]",
         );
         const container = document.getElementById(`ai-chat-history-${wid}`);
         if (!container) return;
@@ -7480,17 +7734,17 @@ function changeMenubarColor(color) {
 
       function saveToHistory(role, content) {
         const history = JSON.parse(
-          localStorage.getItem("gemini_chat_history") || "[]",
+          appStorage.getItem("gemini_chat_history") || "[]",
         );
         history.push({ role, content });
-        localStorage.setItem("gemini_chat_history", JSON.stringify(history));
+        appStorage.setItem("gemini_chat_history", JSON.stringify(history));
       }
 
       function setGeminiKey() {
-        const currentKey = localStorage.getItem("gemini_api_key") || "";
+        const currentKey = appStorage.getItem("gemini_api_key") || "";
         showModal("Enter your Gemini API Key:", currentKey, (newKey) => {
           if (newKey !== null) {
-            localStorage.setItem("gemini_api_key", newKey.trim());
+            appStorage.setItem("gemini_api_key", newKey.trim());
             pushNotification(
               "Veishen Assistant",
               "API Key saved successfully!",
@@ -7504,7 +7758,7 @@ function changeMenubarColor(color) {
           "Clear Chat",
           "Are you sure you want to clear your chat history?",
           () => {
-            localStorage.removeItem("gemini_chat_history");
+            appStorage.removeItem("gemini_chat_history");
             initAI(wid);
             pushNotification("Veishen Assistant", "Chat history cleared.");
           },
@@ -7515,7 +7769,7 @@ function changeMenubarColor(color) {
         const input = document.getElementById(`ai-input-${wid}`);
         const hist = document.getElementById(`ai-chat-history-${wid}`);
         const msg = input.value.trim();
-        const apiKey = localStorage.getItem("gemini_api_key");
+        const apiKey = appStorage.getItem("gemini_api_key");
 
         if (!msg) return;
         if (!apiKey) {
@@ -7536,7 +7790,7 @@ function changeMenubarColor(color) {
         hist.scrollTop = hist.scrollHeight;
 
         const storedHistory = JSON.parse(
-          localStorage.getItem("gemini_chat_history") || "[]",
+          appStorage.getItem("gemini_chat_history") || "[]",
         );
         const contextParts = storedHistory.slice(-10).map((m) => ({
           role: m.role === "user" ? "user" : "model",
@@ -7847,7 +8101,7 @@ function changeMenubarColor(color) {
         }
       }
 
-function toggleCalendar(e) {
+      function toggleCalendar(e) {
         if (e) e.stopPropagation();
         const menu = document.getElementById("calendar-flyout");
         const isClosed = menu.classList.contains("opacity-0");
@@ -7869,7 +8123,8 @@ function toggleCalendar(e) {
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const today = now.getDate();
 
-        let calendar = '<div class="grid grid-cols-7 gap-1 text-center text-xs">';
+        let calendar =
+          '<div class="grid grid-cols-7 gap-1 text-center text-xs">';
         ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].forEach((day) => {
           calendar += `<div class="font-bold p-1 text-ui-400">${day}</div>`;
         });
@@ -7907,33 +8162,73 @@ function toggleCalendar(e) {
         closeAllPanels();
       }
 
-      function playNotificationSound() {
+      let sysAudioCtx = null;
+
+      function playErrorSound() {
         if (typeof isMuted !== "undefined" && isMuted) return;
-
         try {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (!AudioContext) return;
-          const ctx = new AudioContext();
+          if (!sysAudioCtx)
+            sysAudioCtx = new (
+              window.AudioContext || window.webkitAudioContext
+            )();
+          if (sysAudioCtx.state === "suspended") sysAudioCtx.resume();
 
+          const ctx = sysAudioCtx;
           const vol =
             typeof currentVol !== "undefined" ? currentVol / 100 : 0.7;
+          if (vol <= 0) return;
+
+          const baseVol = vol * 0.6;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(150, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+
+          gain.gain.setValueAtTime(0.001, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(
+            baseVol,
+            ctx.currentTime + 0.02,
+          );
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.35);
+        } catch (e) {}
+      }
+
+      function playNotificationSound() {
+        if (typeof isMuted !== "undefined" && isMuted) return;
+        try {
+          if (!sysAudioCtx)
+            sysAudioCtx = new (
+              window.AudioContext || window.webkitAudioContext
+            )();
+          if (sysAudioCtx.state === "suspended") sysAudioCtx.resume();
+
+          const ctx = sysAudioCtx;
+          const vol =
+            typeof currentVol !== "undefined" ? currentVol / 100 : 0.7;
+          if (vol <= 0) return;
+
           const baseVol = vol * 0.15;
 
           const osc1 = ctx.createOscillator();
           const gain1 = ctx.createGain();
           osc1.type = "sine";
           osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
-
           gain1.gain.setValueAtTime(0, ctx.currentTime);
           gain1.gain.linearRampToValueAtTime(baseVol, ctx.currentTime + 0.02);
           gain1.gain.exponentialRampToValueAtTime(
             0.001,
             ctx.currentTime + 0.15,
           );
-
           osc1.connect(gain1);
           gain1.connect(ctx.destination);
-
           osc1.start(ctx.currentTime);
           osc1.stop(ctx.currentTime + 0.2);
 
@@ -7941,14 +8236,11 @@ function toggleCalendar(e) {
           const gain2 = ctx.createGain();
           osc2.type = "sine";
           osc2.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12);
-
           gain2.gain.setValueAtTime(0, ctx.currentTime + 0.12);
           gain2.gain.linearRampToValueAtTime(baseVol, ctx.currentTime + 0.14);
           gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-
           osc2.connect(gain2);
           gain2.connect(ctx.destination);
-
           osc2.start(ctx.currentTime + 0.12);
           osc2.stop(ctx.currentTime + 0.5);
         } catch (e) {
@@ -7957,7 +8249,11 @@ function toggleCalendar(e) {
       }
 
       function pushNotification(title, message) {
-        playNotificationSound();
+        if (title.toLowerCase().includes("error")) {
+          playErrorSound();
+        } else {
+          playNotificationSound();
+        }
 
         const time = new Date().toLocaleTimeString([], {
           hour: "2-digit",
@@ -8598,7 +8894,9 @@ function toggleCalendar(e) {
             );
             if (wins.length) {
               const w = wins[wins.length - 1];
-              w.fsState.currentFolder = "bin";
+              w.fsState.tabs.find(
+                (t) => t.id === w.fsState.activeTab,
+              ).currentFolder = "bin";
               renderFileView(w.element.id.replace("window-", ""));
             }
           }, 100);
@@ -8736,7 +9034,9 @@ function toggleCalendar(e) {
             selectedIcons.clear();
             renderDesktopIcons();
           } else {
-            windows[context].fsState.selected.clear();
+            windows[context].fsState.tabs
+              .find((t) => t.id === windows[context].fsState.activeTab)
+              .selected.clear();
             renderFileView(context);
           }
         }
@@ -8886,6 +9186,9 @@ function toggleCalendar(e) {
                         </div>
                         <div class="ctx-item" onclick="fsCreateFile('desktop'); hideDesktopContextMenu()">
                             <i class="fa-solid fa-file-lines text-gray-400"></i> <span>Text Document</span>
+                        </div>
+                        <div class="ctx-item" onclick="fsUploadFile('desktop'); hideDesktopContextMenu()">
+                            <i class="fa-solid fa-file-arrow-up text-purple-400"></i> <span>Upload File</span>
                         </div>
                     </div>
                 </div>
@@ -9239,9 +9542,12 @@ function toggleCalendar(e) {
               grid.querySelectorAll(".file-item").forEach((item) => {
                 const rect = item.getBoundingClientRect();
                 if (rectIntersect(boxRect, rect)) {
-                  windows[selectionContext].fsState.selected.add(
-                    item.dataset.id,
-                  );
+                  windows[selectionContext].fsState.tabs
+                    .find(
+                      (t) =>
+                        t.id === windows[selectionContext].fsState.activeTab,
+                    )
+                    .selected.add(item.dataset.id);
                 }
                 item.classList.remove("selected-file-item");
               });
@@ -9519,12 +9825,14 @@ function toggleCalendar(e) {
               if (item.type === "bin") {
                 openApp("files");
                 setTimeout(() => {
-                  const fileWins = Object.values(windows).filter(
-                    (x) => x.appId === "files",
+                  const wins = Object.values(windows).filter(
+                    (w) => w.appId === "files",
                   );
-                  const w = fileWins[fileWins.length - 1];
-                  if (w) {
-                    w.fsState.currentFolder = "bin";
+                  if (wins.length) {
+                    const w = wins[wins.length - 1];
+                    w.fsState.tabs.find(
+                      (t) => t.id === w.fsState.activeTab,
+                    ).currentFolder = "bin";
                     renderFileView(w.element.id.replace("window-", ""));
                   }
                 }, 100);
@@ -9539,7 +9847,9 @@ function toggleCalendar(e) {
                     );
                     const w = fileWins[fileWins.length - 1];
                     if (w) {
-                      w.fsState.currentFolder = item.id;
+                      w.fsState.tabs.find(
+                        (t) => t.id === w.fsState.activeTab,
+                      ).currentFolder = item.id;
                       renderFileView(w.element.id.replace("window-", ""));
                     }
                   }, 100);
@@ -9604,7 +9914,7 @@ function toggleCalendar(e) {
 
         function showBinContext(e) {
           const ctxMenu = document.getElementById("desktop-ctx-menu");
-          ctxMenu.innerHTML = `<div class="ctx-item" onclick="openApp('files'); setTimeout(()=>{ const fw=Object.values(windows).filter(x=>x.appId==='files'); const w=fw[fw.length-1]; if(w){ w.fsState.currentFolder='bin'; renderFileView(w.element.id.replace('window-','')); } }, 100); hideDesktopContextMenu()">Open</div><div class="ctx-item" onclick="fsEmptyBin(); hideDesktopContextMenu()">Empty Bin</div>`;
+          ctxMenu.innerHTML = `<div class="ctx-item" onclick="openApp('files'); setTimeout(()=>{ const fw=Object.values(windows).filter(x=>x.appId==='files'); const w=fw[fw.length-1]; if(w){ w.fsState.tabs.find(t=>t.id===w.fsState.activeTab).currentFolder='bin'; renderFileView(w.element.id.replace('window-','')); } }, 100); hideDesktopContextMenu()">Open</div><div class="ctx-item" onclick="fsEmptyBin(); hideDesktopContextMenu()">Empty Bin</div>`;
           placeMenu(e, ctxMenu);
         }
         function showShortcutContext(e, item) {
@@ -9703,7 +10013,7 @@ function toggleCalendar(e) {
             widgetElement.style.zIndex = "10";
             widgetElement.style.position = "fixed";
 
-            const savedPosition = localStorage.getItem(
+            const savedPosition = appStorage.getItem(
               `widget-position-${widget.id}`,
             );
             if (savedPosition) {
@@ -9789,7 +10099,7 @@ function toggleCalendar(e) {
               left: widgetElement.style.left,
               top: widgetElement.style.top,
             };
-            localStorage.setItem(
+            appStorage.setItem(
               `widget-position-${widgetId}`,
               JSON.stringify(position),
             );
@@ -9936,19 +10246,166 @@ function toggleCalendar(e) {
     `;
       }
 
+      function addFsTab(wid) {
+        const state = windows[wid].fsState;
+        const newId =
+          state.tabs.length > 0
+            ? Math.max(...state.tabs.map((t) => t.id)) + 1
+            : 1;
+        state.tabs.push({
+          id: newId,
+          currentFolder: "root",
+          selected: new Set(),
+          history: ["root"],
+          historyIndex: 0,
+        });
+        state.activeTab = newId;
+        renderFsTabs(wid);
+        renderFileView(wid);
+        renderFilesSidebar(wid);
+      }
+
+      function switchFsTab(wid, tabId) {
+        windows[wid].fsState.activeTab = tabId;
+        renderFsTabs(wid);
+        renderFileView(wid);
+        renderFilesSidebar(wid);
+      }
+
+      function closeFsTab(wid, tabId) {
+        const state = windows[wid].fsState;
+        if (state.tabs.length === 1) return;
+        const index = state.tabs.findIndex((t) => t.id === tabId);
+        if (index === -1) return;
+        state.tabs.splice(index, 1);
+        if (state.activeTab === tabId) {
+          state.activeTab = state.tabs[Math.max(0, index - 1)].id;
+        }
+        renderFsTabs(wid);
+        renderFileView(wid);
+        renderFilesSidebar(wid);
+      }
+
+      function renderFsTabs(wid) {
+        const bar = document.getElementById(`fs-tab-bar-${wid}`);
+        const state = windows[wid]?.fsState;
+        if (!bar || !state) return;
+
+        bar.innerHTML = "";
+        state.tabs.forEach((tab) => {
+          const isActive = tab.id === state.activeTab;
+          const folder = fileSystem.find((f) => f.id === tab.currentFolder);
+          const title = folder
+            ? folder.id === "root"
+              ? "OS Drive"
+              : folder.name
+            : "Unknown";
+
+          const tabEl = document.createElement("div");
+          tabEl.className = `px-3 py-1.5 text-xs flex items-center gap-2 cursor-pointer transition-colors relative top-[1px] ${isActive ? "bg-ui-900 text-ui-100 rounded-t-lg border-t border-l border-r border-ui-border" : "text-ui-400 hover:bg-ui-700/50"}`;
+          tabEl.onclick = () => switchFsTab(wid, tab.id);
+          tabEl.draggable = true;
+          tabEl.ondragstart = (e) =>
+            e.dataTransfer.setData(
+              "text/plain",
+              JSON.stringify({ wid, id: tab.id, app: "files" }),
+            );
+          tabEl.ondragover = (e) => e.preventDefault();
+          tabEl.ondrop = (e) => handleTabDrop(e, wid, tab.id, "files");
+
+          tabEl.innerHTML = `
+            <span class="truncate max-w-[100px]">${title}</span>
+            ${state.tabs.length > 1 ? `<i class="fa-solid fa-xmark text-[10px] hover:text-red-400 ml-1 p-1.5 rounded-full hover:bg-ui-900/50" onclick="event.stopPropagation(); closeFsTab('${wid}', ${tab.id})"></i>` : ""}
+          `;
+          bar.appendChild(tabEl);
+        });
+
+        const plusBtn = document.createElement("div");
+        plusBtn.className =
+          "px-2 py-1.5 text-ui-400 hover:text-ui-100 cursor-pointer transition-colors";
+        plusBtn.innerHTML = '<i class="fa-solid fa-plus text-xs"></i>';
+        plusBtn.onclick = () => addFsTab(wid);
+        bar.appendChild(plusBtn);
+      }
+
       function initFileExplorer(wid) {
-        windows[wid].fsState = { currentFolder: "root", selected: new Set() };
+        windows[wid].fsState = {
+          tabs: [
+            {
+              id: 1,
+              currentFolder: "root",
+              selected: new Set(),
+              history: ["root"],
+              historyIndex: 0,
+            },
+          ],
+          activeTab: 1,
+        };
+        renderFsTabs(wid);
         renderFileView(wid);
       }
 
       function getFileIcon(type) {
         if (type === "folder") return "fa-folder text-blue-400";
         if (type === "image") return "fa-image text-orange-400";
+        if (type === "video") return "fa-file-video text-purple-400";
+        if (type === "audio") return "fa-file-audio text-pink-400";
         return "fa-file-lines text-gray-400";
       }
 
       function renderFileView(wid) {
-        const state = windows[wid].fsState;
+        const fsStateObj = windows[wid].fsState;
+        const state = fsStateObj.tabs.find(
+          (t) => t.id === fsStateObj.activeTab,
+        );
+
+        if (!state.history) {
+          state.history = [state.currentFolder];
+          state.historyIndex = 0;
+        }
+        if (
+          !state._navigating &&
+          state.history[state.historyIndex] !== state.currentFolder
+        ) {
+          state.history = state.history.slice(0, state.historyIndex + 1);
+          state.history.push(state.currentFolder);
+          state.historyIndex++;
+        }
+        state._navigating = false;
+
+        const backBtn = document.getElementById(`fs-back-${wid}`);
+        const fwdBtn = document.getElementById(`fs-forward-${wid}`);
+        if (backBtn && fwdBtn) {
+          backBtn.disabled = state.historyIndex <= 0;
+          fwdBtn.disabled = state.historyIndex >= state.history.length - 1;
+
+          if (!backBtn.disabled) {
+            const prevId = state.history[state.historyIndex - 1];
+            const prevFolder = fileSystem.find((f) => f.id === prevId);
+            const name = prevFolder
+              ? prevFolder.id === "root"
+                ? "OS Drive"
+                : prevFolder.name
+              : "Unknown";
+            backBtn.title = `Back to ${name}`;
+          } else {
+            backBtn.title = "Back";
+          }
+
+          if (!fwdBtn.disabled) {
+            const nextId = state.history[state.historyIndex + 1];
+            const nextFolder = fileSystem.find((f) => f.id === nextId);
+            const name = nextFolder
+              ? nextFolder.id === "root"
+                ? "OS Drive"
+                : nextFolder.name
+              : "Unknown";
+            fwdBtn.title = `Forward to ${name}`;
+          } else {
+            fwdBtn.title = "Forward";
+          }
+        }
+
         const grid = document.getElementById(`fs-grid-${wid}`);
         const pathEl = document.getElementById(`fs-path-${wid}`);
 
@@ -10169,11 +10626,18 @@ function toggleCalendar(e) {
                     <i class="fa-solid fa-folder text-blue-400 text-xl drop-shadow-md pointer-events-none"></i>
                     ${listEmblemHtml}
                 </div>`;
+            } else if (
+              (item.type === "image" || item.type === "video") &&
+              item.url
+            ) {
+              iconContainer = `<img src="${item.type === "video" ? "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100&q=80" : item.url}" class="w-6 h-6 object-cover rounded shadow-sm pointer-events-none">`;
             }
 
             el.innerHTML = `
-                <div class="w-8 flex justify-center flex-shrink-0">
+                <div class="w-8 flex justify-center flex-shrink-0 relative">
                     ${iconContainer}
+                    ${item.type === "video" ? '<i class="fa-solid fa-play absolute inset-0 m-auto text-[8px] text-white/80 drop-shadow-md"></i>' : ""}
+                </div>
                 </div>
                 <div class="flex-1 min-w-0 flex flex-col">
                     <span class="text-xs font-medium text-ui-100 truncate pointer-events-none">${displayName}</span>
@@ -10181,10 +10645,17 @@ function toggleCalendar(e) {
                 </div>
             `;
           } else {
+            let mainIcon = `<i class="fa-solid ${getFileIcon(item.type)} text-3xl drop-shadow-md pointer-events-none relative z-0"></i>`;
+            if ((item.type === "image" || item.type === "video") && item.url) {
+              mainIcon = `<div class="w-10 h-10 rounded overflow-hidden shadow-md pointer-events-none relative z-0">
+                    <img src="${item.type === "video" ? "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100&q=80" : item.url}" class="w-full h-full object-cover">
+                    ${item.type === "video" ? '<div class="absolute inset-0 flex items-center justify-center bg-black/30"><i class="fa-solid fa-play text-white/80 text-[10px]"></i></div>' : ""}
+                </div>`;
+            }
             el.innerHTML = `
                 <div class="relative flex items-center justify-center">
                     ${progressRing} 
-                    <i class="fa-solid ${getFileIcon(item.type)} text-3xl drop-shadow-md pointer-events-none relative z-0"></i>
+                    ${mainIcon}
                     ${emblemHtml}
                 </div>
                 <span class="text-xs text-center break-all line-clamp-2 select-none pointer-events-none mt-1">${displayName}</span>
@@ -10193,10 +10664,14 @@ function toggleCalendar(e) {
 
           grid.appendChild(el);
         });
+        renderFsTabs(wid);
       }
 
       function fsNavigate(wid, dir) {
-        const state = windows[wid].fsState;
+        const fsStateObj = windows[wid]?.fsState;
+        const state = fsStateObj
+          ? fsStateObj.tabs.find((t) => t.id === fsStateObj.activeTab)
+          : null;
         if (dir === "up") {
           const curr = fileSystem.find((f) => f.id === state.currentFolder);
           if (curr && curr.parentId) {
@@ -10207,8 +10682,39 @@ function toggleCalendar(e) {
         }
       }
 
+      function fsGoBack(wid) {
+        const fsStateObj = windows[wid]?.fsState;
+        const state = fsStateObj
+          ? fsStateObj.tabs.find((t) => t.id === fsStateObj.activeTab)
+          : null;
+        if (state && state.historyIndex > 0) {
+          state.historyIndex--;
+          state.currentFolder = state.history[state.historyIndex];
+          state._navigating = true;
+          state.selected.clear();
+          renderFileView(wid);
+        }
+      }
+
+      function fsGoForward(wid) {
+        const fsStateObj = windows[wid]?.fsState;
+        const state = fsStateObj
+          ? fsStateObj.tabs.find((t) => t.id === fsStateObj.activeTab)
+          : null;
+        if (state && state.historyIndex < state.history.length - 1) {
+          state.historyIndex++;
+          state.currentFolder = state.history[state.historyIndex];
+          state._navigating = true;
+          state.selected.clear();
+          renderFileView(wid);
+        }
+      }
+
       function fsNavigateTo(wid, folderId) {
-        const state = windows[wid]?.fsState;
+        const fsStateObj = windows[wid]?.fsState;
+        const state = fsStateObj
+          ? fsStateObj.tabs.find((t) => t.id === fsStateObj.activeTab)
+          : null;
         if (!state) return;
 
         state.currentFolder = folderId;
@@ -10222,7 +10728,9 @@ function toggleCalendar(e) {
 
       function fsDeselect(wid) {
         if (!isDragging && windows[wid] && windows[wid].fsState) {
-          windows[wid].fsState.selected.clear();
+          windows[wid].fsState.tabs
+            .find((t) => t.id === windows[wid].fsState.activeTab)
+            .selected.clear();
           renderFileView(wid);
         }
       }
@@ -10237,7 +10745,9 @@ function toggleCalendar(e) {
           parentId = "desktop";
           refreshDesktop = true;
         } else if (windows[widOrTarget]) {
-          parentId = windows[widOrTarget].fsState.currentFolder;
+          parentId = windows[widOrTarget].fsState.tabs.find(
+            (t) => t.id === windows[widOrTarget].fsState.activeTab,
+          ).currentFolder;
           refreshWindowId = widOrTarget;
 
           if (parentId === "desktop") refreshDesktop = true;
@@ -10277,7 +10787,9 @@ function toggleCalendar(e) {
             Object.keys(windows).forEach((key) => {
               if (
                 windows[key].appId === "files" &&
-                windows[key].fsState.currentFolder === parentId
+                windows[key].fsState.tabs.find(
+                  (t) => t.id === windows[key].fsState.activeTab,
+                ).currentFolder === parentId
               ) {
                 renderFileView(key);
               }
@@ -10296,7 +10808,9 @@ function toggleCalendar(e) {
           parentId = "desktop";
           refreshDesktop = true;
         } else if (windows[widOrTarget]) {
-          parentId = windows[widOrTarget].fsState.currentFolder;
+          parentId = windows[widOrTarget].fsState.tabs.find(
+            (t) => t.id === windows[widOrTarget].fsState.activeTab,
+          ).currentFolder;
           refreshWindowId = widOrTarget;
 
           if (parentId === "desktop") refreshDesktop = true;
@@ -10338,13 +10852,99 @@ function toggleCalendar(e) {
             Object.keys(windows).forEach((key) => {
               if (
                 windows[key].appId === "files" &&
-                windows[key].fsState.currentFolder === parentId
+                windows[key].fsState.tabs.find(
+                  (t) => t.id === windows[key].fsState.activeTab,
+                ).currentFolder === parentId
               ) {
                 renderFileView(key);
               }
             });
           }
         });
+      }
+
+      function fsUploadFile(widOrTarget) {
+        let parentId = "root";
+        let refreshDesktop = false;
+        let refreshWindowId = null;
+
+        if (widOrTarget === "desktop") {
+          parentId = "desktop";
+          refreshDesktop = true;
+        } else if (windows[widOrTarget]) {
+          parentId = windows[widOrTarget].fsState.tabs.find(
+            (t) => t.id === windows[widOrTarget].fsState.activeTab,
+          ).currentFolder;
+          refreshWindowId = widOrTarget;
+          if (parentId === "desktop") refreshDesktop = true;
+        }
+
+        const input = document.createElement("input");
+        input.type = "file";
+        input.onchange = (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const isText =
+            file.type.startsWith("text/") ||
+            file.name.match(/\.(txt|md|js|html|css|json|csv)$/i);
+          const isImage = file.type.startsWith("image/");
+          const isVideo =
+            file.type.startsWith("video/") ||
+            file.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i);
+          const isAudio =
+            file.type.startsWith("audio/") ||
+            file.name.match(/\.(mp3|wav|flac|m4a)$/i);
+
+          const newId = "file-" + Date.now();
+          let fileType = "file";
+          if (isImage) fileType = "image";
+          else if (isVideo) fileType = "video";
+          else if (isAudio) fileType = "audio";
+
+          const finishUpload = (result) => {
+            fileSystem.push({
+              id: newId,
+              parentId: parentId,
+              name: file.name,
+              type: fileType,
+              content: isText ? result : undefined,
+              url: !isText ? result : undefined,
+            });
+
+            saveFileSystem();
+            pushNotification("Files", `Uploaded "${file.name}" successfully.`);
+
+            if (refreshDesktop) renderDesktopIcons();
+            if (refreshWindowId) renderFileView(refreshWindowId);
+
+            Object.keys(windows).forEach((key) => {
+              if (
+                windows[key].appId === "files" &&
+                windows[key].fsState.tabs.find(
+                  (t) => t.id === windows[key].fsState.activeTab,
+                ).currentFolder === parentId
+              ) {
+                renderFileView(key);
+              }
+            });
+          };
+
+          let uploadFile = file;
+          if (!isText && file.name.match(/\.(mkv|avi|mov)$/i)) {
+            uploadFile = new Blob([file], { type: "video/mp4" });
+          }
+
+          if (!isText && file.size > 20 * 1024 * 1024) {
+            finishUpload(URL.createObjectURL(uploadFile));
+          } else {
+            const reader = new FileReader();
+            reader.onload = (event) => finishUpload(event.target.result);
+            if (isText) reader.readAsText(uploadFile);
+            else reader.readAsDataURL(uploadFile);
+          }
+        };
+        input.click();
       }
 
       let fsClipboard = { action: null, items: [] };
@@ -10354,10 +10954,22 @@ function toggleCalendar(e) {
         if (context === "desktop") {
           selected = Array.from(selectedIcons);
         } else if (windows[context]) {
-          selected = Array.from(windows[context].fsState.selected);
+          selected = Array.from(
+            windows[context].fsState.tabs.find(
+              (t) => t.id === windows[context].fsState.activeTab,
+            ).selected,
+          );
         }
 
-        const protectedFolders = ["root", "bin", "desktop", "docs", "imgs"];
+        const protectedFolders = [
+          "root",
+          "bin",
+          "desktop",
+          "docs",
+          "imgs",
+          "music_sys",
+          "vids_sys",
+        ];
         selected = selected.filter((id) => !protectedFolders.includes(id));
 
         if (selected.length === 0) return;
@@ -10472,7 +11084,15 @@ function toggleCalendar(e) {
       }
 
       function fsDeleteItem(wid, itemId) {
-        const protectedFolders = ["root", "bin", "desktop", "docs", "imgs"];
+        const protectedFolders = [
+          "root",
+          "bin",
+          "desktop",
+          "docs",
+          "imgs",
+          "music_sys",
+          "vids_sys",
+        ];
         if (protectedFolders.includes(itemId)) {
           pushNotification("Error", "Cannot delete system folders.");
           return;
@@ -10503,13 +11123,15 @@ function toggleCalendar(e) {
 
             if (pinnedApps.includes(itemId)) {
               pinnedApps = pinnedApps.filter((id) => id !== itemId);
-              localStorage.setItem(
+              appStorage.setItem(
                 "gemini_pinned_apps",
                 JSON.stringify(pinnedApps),
               );
             }
             if (pinnedTaskbarApps.includes(itemId)) {
-              pinnedTaskbarApps = pinnedTaskbarApps.filter((id) => id !== itemId);
+              pinnedTaskbarApps = pinnedTaskbarApps.filter(
+                (id) => id !== itemId,
+              );
               saveTaskbarPins();
             }
           } else {
@@ -10535,7 +11157,15 @@ function toggleCalendar(e) {
       }
 
       function fsRenameItem(wid, itemId) {
-        const protectedFolders = ["root", "bin", "desktop", "docs", "imgs"];
+        const protectedFolders = [
+          "root",
+          "bin",
+          "desktop",
+          "docs",
+          "imgs",
+          "music_sys",
+          "vids_sys",
+        ];
         if (protectedFolders.includes(itemId)) {
           pushNotification("Error", "Cannot rename system folders.");
           return;
@@ -10578,13 +11208,150 @@ function toggleCalendar(e) {
             Object.keys(windows).forEach((key) => {
               if (
                 windows[key].appId === "files" &&
-                windows[key].fsState.currentFolder === item.parentId
+                windows[key].fsState.tabs.find(
+                  (t) => t.id === windows[key].fsState.activeTab,
+                ).currentFolder === item.parentId
               ) {
                 renderFileView(key);
               }
             });
           }
         });
+      }
+
+      let installedApps =
+        JSON.parse(appStorage.getItem("gemini_installed_apps")) || [];
+
+      function loadInstalledApps() {
+        installedApps.forEach((appData) => {
+          apps[appData.id] = {
+            title: appData.title,
+            icon: appData.icon,
+            color: "text-ui-100",
+            width: 600,
+            height: 400,
+            content: (wid) => {
+              const sourceCode =
+                appData.mode === "single"
+                  ? appData.singleHtml
+                  : `<!DOCTYPE html><html><head><style>${appData.css}</style></head><body>${appData.html}<script>${appData.js}<\/script></body></html>`;
+              const blob = new Blob([sourceCode], { type: "text/html" });
+              const url = URL.createObjectURL(blob);
+              return `<iframe src="${url}" class="w-full h-full border-none bg-white" sandbox="allow-scripts allow-forms allow-popups"></iframe>`;
+            },
+          };
+        });
+      }
+
+      function installHai(appData) {
+        if (!installedApps.find((a) => a.id === appData.id)) {
+          installedApps.push(appData);
+          appStorage.setItem(
+            "gemini_installed_apps",
+            JSON.stringify(installedApps),
+          );
+        }
+        loadInstalledApps();
+        if (!desktopAppShortcuts.find((s) => s.id === appData.id)) {
+          addToDesktop(appData.id);
+        }
+        pushNotification(
+          "Installer",
+          `${appData.title} installed successfully!`,
+        );
+      }
+
+      function initAppStudio(wid) {
+        windows[wid].editors = {
+          html: CodeMirror.fromTextArea(
+            document.getElementById(`as-html-${wid}`),
+            { mode: "htmlmixed", theme: "material-darker", lineNumbers: true },
+          ),
+          css: CodeMirror.fromTextArea(
+            document.getElementById(`as-css-${wid}`),
+            { mode: "css", theme: "material-darker", lineNumbers: true },
+          ),
+          js: CodeMirror.fromTextArea(document.getElementById(`as-js-${wid}`), {
+            mode: "javascript",
+            theme: "material-darker",
+            lineNumbers: true,
+          }),
+          single: CodeMirror.fromTextArea(
+            document.getElementById(`as-single-${wid}`),
+            { mode: "htmlmixed", theme: "material-darker", lineNumbers: true },
+          ),
+        };
+      }
+
+      function asSwitchTab(wid, tab) {
+        ["html", "css", "js", "single"].forEach((t) => {
+          document
+            .getElementById(`as-${t}-wrap-${wid}`)
+            .classList.add("hidden");
+          document
+            .getElementById(`as-btn-${t}-${wid}`)
+            .classList.remove("bg-ui-600");
+        });
+        document
+          .getElementById(`as-${tab}-wrap-${wid}`)
+          .classList.remove("hidden");
+        document
+          .getElementById(`as-btn-${tab}-${wid}`)
+          .classList.add("bg-ui-600");
+
+        const modeSelect = document.getElementById(`as-mode-${wid}`);
+        if (tab === "single") modeSelect.value = "single";
+        else modeSelect.value = "split";
+
+        if (windows[wid] && windows[wid].editors && windows[wid].editors[tab]) {
+          windows[wid].editors[tab].refresh();
+        }
+      }
+
+      function buildAppObj(wid) {
+        return {
+          id:
+            document.getElementById(`as-id-${wid}`).value.trim() ||
+            "custom-" + Date.now(),
+          title:
+            document.getElementById(`as-title-${wid}`).value.trim() ||
+            "Custom App",
+          icon:
+            document.getElementById(`as-icon-${wid}`).value.trim() || "fa-box",
+          mode: document.getElementById(`as-mode-${wid}`).value,
+          html: windows[wid].editors.html.getValue(),
+          css: windows[wid].editors.css.getValue(),
+          js: windows[wid].editors.js.getValue(),
+          singleHtml: windows[wid].editors.single.getValue(),
+        };
+      }
+
+      function saveAsSha(wid) {
+        const data = buildAppObj(wid);
+        fileSystem.push({
+          id: "file-" + Date.now(),
+          parentId: "desktop",
+          name: data.title + ".sha",
+          type: "file",
+          content: JSON.stringify(data),
+        });
+        saveFileSystem();
+        renderDesktopIcons();
+        pushNotification("App Studio", `Saved ${data.title}.sha to Desktop`);
+      }
+
+      function saveAsHai(wid) {
+        const data = buildAppObj(wid);
+        fileSystem.push({
+          id: "file-" + Date.now(),
+          parentId: "desktop",
+          name: data.title + ".hai",
+          type: "file",
+          content: JSON.stringify({ type: "hai", appData: data }),
+        });
+        saveFileSystem();
+        renderDesktopIcons();
+        pushNotification("App Studio", `Saved ${data.title}.hai to Desktop`);
       }
 
       function openFile(file) {
@@ -10596,7 +11363,55 @@ function toggleCalendar(e) {
           color: file.type === "image" ? "text-orange-400" : "text-gray-400",
         });
 
-        if (file.type === "image") {
+        if (file.name.endsWith(".sha")) {
+          try {
+            const appData = JSON.parse(file.content);
+            apps[appData.id] = {
+              title: appData.title,
+              icon: appData.icon,
+              color: "text-ui-100",
+              width: 600,
+              height: 400,
+              content: (wid) => {
+                const sourceCode =
+                  appData.mode === "single"
+                    ? appData.singleHtml
+                    : `<!DOCTYPE html><html><head><style>${appData.css}</style></head><body>${appData.html}<script>${appData.js}<\/script></body></html>`;
+                const blob = new Blob([sourceCode], { type: "text/html" });
+                const url = URL.createObjectURL(blob);
+                return `<iframe src="${url}" class="w-full h-full border-none bg-white" sandbox="allow-scripts allow-forms allow-popups"></iframe>`;
+              },
+            };
+            openApp(appData.id);
+          } catch (e) {
+            pushNotification("Error", "Invalid .sha file");
+          }
+          return;
+        }
+
+        if (file.name.endsWith(".hai")) {
+          try {
+            const data = JSON.parse(file.content);
+            if (data.type === "hai" && data.appData) {
+              showConfirmModal(
+                "Install App",
+                `Do you want to install ${data.appData.title}?`,
+                () => {
+                  installHai(data.appData);
+                },
+              );
+            }
+          } catch (e) {
+            pushNotification("Error", "Invalid .hai file");
+          }
+          return;
+        }
+
+        if (
+          file.type === "image" ||
+          file.type === "video" ||
+          file.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i)
+        ) {
           openApp("photos");
           setTimeout(() => {
             const photoWins = Object.values(windows).filter(
@@ -10606,6 +11421,33 @@ function toggleCalendar(e) {
               photoWins.length - 1
             ].element.id.replace("window-", "");
             openMediaFull(targetWid, file.id);
+          }, 150);
+          return;
+        }
+
+        if (
+          file.type === "audio" ||
+          file.name.match(/\.(mp3|wav|flac|m4a)$/i)
+        ) {
+          openApp("music");
+          setTimeout(() => {
+            const musicWins = Object.values(windows).filter(
+              (w) => w.appId === "music",
+            );
+            const targetWid = musicWins[
+              musicWins.length - 1
+            ].element.id.replace("window-", "");
+
+            const song = {
+              id: file.id,
+              title: file.name,
+              artist: "Local File",
+              album: "Uploads",
+              art: "https://images.unsplash.com/photo-1614850523060-8da1d56ae167?w=400&q=80",
+              url: file.url || file.content,
+            };
+
+            playMusicTrack(targetWid, song, 0);
           }, 150);
           return;
         }
@@ -10662,6 +11504,7 @@ function toggleCalendar(e) {
             targetWid ? 10 : 100,
           );
         } else {
+          playErrorSound();
           const modal = document.getElementById("custom-modal");
           const modalContent = document.getElementById("modal-content");
 
@@ -10724,8 +11567,14 @@ function toggleCalendar(e) {
         const ctxMenu = document.getElementById("desktop-ctx-menu");
         const item = itemId ? fileSystem.find((f) => f.id === itemId) : null;
 
+        const fsStateObj = windows[wid]?.fsState;
         const currentFolder =
-          wid === "desktop" ? "desktop" : windows[wid]?.fsState?.currentFolder;
+          wid === "desktop"
+            ? "desktop"
+            : fsStateObj
+              ? fsStateObj.tabs.find((t) => t.id === fsStateObj.activeTab)
+                  ?.currentFolder
+              : null;
         const isInBin =
           currentFolder === "bin" || (item && item.parentId === "bin");
 
@@ -10743,6 +11592,8 @@ function toggleCalendar(e) {
             "desktop",
             "docs",
             "imgs",
+            "music_sys",
+            "vids_sys",
           ].includes(itemId);
 
           let extraOptions = "";
@@ -10837,6 +11688,9 @@ function toggleCalendar(e) {
             </div>
             <div class="ctx-item" onclick="fsCreateFile('${wid}'); hideDesktopContextMenu()">
                 <i class="fa-solid fa-file-lines text-gray-400"></i> <span>New File</span>
+            </div>
+            <div class="ctx-item" onclick="fsUploadFile('${wid}'); hideDesktopContextMenu()">
+                <i class="fa-solid fa-file-arrow-up text-purple-400"></i> <span>Upload File</span>
             </div>
              ${isInBin ? `<div class="border-t border-ui-border my-1"></div><div class="ctx-item" onclick="fsEmptyBin(); hideDesktopContextMenu()"><i class="fa-solid fa-trash text-red-400"></i> Empty Bin</div>` : ""}
         `;
@@ -10976,7 +11830,12 @@ function toggleCalendar(e) {
           const calTime = document.getElementById("calendar-time");
           const calDate = document.getElementById("calendar-date");
           if (calTime) calTime.innerText = timeStr;
-          if (calDate) calDate.innerText = now.toLocaleDateString("en-US", { weekday: 'long', month: 'long', day: 'numeric' });
+          if (calDate)
+            calDate.innerText = now.toLocaleDateString("en-US", {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            });
 
           if (now.getSeconds() === 0) {
             checkAutomations(now);
@@ -10990,9 +11849,178 @@ function toggleCalendar(e) {
         setInterval(update, 1000);
       }
 
-      window.onload = () => {
-        localStorage.removeItem("gemini_firmware");
+      window.onload = async () => {
+        await appStorage.init();
+        loadInstalledApps();
+
+        storedNotes =
+          JSON.parse(appStorage.getItem("gemini_notes_data")) || storedNotes;
+        fileSystem = JSON.parse(appStorage.getItem("gemini_fs")) || fileSystem;
+        if (!fileSystem.find((f) => f.id === "desktop")) {
+          fileSystem.push({
+            id: "desktop",
+            parentId: "root",
+            name: "Desktop",
+            type: "folder",
+          });
+          appStorage.setItem("gemini_fs", JSON.stringify(fileSystem));
+        }
+        if (!fileSystem.find((f) => f.id === "music_sys")) {
+          fileSystem.push({
+            id: "music_sys",
+            parentId: "root",
+            name: "Music",
+            type: "folder",
+          });
+          appStorage.setItem("gemini_fs", JSON.stringify(fileSystem));
+        }
+        if (!fileSystem.find((f) => f.id === "vids_sys")) {
+          fileSystem.push({
+            id: "vids_sys",
+            parentId: "root",
+            name: "Videos",
+            type: "folder",
+          });
+          appStorage.setItem("gemini_fs", JSON.stringify(fileSystem));
+        }
+
+        pinnedApps =
+          JSON.parse(appStorage.getItem("gemini_pinned_apps")) || pinnedApps;
+        if (!pinnedApps.includes("bin")) {
+          pinnedApps.push("bin");
+          appStorage.setItem("gemini_pinned_apps", JSON.stringify(pinnedApps));
+        }
+
+        pinnedTaskbarApps =
+          JSON.parse(appStorage.getItem("gemini_taskbar_pins")) ||
+          pinnedTaskbarApps;
+        pinnedSidebarFolders =
+          JSON.parse(appStorage.getItem("gemini_sidebar_folders")) ||
+          pinnedSidebarFolders;
+        recentApps =
+          JSON.parse(appStorage.getItem("gemini_recent_apps")) || recentApps;
+
+        const loadedSettings = JSON.parse(
+          appStorage.getItem("gemini_settings"),
+        );
+        if (loadedSettings) settings = { ...settings, ...loadedSettings };
+
+        if (settings.username === undefined) settings.username = null;
+        if (settings.omniSearchEnabled === undefined)
+          settings.omniSearchEnabled = true;
+        if (settings.taskbarLayout === undefined)
+          settings.taskbarLayout = "monolith";
+        if (settings.taskbarSegmentation === undefined)
+          settings.taskbarSegmentation = "connected";
+        if (settings.taskbarAlignment === undefined)
+          settings.taskbarAlignment = "left";
+        if (settings.startMenuPosition === undefined)
+          settings.startMenuPosition = "left";
+        if (!settings.timeFormat) settings.timeFormat = "12h";
+        if (!settings.stageManagerPosition)
+          settings.stageManagerPosition = "left";
+        if (settings.shakeToFind === undefined) settings.shakeToFind = true;
+        if (settings.ctrlToFind === undefined) settings.ctrlToFind = true;
+        if (settings.sonarToFind === undefined) settings.sonarToFind = false;
+        if (settings.cursorFill === undefined) settings.cursorFill = "#ffffff";
+        if (settings.cursorStroke === undefined)
+          settings.cursorStroke = "#000000";
+        if (settings.cursorOpacity === undefined) settings.cursorOpacity = 100;
+        if (settings.cursorGlow === undefined) settings.cursorGlow = 0;
+        if (settings.cursorGlowColor === undefined)
+          settings.cursorGlowColor = "#3b82f6";
+        if (settings.dynamicIsland === undefined) settings.dynamicIsland = true;
+        if (settings.menubarColor === undefined) settings.menubarColor = "";
+        if (settings.titlebarStyle === undefined)
+          settings.titlebarStyle = "mac";
+        if (settings.titlebarButtonOrder === undefined)
+          settings.titlebarButtonOrder = "close,min,max";
+        if (settings.titlebarButtonAlign === undefined)
+          settings.titlebarButtonAlign =
+            settings.titlebarStyle === "mac" ? "left" : "right";
+        if (settings.showTaskbarSearch === undefined)
+          settings.showTaskbarSearch = false;
+        if (settings.autoHideDock === undefined) settings.autoHideDock = false;
+        if (settings.dockIndicatorWidth === undefined)
+          settings.dockIndicatorWidth = 140;
+        if (settings.dockIndicatorHeight === undefined)
+          settings.dockIndicatorHeight = 5;
+        if (settings.dockSquircleN === undefined) settings.dockSquircleN = 3.77;
+        if (settings.dockColor === undefined) settings.dockColor = "system";
+        if (settings.macMenuBarTransparent === undefined)
+          settings.macMenuBarTransparent = false;
+        if (!settings.desktopAlignment) settings.desktopAlignment = "left";
+        if (settings.brightness === undefined) settings.brightness = 100;
+        if (settings.volume === undefined) settings.volume = 70;
+        if (settings.nightLight === undefined) settings.nightLight = 0;
+        if (settings.autoNightLight === undefined)
+          settings.autoNightLight = false;
+        if (settings.autoNightLightTime === undefined)
+          settings.autoNightLightTime = "18:00";
+        if (settings.autoNightLightEndTime === undefined)
+          settings.autoNightLightEndTime = "06:00";
+        if (settings.autoNightLightIntensity === undefined)
+          settings.autoNightLightIntensity = 50;
+        if (settings.autoBrightness === undefined)
+          settings.autoBrightness = false;
+        if (settings.autoBrightnessTime === undefined)
+          settings.autoBrightnessTime = "18:00";
+        if (settings.autoBrightnessEndTime === undefined)
+          settings.autoBrightnessEndTime = "06:00";
+        if (settings.autoBrightnessLevel === undefined)
+          settings.autoBrightnessLevel = 30;
+        if (settings._isAutoNightLightActive === undefined)
+          settings._isAutoNightLightActive = false;
+        if (settings._isAutoBrightnessActive === undefined)
+          settings._isAutoBrightnessActive = false;
+
+        document.documentElement.style.setProperty(
+          "--dock-indicator-width",
+          settings.dockIndicatorWidth + "px",
+        );
+        document.documentElement.style.setProperty(
+          "--dock-indicator-height",
+          settings.dockIndicatorHeight + "px",
+        );
+
+        activeWidgets =
+          JSON.parse(appStorage.getItem("gemini_widgets")) || activeWidgets;
+        musicLibrary =
+          JSON.parse(appStorage.getItem("gemini_music_data")) || musicLibrary;
+        likedPhotos =
+          JSON.parse(appStorage.getItem("gemini_liked_photos")) || likedPhotos;
+
+        rawDesktopShortcuts =
+          JSON.parse(appStorage.getItem("gemini_desktop_shortcuts")) ||
+          rawDesktopShortcuts;
+        desktopAppShortcuts = rawDesktopShortcuts.map((s) =>
+          typeof s === "string" ? { id: s } : s,
+        );
+
+        appStorage.removeItem("gemini_firmware");
         console.log("🚀 Window loaded, initializing...");
+
+        initGlassSlider(
+          "brightness-slider-root",
+          "brightness-progress",
+          "brightness-thumb",
+          settings.brightness,
+          updateBrightness,
+        );
+        initGlassSlider(
+          "volume-slider-root",
+          "volume-progress",
+          "volume-thumb",
+          settings.volume,
+          baseUpdateVolume,
+        );
+        initGlassSlider(
+          "nightlight-slider-root",
+          "nightlight-progress",
+          "nightlight-thumb",
+          settings.nightLight,
+          updateNightLight,
+        );
 
         toggleDynamicIsland(settings.dynamicIsland);
         if (settings.accentColor)
@@ -11005,7 +12033,10 @@ function toggleCalendar(e) {
         if (settings.theme) setTheme(settings.theme);
 
         if (settings.menubarColor) {
-          document.documentElement.style.setProperty("--menubar-color", settings.menubarColor);
+          document.documentElement.style.setProperty(
+            "--menubar-color",
+            settings.menubarColor,
+          );
           document.body.classList.add("has-menubar-color");
         }
 
@@ -11081,18 +12112,18 @@ function toggleCalendar(e) {
           renderWidgets();
         }, 100);
 
-        const lastVersion = localStorage.getItem("gemini_last_version");
+        const lastVersion = appStorage.getItem("gemini_last_version");
         if (
           lastVersion &&
           lastVersion !== SYSTEM_VERSION &&
           isNewerVersion(SYSTEM_VERSION, lastVersion)
         ) {
-          localStorage.setItem("gemini_show_changelog", "true");
+          appStorage.setItem("gemini_show_changelog", "true");
         }
-        localStorage.setItem("gemini_last_version", SYSTEM_VERSION);
+        appStorage.setItem("gemini_last_version", SYSTEM_VERSION);
 
-        if (localStorage.getItem("gemini_show_changelog") === "true") {
-          localStorage.removeItem("gemini_show_changelog");
+        if (appStorage.getItem("gemini_show_changelog") === "true") {
+          appStorage.removeItem("gemini_show_changelog");
           setTimeout(() => {
             openApp("changelog");
             setTimeout(() => {
@@ -11251,8 +12282,10 @@ function toggleCalendar(e) {
       function toggleMacMenuBarTransparent(checked) {
         settings.macMenuBarTransparent = checked;
         saveSettings();
-        if (settings.layout === "macos") applyLayout("macos");
-        refreshSettingsUI();
+        setTimeout(() => {
+          if (settings.layout === "macos") applyLayout("macos");
+          else refreshSettingsUI();
+        }, 200);
       }
 
       function updateDockIndicator(type, val) {
@@ -11493,28 +12526,6 @@ function toggleCalendar(e) {
         settings.volume = val;
         saveSettings();
       };
-
-      initGlassSlider(
-        "brightness-slider-root",
-        "brightness-progress",
-        "brightness-thumb",
-        settings.brightness,
-        updateBrightness,
-      );
-      initGlassSlider(
-        "volume-slider-root",
-        "volume-progress",
-        "volume-thumb",
-        settings.volume,
-        baseUpdateVolume,
-      );
-      initGlassSlider(
-        "nightlight-slider-root",
-        "nightlight-progress",
-        "nightlight-thumb",
-        settings.nightLight,
-        updateNightLight,
-      );
 
       /* --- NEW LAYOUT LOGIC --- */
 
@@ -11832,7 +12843,9 @@ function toggleCalendar(e) {
             );
             if (wins.length) {
               const w = wins[wins.length - 1];
-              w.fsState.currentFolder = "bin";
+              w.fsState.tabs.find(
+                (t) => t.id === w.fsState.activeTab,
+              ).currentFolder = "bin";
               renderFileView(w.element.id.replace("window-", ""));
             }
           }, 100);
@@ -11877,12 +12890,15 @@ function toggleCalendar(e) {
         } else {
           const win = windows[context];
           if (win) {
-            if (!win.fsState.selected.has(itemId)) {
-              if (!e.ctrlKey && !e.metaKey) win.fsState.selected.clear();
-              win.fsState.selected.add(itemId);
+            const activeTab = win.fsState.tabs.find(
+              (t) => t.id === win.fsState.activeTab,
+            );
+            if (!activeTab.selected.has(itemId)) {
+              if (!e.ctrlKey && !e.metaKey) activeTab.selected.clear();
+              activeTab.selected.add(itemId);
               renderFileView(context);
             }
-            itemsToDrag = Array.from(win.fsState.selected);
+            itemsToDrag = Array.from(activeTab.selected);
           }
         }
 
@@ -12142,7 +13158,15 @@ function toggleCalendar(e) {
               !affectedWindowIds.size &&
               targetParentId === "desktop";
 
-            const protectedFolders = ["root", "bin", "desktop", "docs", "imgs"];
+            const protectedFolders = [
+              "root",
+              "bin",
+              "desktop",
+              "docs",
+              "imgs",
+              "music_sys",
+              "vids_sys",
+            ];
             if (protectedFolders.includes(item.id)) {
               errorCount++;
               return;
@@ -12160,7 +13184,9 @@ function toggleCalendar(e) {
               Object.keys(windows).forEach((wid) => {
                 if (
                   windows[wid].appId === "files" &&
-                  windows[wid].fsState.currentFolder === item.parentId
+                  windows[wid].fsState.tabs.find(
+                    (t) => t.id === windows[wid].fsState.activeTab,
+                  ).currentFolder === item.parentId
                 ) {
                   affectedWindowIds.add(wid);
                 }
@@ -12217,7 +13243,9 @@ function toggleCalendar(e) {
               Object.keys(windows).forEach((wid) => {
                 if (
                   windows[wid].appId === "files" &&
-                  windows[wid].fsState.currentFolder === targetParentId
+                  windows[wid].fsState.tabs.find(
+                    (t) => t.id === windows[wid].fsState.activeTab,
+                  ).currentFolder === targetParentId
                 ) {
                   affectedWindowIds.add(wid);
                 }
@@ -12226,7 +13254,7 @@ function toggleCalendar(e) {
 
             saveFileSystem();
             if (shortcutsModified)
-              localStorage.setItem(
+              appStorage.setItem(
                 "gemini_desktop_shortcuts",
                 JSON.stringify(desktopAppShortcuts),
               );
@@ -12288,7 +13316,9 @@ function toggleCalendar(e) {
               if (windowEl) {
                 const wid = windowEl.id.replace("window-", "");
 
-                windows[wid].fsState.currentFolder = itemId;
+                windows[wid].fsState.tabs.find(
+                  (t) => t.id === windows[wid].fsState.activeTab,
+                ).currentFolder = itemId;
                 renderFileView(wid);
 
                 handleDragLeave(e, true);
@@ -12406,7 +13436,7 @@ function toggleCalendar(e) {
 
         if (recentApps.length > 4) recentApps.pop();
 
-        localStorage.setItem("gemini_recent_apps", JSON.stringify(recentApps));
+        appStorage.setItem("gemini_recent_apps", JSON.stringify(recentApps));
 
         renderStartMenu();
       }
@@ -12475,7 +13505,7 @@ function toggleCalendar(e) {
                 html += `<div class="text-[10px] font-bold text-ui-400 mb-2 mt-4 pl-2">Files</div>`;
                 html += matchedFiles
                   .map((f) => {
-                    let iconHtml = `<i class="fa-solid ${f.type === "folder" ? "fa-folder text-blue-400" : "fa-file-lines text-gray-400"} text-sm"></i>`;
+                    let iconHtml = `<i class="fa-solid ${getFileIcon(f.type)} text-sm"></i>`;
                     if (f.type === "folder") {
                       const emblemIcon = getFolderEmblem(f.id);
                       if (emblemIcon) {
@@ -12485,10 +13515,15 @@ function toggleCalendar(e) {
                                     <i class="fa-solid ${emblemIcon} absolute text-[6px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>
                                 </div>`;
                       }
+                    } else if (
+                      (f.type === "image" || f.type === "video") &&
+                      f.url
+                    ) {
+                      iconHtml = `<img src="${f.type === "video" ? "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100&q=80" : f.url}" class="w-6 h-6 object-cover rounded shadow-sm pointer-events-none">`;
                     }
                     const clickAction =
                       f.type === "folder"
-                        ? `addToRecent({id:'${f.id}', type:'folder', title:'${f.name}', icon:'fa-folder', color:'text-blue-400'}); openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100)`
+                        ? `addToRecent({id:'${f.id}', type:'folder', title:'${f.name}', icon:'fa-folder', color:'text-blue-400'}); openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.tabs.find(t=>t.id===w.fsState.activeTab).currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100)`
                         : `openFile({id:'${f.id}', name:'${f.name}', type:'${f.type}', content:'${f.content || ""}'})`;
                     return `
                         <button onclick="${clickAction}; toggleStartMenu(false)" class="flex items-center p-2 hover:bg-white/10 rounded transition gap-3 w-full text-left">
@@ -12543,7 +13578,7 @@ function toggleCalendar(e) {
                     ? item.icon
                     : `fa-${item.icon}`;
                 } else if (item.type === "folder") {
-                  clickAction = `openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.currentFolder='${item.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100)`;
+                  clickAction = `openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.tabs.find(t=>t.id===w.fsState.activeTab).currentFolder='${item.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100)`;
                   iconClass = "fa-folder";
                   if (!colorClass) colorClass = "text-blue-400";
 
@@ -12664,7 +13699,7 @@ function toggleCalendar(e) {
         } else {
           pinnedApps.push(appId);
         }
-        localStorage.setItem("gemini_pinned_apps", JSON.stringify(pinnedApps));
+        appStorage.setItem("gemini_pinned_apps", JSON.stringify(pinnedApps));
         renderStartMenu();
       }
 
@@ -12840,6 +13875,12 @@ function toggleCalendar(e) {
                   iconHtml = `<i class="fa-solid fa-folder text-blue-400 text-sm w-5 text-center"></i>`;
                 }
               }
+            } else if (item.type === "image" && item.url) {
+              if (isGrid) {
+                iconHtml = `<img src="${item.url}" class="w-8 h-8 object-cover rounded mb-1 shadow-sm">`;
+              } else {
+                iconHtml = `<img src="${item.url}" class="w-5 h-5 object-cover rounded shadow-sm">`;
+              }
             } else {
               const baseIcon = getFileIcon(item.type);
               if (isGrid) {
@@ -12898,7 +13939,9 @@ function toggleCalendar(e) {
         setTimeout(() => {
           const w = Object.values(windows).find((win) => win.appId === "files");
           if (w) {
-            w.fsState.currentFolder = folderId;
+            w.fsState.tabs.find(
+              (t) => t.id === w.fsState.activeTab,
+            ).currentFolder = folderId;
             renderFileView(w.element.id.replace("window-", ""));
           }
         }, 100);
@@ -12946,6 +13989,131 @@ function toggleCalendar(e) {
           document.documentElement.style.setProperty(
             "--icon-taint",
             settings.iconTaintColor,
+          );
+        }
+      }
+
+      function initDockSliders(wid) {
+        const sliderW = document.getElementById(`dock-width-slider-${wid}`);
+        if (!sliderW || sliderW.dataset.init === "true") return;
+        sliderW.dataset.init = "true";
+
+        const widthPercent = Math.round(
+          ((settings.dockIndicatorWidth - 50) / 350) * 100,
+        );
+        initGlassSlider(
+          `dock-width-slider-${wid}`,
+          `dock-width-progress-${wid}`,
+          `dock-width-thumb-${wid}`,
+          widthPercent,
+          (val) => {
+            const pxVal = 50 + (val / 100) * 350;
+            updateDockIndicator("width", pxVal);
+
+            const sliderS = document.getElementById(`squircle-slider-${wid}`);
+            if (sliderS && sliderS.dataset.init !== "true") {
+              sliderS.dataset.init = "true";
+
+              const sPercent = Math.max(
+                0,
+                Math.min(100, ((settings.dockSquircleN - 2) / 8) * 100),
+              );
+
+              initGlassSlider(
+                `squircle-slider-${wid}`,
+                `squircle-progress-${wid}`,
+                `squircle-thumb-${wid}`,
+                sPercent,
+                (val) => {
+                  const actualN = (2 + (val / 100) * 8).toFixed(2);
+
+                  const thumb = document.getElementById(
+                    `squircle-thumb-${wid}`,
+                  );
+                  if (thumb) {
+                    const txt = thumb.querySelector(".slider-thumb-text");
+                    if (txt) txt.innerText = actualN;
+                  }
+
+                  updateDockSquircle(actualN, true);
+
+                  const numInput = sliderS.parentElement.querySelector(
+                    'input[type="number"]',
+                  );
+                  if (numInput) numInput.value = actualN;
+                },
+              );
+            }
+          },
+        );
+
+        const heightPercent = Math.round(
+          ((settings.dockIndicatorHeight - 2) / 14) * 100,
+        );
+        initGlassSlider(
+          `dock-height-slider-${wid}`,
+          `dock-height-progress-${wid}`,
+          `dock-height-thumb-${wid}`,
+          heightPercent,
+          (val) => {
+            const pxVal = 2 + (val / 100) * 14;
+            updateDockIndicator("height", pxVal);
+          },
+        );
+      }
+
+      function initCursorSliders(wid) {
+        const opSlider = document.getElementById(
+          `cursor-opacity-slider-${wid}`,
+        );
+        if (opSlider && opSlider.dataset.init !== "true") {
+          opSlider.dataset.init = "true";
+          const opPercent = Math.max(
+            0,
+            Math.min(100, ((settings.cursorOpacity - 10) / 90) * 100),
+          );
+
+          initGlassSlider(
+            `cursor-opacity-slider-${wid}`,
+            `cursor-opacity-progress-${wid}`,
+            `cursor-opacity-thumb-${wid}`,
+            opPercent,
+            (val) => {
+              const actualOp = Math.round(10 + (val / 100) * 90);
+              const thumb = document.getElementById(
+                `cursor-opacity-thumb-${wid}`,
+              );
+              if (thumb) {
+                const txt = thumb.querySelector(".slider-thumb-text");
+                if (txt) txt.innerText = actualOp + "%";
+              }
+              updateCursorSlider("cursorOpacity", actualOp, wid);
+            },
+          );
+        }
+
+        const glSlider = document.getElementById(`cursor-glow-slider-${wid}`);
+        if (glSlider && glSlider.dataset.init !== "true") {
+          glSlider.dataset.init = "true";
+          const glPercent = Math.max(
+            0,
+            Math.min(100, (settings.cursorGlow / 10) * 100),
+          );
+
+          initGlassSlider(
+            `cursor-glow-slider-${wid}`,
+            `cursor-glow-progress-${wid}`,
+            `cursor-glow-thumb-${wid}`,
+            glPercent,
+            (val) => {
+              const actualGl = Math.round((val / 100) * 10);
+              const thumb = document.getElementById(`cursor-glow-thumb-${wid}`);
+              if (thumb) {
+                const txt = thumb.querySelector(".slider-thumb-text");
+                if (txt) txt.innerText = actualGl + "px";
+              }
+              updateCursorSlider("cursorGlow", actualGl, wid);
+            },
           );
         }
       }
@@ -13013,12 +14181,11 @@ function toggleCalendar(e) {
               }
             });
             if (pinsChanged)
-              localStorage.setItem(
+              appStorage.setItem(
                 "gemini_pinned_apps",
                 JSON.stringify(pinnedApps),
               );
-            if (taskbarPinsChanged)
-              saveTaskbarPins();
+            if (taskbarPinsChanged) saveTaskbarPins();
 
             fileSystem = fileSystem.filter((f) => f.parentId !== "bin");
             saveFileSystem();
@@ -13030,7 +14197,9 @@ function toggleCalendar(e) {
             Object.keys(windows).forEach((key) => {
               if (
                 windows[key].appId === "files" &&
-                windows[key].fsState.currentFolder === "bin"
+                windows[key].fsState.tabs.find(
+                  (t) => t.id === windows[key].fsState.activeTab,
+                ).currentFolder === "bin"
               ) {
                 renderFileView(key);
               }
@@ -13060,7 +14229,7 @@ function toggleCalendar(e) {
       }
 
       let rawDesktopShortcuts = JSON.parse(
-        localStorage.getItem("gemini_desktop_shortcuts"),
+        appStorage.getItem("gemini_desktop_shortcuts"),
       ) || [
         "system-info",
         "terminal",
@@ -13072,6 +14241,7 @@ function toggleCalendar(e) {
         "calculator",
         "music",
         "photos",
+        "appstudio",
       ];
 
       let desktopAppShortcuts = rawDesktopShortcuts.map((s) =>
@@ -13081,7 +14251,7 @@ function toggleCalendar(e) {
         rawDesktopShortcuts.length > 0 &&
         typeof rawDesktopShortcuts[0] === "string"
       ) {
-        localStorage.setItem(
+        appStorage.setItem(
           "gemini_desktop_shortcuts",
           JSON.stringify(desktopAppShortcuts),
         );
@@ -13090,7 +14260,7 @@ function toggleCalendar(e) {
       function addToDesktop(appId) {
         if (!desktopAppShortcuts.find((s) => s.id === appId)) {
           desktopAppShortcuts.push({ id: appId });
-          localStorage.setItem(
+          appStorage.setItem(
             "gemini_desktop_shortcuts",
             JSON.stringify(desktopAppShortcuts),
           );
@@ -13103,7 +14273,7 @@ function toggleCalendar(e) {
 
       function removeFromDesktop(appId) {
         desktopAppShortcuts = desktopAppShortcuts.filter((s) => s.id !== appId);
-        localStorage.setItem(
+        appStorage.setItem(
           "gemini_desktop_shortcuts",
           JSON.stringify(desktopAppShortcuts),
         );
@@ -13124,7 +14294,9 @@ function toggleCalendar(e) {
         const url = input.value.trim();
         if (url) {
           if (
-            url.match(/\.(jpeg|jpg|gif|png|webp|bmp|svg|mp4|webm|ogg)$/i) ||
+            url.match(
+              /\.(jpeg|jpg|gif|png|webp|bmp|svg|mp4|webm|ogg|mkv|avi|mov)$/i,
+            ) ||
             url.startsWith("http")
           ) {
             changeWallpaper(url);
@@ -13165,6 +14337,10 @@ function toggleCalendar(e) {
             return "fa-file-lines";
           case "imgs":
             return "fa-image";
+          case "music_sys":
+            return "fa-music";
+          case "vids_sys":
+            return "fa-film";
           case "bin":
             return "fa-trash-can";
           default:
@@ -13226,7 +14402,7 @@ function toggleCalendar(e) {
             lon: lon,
           };
 
-          localStorage.setItem(
+          appStorage.setItem(
             `widget-weather-location-${widgetId}`,
             JSON.stringify(location),
           );
@@ -13248,7 +14424,7 @@ function toggleCalendar(e) {
             lat: lat,
             lon: lon,
           };
-          localStorage.setItem(
+          appStorage.setItem(
             `widget-weather-location-${widgetId}`,
             JSON.stringify(location),
           );
@@ -13449,21 +14625,35 @@ function toggleCalendar(e) {
       }
 
       function handlePasswordToggle(e, wid) {
-        e.preventDefault();
-
-        const intendedState = !settings.requirePassword;
+        const checkbox = e.target;
+        const intendedState = checkbox.checked;
 
         showModal("Enter Current Password to Confirm:", "", (pass) => {
           if (pass === settings.lockScreenPassword) {
             setLockScreenSetting("requirePassword", intendedState);
-            refreshSettingsUI();
+            setTimeout(() => refreshSettingsUI(), 200);
             pushNotification(
               "Security",
               intendedState ? "Password enabled." : "Password disabled.",
             );
           } else {
+            checkbox.checked = !intendedState;
             pushNotification("Error", "Incorrect password.");
           }
+        });
+
+        const modal = document.getElementById("custom-modal");
+        const observer = new MutationObserver((mutations) => {
+          if (modal.classList.contains("hidden")) {
+            if (settings.requirePassword !== intendedState) {
+              checkbox.checked = settings.requirePassword;
+            }
+            observer.disconnect();
+          }
+        });
+        observer.observe(modal, {
+          attributes: true,
+          attributeFilter: ["class"],
         });
 
         setTimeout(() => {
@@ -13761,14 +14951,14 @@ function toggleCalendar(e) {
                   "gemini_welcome_shown",
                 ];
 
-                for (let i = 0; i < localStorage.length; i++) {
-                  const key = localStorage.key(i);
+                for (let i = 0; i < appStorage.length; i++) {
+                  const key = appStorage.key(i);
                   if (key && key.startsWith("widget-")) {
                     keysToRemove.push(key);
                   }
                 }
 
-                keysToRemove.forEach((k) => localStorage.removeItem(k));
+                keysToRemove.forEach((k) => appStorage.removeItem(k));
 
                 setTimeout(() => {
                   location.reload();
@@ -13939,7 +15129,7 @@ function toggleCalendar(e) {
             html += `<div class="text-[10px] font-bold text-ui-400 mb-2 mt-4 pl-2">Files</div>`;
             html += matchedFiles
               .map((f) => {
-                let iconHtml = `<i class="fa-solid ${f.type === "folder" ? "fa-folder text-blue-400" : "fa-file-lines text-gray-400"} text-sm"></i>`;
+                let iconHtml = `<i class="fa-solid ${getFileIcon(f.type)} text-sm"></i>`;
                 if (f.type === "folder") {
                   const emblemIcon = getFolderEmblem(f.id);
                   if (emblemIcon) {
@@ -13949,10 +15139,15 @@ function toggleCalendar(e) {
                             <i class="fa-solid ${emblemIcon} absolute text-[6px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i>
                         </div>`;
                   }
+                } else if (
+                  (f.type === "image" || f.type === "video") &&
+                  f.url
+                ) {
+                  iconHtml = `<img src="${f.type === "video" ? "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100&q=80" : f.url}" class="w-6 h-6 object-cover rounded shadow-sm pointer-events-none">`;
                 }
                 const clickAction =
                   f.type === "folder"
-                    ? `addToRecent({id:'${f.id}', type:'folder', title:'${f.name}', icon:'fa-folder', color:'text-blue-400'}); openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100)`
+                    ? `addToRecent({id:'${f.id}', type:'folder', title:'${f.name}', icon:'fa-folder', color:'text-blue-400'}); openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.tabs.find(t=>t.id===w.fsState.activeTab).currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100)`
                     : `openFile({id:'${f.id}', name:'${f.name}', type:'${f.type}', content:'${f.content || ""}'})`;
                 return `
                 <button onclick="${clickAction}; toggleTaskbarSearchPopup(false); document.getElementById('taskbar-search-input').value=''" class="flex items-center p-2 hover:bg-white/10 rounded transition gap-3 w-full text-left">
@@ -13970,7 +15165,7 @@ function toggleCalendar(e) {
       function toggleSetting(key, value) {
         settings[key] = value;
         saveSettings();
-        refreshSettingsUI();
+        setTimeout(() => refreshSettingsUI(), 200);
       }
 
       let currentSaveContext = null;
@@ -14092,6 +15287,8 @@ function toggleCalendar(e) {
             } else {
               iconHtml = `<i class="fa-solid fa-folder text-blue-400 text-3xl drop-shadow-md pointer-events-none"></i>`;
             }
+          } else if (item.type === "image" && item.url) {
+            iconHtml = `<div class="w-10 h-10 rounded overflow-hidden shadow-md pointer-events-none"><img src="${item.url}" class="w-full h-full object-cover"></div>`;
           } else {
             iconHtml = `<i class="fa-solid ${getFileIcon(item.type)} text-3xl drop-shadow-md pointer-events-none"></i>`;
           }
@@ -14569,7 +15766,9 @@ function toggleCalendar(e) {
               Object.keys(windows).forEach((key) => {
                 if (
                   windows[key].appId === "files" &&
-                  windows[key].fsState.currentFolder === result.folderId
+                  windows[key].fsState.tabs.find(
+                    (t) => t.id === windows[key].fsState.activeTab,
+                  ).currentFolder === result.folderId
                 ) {
                   renderFileView(key);
                 }
@@ -15237,7 +16436,7 @@ function toggleCalendar(e) {
       /* --- ULTIMATE MUSIC APP ENGINE --- */
 
       let musicLibrary = JSON.parse(
-        localStorage.getItem("gemini_music_data"),
+        appStorage.getItem("gemini_music_data"),
       ) || {
         liked: [],
         playlists: [],
@@ -15246,7 +16445,7 @@ function toggleCalendar(e) {
       let musicQueues = {};
 
       function saveMusicLibrary() {
-        localStorage.setItem("gemini_music_data", JSON.stringify(musicLibrary));
+        appStorage.setItem("gemini_music_data", JSON.stringify(musicLibrary));
       }
 
       function switchMusicTab(wid, tab, playlistId = null) {
@@ -15314,12 +16513,28 @@ function toggleCalendar(e) {
         textEl.innerHTML = `<div class="text-white/50 text-xl font-bold italic animate-pulse py-20 text-center">Finding lyrics...</div>`;
 
         try {
-          const res = await fetch(
-            `https://lrclib.net/api/get?artist_name=${encodeURIComponent(song.artist)}&track_name=${encodeURIComponent(song.title)}`,
-          );
-          const data = await res.json();
+          let data = null;
 
-          if (data.plainLyrics) {
+          if (song.artist === "Local File") {
+            const cleanTitle = song.title
+              .replace(/\.[^/.]+$/, "")
+              .replace(/_/g, " ");
+            const res = await fetch(
+              `https://lrclib.net/api/search?q=${encodeURIComponent(cleanTitle)}`,
+            );
+            const searchResults = await res.json();
+            if (searchResults && searchResults.length > 0) {
+              data =
+                searchResults.find((r) => r.plainLyrics) || searchResults[0];
+            }
+          } else {
+            const res = await fetch(
+              `https://lrclib.net/api/get?artist_name=${encodeURIComponent(song.artist)}&track_name=${encodeURIComponent(song.title)}`,
+            );
+            data = await res.json();
+          }
+
+          if (data && data.plainLyrics) {
             textEl.innerHTML = `
                 <div class="text-white text-xl sm:text-2xl font-bold tracking-tight drop-shadow-lg whitespace-pre-wrap text-left max-w-2xl mx-auto pb-32">
                     ${data.plainLyrics}
@@ -15734,6 +16949,7 @@ function toggleCalendar(e) {
         const audio = document.getElementById(`audio-element-${wid}`);
         const prog = document.getElementById(`player-progress-${wid}`);
         const currTime = document.getElementById(`music-time-curr-${wid}`);
+        const totalTime = document.getElementById(`music-time-total-${wid}`);
         if (audio && audio.duration) {
           const pct = (audio.currentTime / audio.duration) * 100;
           if (prog) prog.style.width = pct + "%";
@@ -15742,17 +16958,30 @@ function toggleCalendar(e) {
             .toString()
             .padStart(2, "0");
           if (currTime) currTime.innerText = `${mins}:${secs}`;
+
+          if (totalTime && !isNaN(audio.duration)) {
+            const tmins = Math.floor(audio.duration / 60);
+            const tsecs = Math.floor(audio.duration % 60)
+              .toString()
+              .padStart(2, "0");
+            totalTime.innerText = `${tmins}:${tsecs}`;
+          }
         }
       }
 
       let likedPhotos =
-        JSON.parse(localStorage.getItem("gemini_liked_photos")) || [];
+        JSON.parse(appStorage.getItem("gemini_liked_photos")) || [];
 
       function renderPhotos(wid, filterLiked = false) {
         const container = document.getElementById(`photos-grid-${wid}`);
         if (!container) return;
 
-        const allImages = fileSystem.filter((f) => f.type === "image");
+        const allImages = fileSystem.filter(
+          (f) =>
+            f.type === "image" ||
+            f.type === "video" ||
+            f.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i),
+        );
 
         const displayItems = filterLiked
           ? allImages.filter((m) => likedPhotos.includes(m.id))
@@ -15762,20 +16991,31 @@ function toggleCalendar(e) {
         container.innerHTML = displayItems
           .map((item) => {
             const isLiked = likedPhotos.includes(item.id);
+            const isVideo =
+              item.type === "video" ||
+              item.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i);
+            const mediaTag = isVideo
+              ? `<video src="${item.url}" class="w-full block" loading="lazy"></video><div class="absolute inset-0 flex items-center justify-center pointer-events-none"><i class="fa-solid fa-play text-white/70 text-3xl drop-shadow-lg"></i></div>`
+              : `<img src="${item.url}" class="w-full block" loading="lazy">`;
+
             return `
             <div class="masonry-item media-card-hover group relative rounded-lg overflow-hidden border border-ui-border bg-black shadow-lg cursor-pointer" onclick="openMediaFull('${wid}', '${item.id}')">
-                <img src="${item.url}" class="w-full block" loading="lazy">
+                ${mediaTag}
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
                     <div class="flex justify-between items-center">
                         <div class="flex gap-2">
                             <button onclick="event.stopPropagation(); toggleLikePhoto('${wid}', '${item.id}')" class="w-8 h-8 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 flex items-center justify-center transition">
                                 <i class="${isLiked ? "fa-solid text-red-500" : "fa-regular text-white"} fa-heart"></i>
                             </button>
-                            <button onclick="event.stopPropagation(); setAsWallpaper('${item.url}')" class="w-8 h-8 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 flex items-center justify-center transition" title="Set as Wallpaper">
+                            ${
+                              !isVideo
+                                ? `<button onclick="event.stopPropagation(); setAsWallpaper('${item.url}')" class="w-8 h-8 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 flex items-center justify-center transition" title="Set as Wallpaper">
                                 <i class="fa-solid fa-desktop text-white text-[10px]"></i>
-                            </button>
+                            </button>`
+                                : ""
+                            }
                         </div>
-                        <div class="text-[9px] text-white/70 font-bold uppercase tracking-wider">${item.name}</div>
+                        <div class="text-[9px] text-white/70 font-bold uppercase tracking-wider truncate ml-2">${item.name}</div>
                     </div>
                 </div>
             </div>`;
@@ -15795,9 +17035,408 @@ function toggleCalendar(e) {
         const likeBtn = document.getElementById(`lb-like-${wid}`);
         const wallBtn = document.getElementById(`lb-wall-${wid}`);
 
-        container.innerHTML = `<img src="${item.url}" class="lightbox-content relative" id="img-full-${wid}" 
+        if (
+          item.type === "video" ||
+          (item.name && item.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i))
+        ) {
+          container.innerHTML = `
+                <div class="relative flex items-center justify-center w-full h-full overflow-hidden outline-none" id="video-wrapper-${wid}" tabindex="0" onkeydown="handleVideoKey(event, '${wid}')">
+                    <canvas id="canvas-full-${wid}" class="w-full h-full object-contain rounded-lg hidden"></canvas>
+                    <video src="${item.url}" class="w-full h-full object-contain rounded-lg" id="img-full-${wid}" autoplay></video>
+                    
+                    <div id="video-left-icon-${wid}" class="absolute left-10 flex items-center justify-center pointer-events-none opacity-0 transition-all duration-300 z-[100] scale-50"><div id="video-left-icon-i-${wid}" class="w-auto min-w-[5rem] px-6 h-20 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white text-3xl shadow-2xl"></div></div>
+                    <div id="video-center-icon-${wid}" class="absolute flex items-center justify-center pointer-events-none opacity-0 transition-all duration-300 z-[100] scale-50"><div id="video-center-icon-i-${wid}" class="w-auto min-w-[5rem] px-6 h-20 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white text-3xl shadow-2xl"><i class="fa-solid fa-play ml-1"></i></div></div>
+                    <div id="video-right-icon-${wid}" class="absolute right-10 flex items-center justify-center pointer-events-none opacity-0 transition-all duration-300 z-[100] scale-50"><div id="video-right-icon-i-${wid}" class="w-auto min-w-[5rem] px-6 h-20 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white text-3xl shadow-2xl"></div></div>
+                    
+                    <div id="video-controls-${wid}" class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl p-3 bg-black/70 backdrop-blur-xl rounded-2xl transition-opacity duration-500 flex flex-col gap-3 z-[110] border border-white/10 shadow-2xl opacity-100" onclick="event.stopPropagation()">
+                        <div class="h-1.5 w-full bg-white/20 rounded-full cursor-pointer relative" id="video-progress-container-${wid}">
+                            <div class="absolute top-0 left-0 h-full bg-accent-500 rounded-full pointer-events-none" id="video-progress-${wid}" style="width: 0%;"></div>
+                        </div>
+                        <div class="flex justify-between items-center text-white px-2">
+                            <div class="flex items-center gap-4">
+                                <button id="video-play-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition"><i class="fa-solid fa-pause"></i></button>
+                                
+                                <div class="relative group/vol flex items-center">
+                                    <button id="video-mute-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition"><i class="fa-solid fa-volume-high"></i></button>
+                                    <div class="w-0 overflow-hidden group-hover/vol:w-20 transition-all duration-300 ease-in-out flex items-center">
+                                        <div class="h-1.5 w-16 bg-white/20 rounded-full cursor-pointer relative ml-2" id="video-vol-container-${wid}">
+                                            <div class="absolute top-0 left-0 h-full bg-white rounded-full pointer-events-none" id="video-vol-bar-${wid}" style="width: 100%;"></div>
+                                        </div>
+                                    </div>
+                                    <div id="video-vol-tip-${wid}" class="absolute -top-8 left-1/2 -translate-x-1/2 bg-black/80 text-[10px] px-2 py-1 rounded border border-white/20 opacity-0 group-hover/vol:opacity-100 transition-opacity text-white pointer-events-none whitespace-nowrap">100%</div>
+                                </div>
+                                
+                                <span class="text-xs font-mono opacity-80" id="video-time-${wid}">0:00 / 0:00</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <div class="relative">
+                                    <button id="video-audio-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition opacity-50 pointer-events-none" title="Audio Tracks"><i class="fa-solid fa-music"></i></button>
+                                    <div id="video-audio-menu-${wid}" class="absolute bottom-full right-0 mb-2 bg-black/90 border border-white/20 rounded p-2 hidden min-w-[120px] shadow-xl text-left"></div>
+                                </div>
+                                <div class="relative">
+                                    <button id="video-cc-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition opacity-50 pointer-events-none" title="Subtitles"><i class="fa-solid fa-closed-captioning"></i></button>
+                                    <div id="video-cc-menu-${wid}" class="absolute bottom-full right-0 mb-2 bg-black/90 border border-white/20 rounded p-2 hidden min-w-[120px] shadow-xl text-left"></div>
+                                </div>
+                                <button id="video-pip-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition" title="Picture-in-Picture"><i class="fa-solid fa-clone"></i></button>
+                                <button id="video-crop-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition" title="Fit/Fill"><i class="fa-solid fa-crop"></i></button>
+                                <button id="video-fs-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+          setTimeout(() => {
+            const video = document.getElementById(`img-full-${wid}`);
+            const canvas = document.getElementById(`canvas-full-${wid}`);
+            if (!video) return;
+
+            if (item.name && item.name.toLowerCase().endsWith(".mkv")) {
+              video.classList.add(
+                "hidden",
+                "pointer-events-none",
+                "opacity-0",
+                "absolute",
+              );
+              canvas.classList.remove("hidden");
+              windows[wid].mkvStreamer = new MKVStreamer(
+                item.url,
+                video,
+                canvas,
+                wid,
+              );
+            }
+
+            const playBtn = document.getElementById(`video-play-btn-${wid}`);
+            const muteBtn = document.getElementById(`video-mute-btn-${wid}`);
+            const volCont = document.getElementById(
+              `video-vol-container-${wid}`,
+            );
+            const volBar = document.getElementById(`video-vol-bar-${wid}`);
+            const timeDisplay = document.getElementById(`video-time-${wid}`);
+            const progressCont = document.getElementById(
+              `video-progress-container-${wid}`,
+            );
+            const progress = document.getElementById(`video-progress-${wid}`);
+
+            const fsBtn = document.getElementById(`video-fs-btn-${wid}`);
+            const cropBtn = document.getElementById(`video-crop-btn-${wid}`);
+            const pipBtn = document.getElementById(`video-pip-btn-${wid}`);
+            const ccBtn = document.getElementById(`video-cc-btn-${wid}`);
+            const ccMenu = document.getElementById(`video-cc-menu-${wid}`);
+            const audioBtn = document.getElementById(`video-audio-btn-${wid}`);
+            const audioMenu = document.getElementById(
+              `video-audio-menu-${wid}`,
+            );
+
+            const wrapper = document.getElementById(`video-wrapper-${wid}`);
+            const controls = document.getElementById(`video-controls-${wid}`);
+            const centerIcon = document.getElementById(
+              `video-center-icon-${wid}`,
+            );
+            const centerIconI = document.getElementById(
+              `video-center-icon-i-${wid}`,
+            );
+            const leftIcon = document.getElementById(`video-left-icon-${wid}`);
+            const leftIconI = document.getElementById(
+              `video-left-icon-i-${wid}`,
+            );
+            const rightIcon = document.getElementById(
+              `video-right-icon-${wid}`,
+            );
+            const rightIconI = document.getElementById(
+              `video-right-icon-i-${wid}`,
+            );
+            const volTip = document.getElementById(`video-vol-tip-${wid}`);
+            let idleTimer;
+
+            const resetIdleTimer = () => {
+              if (!controls) return;
+              controls.style.opacity = "1";
+              wrapper.style.cursor = "default";
+              clearTimeout(idleTimer);
+              idleTimer = setTimeout(() => {
+                controls.style.opacity = "0";
+                if (document.fullscreenElement) wrapper.style.cursor = "none";
+              }, 2500);
+            };
+
+            wrapper.onmousemove = resetIdleTimer;
+            wrapper.onmouseleave = () => {
+              clearTimeout(idleTimer);
+              if (controls) controls.style.opacity = "0";
+            };
+            resetIdleTimer();
+
+            const showCenterIcon = (html, pos = "center") => {
+              let targetIcon = centerIcon;
+              let targetIconI = centerIconI;
+              if (pos === "left") {
+                targetIcon = leftIcon;
+                targetIconI = leftIconI;
+              }
+              if (pos === "right") {
+                targetIcon = rightIcon;
+                targetIconI = rightIconI;
+              }
+
+              if (!targetIcon || !targetIconI) return;
+              targetIconI.innerHTML = html;
+              targetIcon.classList.remove("opacity-0", "scale-50", "scale-150");
+              targetIcon.classList.add("opacity-100", "scale-100");
+              clearTimeout(targetIcon.timer1);
+              clearTimeout(targetIcon.timer2);
+              targetIcon.timer1 = setTimeout(() => {
+                targetIcon.classList.remove("opacity-100", "scale-100");
+                targetIcon.classList.add("opacity-0", "scale-150");
+                targetIcon.timer2 = setTimeout(() => {
+                  targetIcon.classList.remove("scale-150");
+                  targetIcon.classList.add("scale-50");
+                }, 300);
+              }, 400);
+            };
+            wrapper.showCenterIcon = showCenterIcon;
+
+            const togglePlay = (e) => {
+              if (e) e.stopPropagation();
+              if (video.paused) {
+                video.play();
+                playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                if (e) showCenterIcon('<i class="fa-solid fa-play ml-1"></i>');
+              } else {
+                video.pause();
+                playBtn.innerHTML = '<i class="fa-solid fa-play ml-0.5"></i>';
+                if (e) showCenterIcon('<i class="fa-solid fa-pause"></i>');
+              }
+            };
+
+            wrapper.focus();
+
+            playBtn.onclick = togglePlay;
+            video.onclick = togglePlay;
+
+            let lastVol = 1;
+            muteBtn.onclick = (e) => {
+              if (e) e.stopPropagation();
+              if (video.volume > 0) {
+                lastVol = video.volume;
+                video.volume = 0;
+                volBar.style.width = "0%";
+                muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+                if (volTip) volTip.innerText = "0%";
+                if (wrapper.showCenterIcon)
+                  wrapper.showCenterIcon(
+                    '<i class="fa-solid fa-volume-xmark"></i>',
+                    "center",
+                  );
+              } else {
+                video.volume = lastVol || 1;
+                volBar.style.width = video.volume * 100 + "%";
+                muteBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                if (volTip)
+                  volTip.innerText = Math.round(video.volume * 100) + "%";
+                if (wrapper.showCenterIcon)
+                  wrapper.showCenterIcon(
+                    '<i class="fa-solid fa-volume-high"></i>',
+                    "center",
+                  );
+              }
+            };
+
+            volCont.onmousedown = (e) => {
+              e.stopPropagation();
+              const updateVol = (ev) => {
+                const rect = volCont.getBoundingClientRect();
+                let pct = Math.max(
+                  0,
+                  Math.min(1, (ev.clientX - rect.left) / rect.width),
+                );
+                video.volume = pct;
+                volBar.style.width = pct * 100 + "%";
+                if (volTip) volTip.innerText = Math.round(pct * 100) + "%";
+                if (pct === 0)
+                  muteBtn.innerHTML =
+                    '<i class="fa-solid fa-volume-xmark"></i>';
+                else if (pct < 0.5)
+                  muteBtn.innerHTML = '<i class="fa-solid fa-volume-low"></i>';
+                else
+                  muteBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+              };
+              updateVol(e);
+              const move = (ev) => updateVol(ev);
+              const stop = () => {
+                document.removeEventListener("mousemove", move);
+                document.removeEventListener("mouseup", stop);
+              };
+              document.addEventListener("mousemove", move);
+              document.addEventListener("mouseup", stop);
+            };
+
+            fsBtn.onclick = (e) => {
+              e.stopPropagation();
+              const cont = document.getElementById(`video-wrapper-${wid}`);
+              if (!document.fullscreenElement) {
+                cont.requestFullscreen().catch(() => {});
+                fsBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+              } else {
+                document.exitFullscreen();
+                fsBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+              }
+            };
+
+            let isFilled = false;
+            cropBtn.onclick = (e) => {
+              e.stopPropagation();
+              isFilled = !isFilled;
+              const mediaContainer = document.getElementById(
+                `lightbox-media-container-${wid}`,
+              );
+              if (isFilled) {
+                video.classList.replace("object-contain", "object-cover");
+                video.classList.remove("rounded-lg");
+                if (mediaContainer) mediaContainer.classList.remove("p-10");
+                cropBtn.classList.add("text-accent-400");
+              } else {
+                video.classList.replace("object-cover", "object-contain");
+                video.classList.add("rounded-lg");
+                if (mediaContainer) mediaContainer.classList.add("p-10");
+                cropBtn.classList.remove("text-accent-400");
+              }
+              if (typeof resetIdleTimer !== "undefined") resetIdleTimer();
+            };
+
+            pipBtn.onclick = async (e) => {
+              e.stopPropagation();
+              try {
+                if (document.pictureInPictureElement)
+                  await document.exitPictureInPicture();
+                else await video.requestPictureInPicture();
+              } catch (err) {}
+            };
+
+            let trackCheckTimer;
+            const setupTracks = () => {
+              let hasTracks = false;
+
+              if (video.textTracks && video.textTracks.length > 0) {
+                ccBtn.classList.remove("opacity-50", "pointer-events-none");
+                let html =
+                  '<div class="text-[10px] text-gray-400 mb-1 px-1">Subtitles</div>';
+                html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer cc-track" data-idx="-1">Off</div>`;
+                for (let i = 0; i < video.textTracks.length; i++) {
+                  const t = video.textTracks[i];
+                  const label = t.label || t.language || "Track " + (i + 1);
+                  html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer cc-track" data-idx="${i}">${label}</div>`;
+                }
+                ccMenu.innerHTML = html;
+                ccBtn.onclick = (e) => {
+                  e.stopPropagation();
+                  ccMenu.classList.toggle("hidden");
+                  audioMenu.classList.add("hidden");
+                };
+                ccMenu.querySelectorAll(".cc-track").forEach((el) => {
+                  el.onclick = (e) => {
+                    e.stopPropagation();
+                    const idx = parseInt(el.dataset.idx);
+                    for (let i = 0; i < video.textTracks.length; i++) {
+                      video.textTracks[i].mode =
+                        i === idx ? "showing" : "hidden";
+                    }
+                    ccMenu.classList.add("hidden");
+                    if (idx >= 0) ccBtn.classList.add("text-accent-400");
+                    else ccBtn.classList.remove("text-accent-400");
+                  };
+                });
+                hasTracks = true;
+              }
+
+              if (video.audioTracks && video.audioTracks.length > 1) {
+                audioBtn.classList.remove("opacity-50", "pointer-events-none");
+                let html =
+                  '<div class="text-[10px] text-gray-400 mb-1 px-1">Audio Tracks</div>';
+                for (let i = 0; i < video.audioTracks.length; i++) {
+                  const t = video.audioTracks[i];
+                  const label = t.label || t.language || "Track " + (i + 1);
+                  html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer audio-track" data-idx="${i}">${label}</div>`;
+                }
+                audioMenu.innerHTML = html;
+                audioBtn.onclick = (e) => {
+                  e.stopPropagation();
+                  audioMenu.classList.toggle("hidden");
+                  ccMenu.classList.add("hidden");
+                };
+                audioMenu.querySelectorAll(".audio-track").forEach((el) => {
+                  el.onclick = (e) => {
+                    e.stopPropagation();
+                    const idx = parseInt(el.dataset.idx);
+                    for (let i = 0; i < video.audioTracks.length; i++) {
+                      video.audioTracks[i].enabled = i === idx;
+                    }
+                    audioMenu.classList.add("hidden");
+                    audioBtn.classList.add("text-accent-400");
+                  };
+                });
+                hasTracks = true;
+              }
+
+              if (hasTracks && trackCheckTimer) clearInterval(trackCheckTimer);
+            };
+
+            video.addEventListener("loadedmetadata", setupTracks);
+            video.addEventListener("canplay", setupTracks);
+            trackCheckTimer = setInterval(setupTracks, 1000);
+
+            document.addEventListener("click", () => {
+              if (!ccMenu.classList.contains("hidden"))
+                ccMenu.classList.add("hidden");
+              if (!audioMenu.classList.contains("hidden"))
+                audioMenu.classList.add("hidden");
+            });
+
+            const fmt = (s) => {
+              if (isNaN(s)) return "0:00";
+              const h = Math.floor(s / 3600);
+              const m = Math.floor((s % 3600) / 60);
+              const sc = Math.floor(s % 60)
+                .toString()
+                .padStart(2, "0");
+              return h > 0
+                ? `${h}:${m.toString().padStart(2, "0")}:${sc}`
+                : `${m}:${sc}`;
+            };
+
+            video.ontimeupdate = () => {
+              if (video.duration) {
+                progress.style.width =
+                  (video.currentTime / video.duration) * 100 + "%";
+                timeDisplay.innerText = `${fmt(video.currentTime)} / ${fmt(video.duration)}`;
+              }
+            };
+
+            progressCont.onmousedown = (e) => {
+              e.stopPropagation();
+              const updateSeek = (ev) => {
+                const rect = progressCont.getBoundingClientRect();
+                const pct = Math.max(
+                  0,
+                  Math.min(1, (ev.clientX - rect.left) / rect.width),
+                );
+                if (video.duration) video.currentTime = pct * video.duration;
+              };
+              updateSeek(e);
+              const move = (ev) => updateSeek(ev);
+              const stop = () => {
+                document.removeEventListener("mousemove", move);
+                document.removeEventListener("mouseup", stop);
+              };
+              document.addEventListener("mousemove", move);
+              document.addEventListener("mouseup", stop);
+            };
+          }, 50);
+        } else {
+          container.innerHTML = `<img src="${item.url}" class="lightbox-content relative" id="img-full-${wid}" 
                             ondblclick="togglePhotoZoom(event, '${wid}')" 
                             onmousedown="startPanning(event, '${wid}')">`;
+        }
 
         const isLiked = likedPhotos.includes(item.id);
         likeBtn.className = `lightbox-btn ${isLiked ? "active" : ""}`;
@@ -15902,10 +17541,21 @@ function toggleCalendar(e) {
 
       function closeMediaFull(wid) {
         const lightbox = document.getElementById(`photos-lightbox-${wid}`);
+        const container = document.getElementById(
+          `lightbox-media-container-${wid}`,
+        );
         if (document.fullscreenElement) document.exitFullscreen();
+
+        const video = container.querySelector("video");
+        if (video) video.pause();
+
+        if (windows[wid] && windows[wid].mkvStreamer) {
+          windows[wid].mkvStreamer.destroy();
+          delete windows[wid].mkvStreamer;
+        }
+
         lightbox.classList.remove("active");
-        document.getElementById(`lightbox-media-container-${wid}`).innerHTML =
-          "";
+        container.innerHTML = "";
       }
 
       function toggleLikePhoto(wid, id) {
@@ -15915,10 +17565,7 @@ function toggleCalendar(e) {
           likedPhotos.push(id);
           pushNotification("Gallery", "Saved to Favorites");
         }
-        localStorage.setItem(
-          "gemini_liked_photos",
-          JSON.stringify(likedPhotos),
-        );
+        appStorage.setItem("gemini_liked_photos", JSON.stringify(likedPhotos));
         const isFavoritesTab = document
           .getElementById(`p-nav-liked-${wid}`)
           .classList.contains("tab-active-photo");
@@ -16085,7 +17732,7 @@ function toggleCalendar(e) {
 
           const loc = geoData.results[0];
 
-          const unit = localStorage.getItem("omni-weather-unit") || "C";
+          const unit = appStorage.getItem("omni-weather-unit") || "C";
           const tempUnitParam =
             unit === "F"
               ? "&temperature_unit=fahrenheit"
@@ -16126,9 +17773,9 @@ function toggleCalendar(e) {
       }
 
       function toggleOmniWeatherUnit(city) {
-        const currentUnit = localStorage.getItem("omni-weather-unit") || "C";
+        const currentUnit = appStorage.getItem("omni-weather-unit") || "C";
         const newUnit = currentUnit === "C" ? "F" : "C";
-        localStorage.setItem("omni-weather-unit", newUnit);
+        appStorage.setItem("omni-weather-unit", newUnit);
 
         if (city) {
           fetchOmniWeather(city);
@@ -16242,11 +17889,13 @@ function toggleCalendar(e) {
               } else {
                 fullIconHtml = `<i class="fa-solid fa-folder text-blue-400 text-xl group-hover:scale-110 transition-transform"></i>`;
               }
+            } else if ((f.type === "image" || f.type === "video") && f.url) {
+              fullIconHtml = `<img src="${f.type === "video" ? "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100&q=80" : f.url}" class="w-10 h-10 object-cover rounded shadow-sm group-hover:scale-110 transition-transform pointer-events-none">`;
             }
 
             const action =
               f.type === "folder"
-                ? `openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100);`
+                ? `openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.tabs.find(t=>t.id===w.fsState.activeTab).currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100);`
                 : `openFile({id:'${f.id}', name:'${f.name}', type:'${f.type}', content:'${f.content || ""}'})`;
 
             const path = getFilePath(f.id);
@@ -16405,7 +18054,7 @@ function toggleCalendar(e) {
         document.getElementById("notification-center").style.bottom = yOffset;
         document.getElementById("control-center").style.bottom = yOffset;
         const cal = document.getElementById("calendar-flyout");
-        if(cal) cal.style.bottom = yOffset;
+        if (cal) cal.style.bottom = yOffset;
       }
 
       function applyLayout(mode) {
@@ -16471,9 +18120,9 @@ function toggleCalendar(e) {
           ctrlCenter.style.top = "40px";
           ctrlCenter.style.bottom = "auto";
           const cal = document.getElementById("calendar-flyout");
-          if(cal) {
-              cal.style.top = "40px";
-              cal.style.bottom = "auto";
+          if (cal) {
+            cal.style.top = "40px";
+            cal.style.bottom = "auto";
           }
 
           renderDock();
@@ -16579,7 +18228,10 @@ function toggleCalendar(e) {
       function renderFilesSidebar(wid) {
         const sidebar = document.getElementById(`fs-sidebar-${wid}`);
         if (!sidebar) return;
-        const state = windows[wid]?.fsState;
+        const fsStateObj = windows[wid]?.fsState;
+        const state = fsStateObj
+          ? fsStateObj.tabs.find((t) => t.id === fsStateObj.activeTab)
+          : null;
         const currentFolder = state ? state.currentFolder : null;
 
         const makeItem = (id, name, icon, isSystem = false) => {
@@ -16620,6 +18272,8 @@ function toggleCalendar(e) {
           true,
         );
         html += makeItem("imgs", "Images", "fa-image text-orange-400", true);
+        html += makeItem("music_sys", "Music", "fa-music text-pink-400", true);
+        html += makeItem("vids_sys", "Videos", "fa-film text-purple-400", true);
         html += makeItem("bin", "Trash", "fa-trash-can text-ui-400", true);
 
         if (pinnedSidebarFolders.length > 0) {
@@ -16693,6 +18347,8 @@ function toggleCalendar(e) {
               "desktop",
               "docs",
               "imgs",
+              "music_sys",
+              "vids_sys",
             ].includes(id);
             const item = fileSystem.find((f) => f.id === id);
             if (
@@ -16948,7 +18604,7 @@ function toggleCalendar(e) {
           );
           if (!versionRes.ok) return;
           const latestVersion = (await versionRes.text()).trim();
-          const installedVersion = localStorage.getItem(
+          const installedVersion = appStorage.getItem(
             "gemini_installed_version",
           );
           if (
@@ -16982,12 +18638,12 @@ function toggleCalendar(e) {
           if (!versionRes.ok) throw new Error("Version file not found");
 
           const latestVersion = (await versionRes.text()).trim();
-          const installedVersion = localStorage.getItem(
+          const installedVersion = appStorage.getItem(
             "gemini_installed_version",
           );
 
           if (!isNewerVersion(installedVersion || "0.0.0", SYSTEM_VERSION)) {
-            localStorage.removeItem("gemini_installed_version");
+            appStorage.removeItem("gemini_installed_version");
           }
 
           if (
@@ -17015,13 +18671,13 @@ function toggleCalendar(e) {
         const installBtn = document.getElementById(`install-btn-${wid}`);
 
         if (installBtn && installBtn.dataset.version) {
-          localStorage.setItem(
+          appStorage.setItem(
             "gemini_installed_version",
             installBtn.dataset.version,
           );
         }
 
-        localStorage.setItem("gemini_show_changelog", "true");
+        appStorage.setItem("gemini_show_changelog", "true");
 
         setTimeout(() => {
           const url = new URL(window.location.href);
@@ -17045,41 +18701,400 @@ function toggleCalendar(e) {
         }
       }
 
-function saveAccountName(wid) {
-          const input = document.getElementById(`settings-username-input-${wid}`);
-          if (input && input.value.trim()) {
-              settings.username = input.value.trim();
-              if (settings.pfp && settings.pfp.type === "text") {
-                  settings.pfp.value = settings.username.charAt(0).toUpperCase();
-              }
-              saveSettings();
-              updateProfileDisplays();
-              pushNotification("Account", "Username updated successfully.");
-              if (wid) {
-                  applyPfpToPreview(settings.pfp, `settings-avatar-preview-${wid}`);
-              }
-          }
-      }
-
-      function updateAccountAvatar(index, wid) {
-          if (index === -1) {
-              const user = settings.username || "U";
-              settings.pfp = {
-                  type: "text",
-                  value: user.charAt(0).toUpperCase(),
-                  bg: "from-blue-500 to-cyan-400",
-              };
-          } else {
-              settings.pfp = pfpPresets[index];
+      function saveAccountName(wid) {
+        const input = document.getElementById(`settings-username-input-${wid}`);
+        if (input && input.value.trim()) {
+          settings.username = input.value.trim();
+          if (settings.pfp && settings.pfp.type === "text") {
+            settings.pfp.value = settings.username.charAt(0).toUpperCase();
           }
           saveSettings();
           updateProfileDisplays();
-          pushNotification("Account", "Avatar updated successfully.");
+          pushNotification("Account", "Username updated successfully.");
           if (wid) {
-              applyPfpToPreview(settings.pfp, `settings-avatar-preview-${wid}`);
+            applyPfpToPreview(settings.pfp, `settings-avatar-preview-${wid}`);
           }
+        }
       }
 
+      function updateAccountAvatar(index, wid) {
+        if (index === -1) {
+          const user = settings.username || "U";
+          settings.pfp = {
+            type: "text",
+            value: user.charAt(0).toUpperCase(),
+            bg: "from-blue-500 to-cyan-400",
+          };
+        } else {
+          settings.pfp = pfpPresets[index];
+        }
+        saveSettings();
+        updateProfileDisplays();
+        pushNotification("Account", "Avatar updated successfully.");
+        if (wid) {
+          applyPfpToPreview(settings.pfp, `settings-avatar-preview-${wid}`);
+        }
+      }
+
+      function handleVideoKey(e, wid) {
+        const video = document.getElementById(`img-full-${wid}`);
+        const wrapper = document.getElementById(`video-wrapper-${wid}`);
+        if (!video || !wrapper) return;
+
+        const playBtn = document.getElementById(`video-play-btn-${wid}`);
+        const volBar = document.getElementById(`video-vol-bar-${wid}`);
+        const muteBtn = document.getElementById(`video-mute-btn-${wid}`);
+        const volTip = document.getElementById(`video-vol-tip-${wid}`);
+
+        const updateVolUI = () => {
+          if (volBar) volBar.style.width = video.volume * 100 + "%";
+          if (volTip) volTip.innerText = Math.round(video.volume * 100) + "%";
+          if (muteBtn) {
+            if (video.volume === 0)
+              muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+            else if (video.volume < 0.5)
+              muteBtn.innerHTML = '<i class="fa-solid fa-volume-low"></i>';
+            else muteBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+          }
+        };
+
+        if (e.code === "Space") {
+          e.preventDefault();
+          if (video.paused) {
+            video.play();
+            if (playBtn)
+              playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            if (wrapper.showCenterIcon)
+              wrapper.showCenterIcon(
+                '<i class="fa-solid fa-play ml-1"></i>',
+                "center",
+              );
+          } else {
+            video.pause();
+            if (playBtn)
+              playBtn.innerHTML = '<i class="fa-solid fa-play ml-0.5"></i>';
+            if (wrapper.showCenterIcon)
+              wrapper.showCenterIcon(
+                '<i class="fa-solid fa-pause"></i>',
+                "center",
+              );
+          }
+        } else if (e.code === "ArrowRight") {
+          e.preventDefault();
+          video.currentTime = Math.min(video.duration, video.currentTime + 5);
+          if (wrapper.showCenterIcon)
+            wrapper.showCenterIcon(
+              '<i class="fa-solid fa-forward-step"></i><span class="text-xl font-bold ml-2">+5s</span>',
+              "right",
+            );
+        } else if (e.code === "ArrowLeft") {
+          e.preventDefault();
+          video.currentTime = Math.max(0, video.currentTime - 5);
+          if (wrapper.showCenterIcon)
+            wrapper.showCenterIcon(
+              '<span class="text-xl font-bold mr-2">-5s</span><i class="fa-solid fa-backward-step"></i>',
+              "left",
+            );
+        } else if (e.code === "ArrowUp") {
+          e.preventDefault();
+          video.volume = Math.min(1, video.volume + 0.1);
+          updateVolUI();
+          if (wrapper.showCenterIcon)
+            wrapper.showCenterIcon(
+              '<i class="fa-solid fa-volume-high"></i><span class="text-xl font-bold ml-2">' +
+                Math.round(video.volume * 100) +
+                "%</span>",
+              "center",
+            );
+        } else if (e.code === "ArrowDown") {
+          e.preventDefault();
+          video.volume = Math.max(0, video.volume - 0.1);
+          updateVolUI();
+          const iconClass =
+            video.volume === 0 ? "fa-volume-xmark" : "fa-volume-low";
+          if (wrapper.showCenterIcon)
+            wrapper.showCenterIcon(
+              `<i class="fa-solid ${iconClass}"></i><span class="text-xl font-bold ml-2">` +
+                Math.round(video.volume * 100) +
+                "%</span>",
+              "center",
+            );
+        } else if (e.code === "KeyM") {
+          e.preventDefault();
+          if (muteBtn) muteBtn.click();
+        } else if (e.code === "KeyF") {
+          e.preventDefault();
+          const fsBtn = document.getElementById(`video-fs-btn-${wid}`);
+          if (fsBtn) fsBtn.click();
+        }
+      }
+
+      class MKVStreamer {
+        constructor(blobUrl, videoEl, canvasEl, wid) {
+          this.blobUrl = blobUrl;
+          this.video = videoEl;
+          this.canvas = canvasEl;
+          this.wid = wid;
+          this.ctx = this.canvas.getContext("2d", {
+            alpha: false,
+            desynchronized: true,
+          });
+          this.worker = null;
+          this.frameQueue = [];
+          this.destroyed = false;
+          this.init();
+        }
+
+        async init() {
+          const workerCode = `
+            let fileBlob;
+            let offset = 0;
+            let timecodeScale = 1000000;
+            let duration = 0;
+            let decoder = null;
+            let buffer = new Uint8Array(0);
+            let parsingHeader = true;
+            let clusterOffsets = [];
+            let videoTrackId = -1;
+
+            function appendBuffer(newBuf) {
+                let tmp = new Uint8Array(buffer.length + newBuf.length);
+                tmp.set(buffer, 0);
+                tmp.set(newBuf, buffer.length);
+                buffer = tmp;
+            }
+
+            function readVINT(buf, pos) {
+                if (pos >= buf.length) return null;
+                let firstByte = buf[pos];
+                let len = 1;
+                let mask = 0x80;
+                while (!(firstByte & mask) && len < 8) {
+                    mask >>= 1;
+                    len++;
+                }
+                if (pos + len > buf.length) return null;
+                let val = firstByte & ~mask;
+                for (let i = 1; i < len; i++) val = (val * 256) + buf[pos + i];
+                return { length: len, value: val };
+            }
+
+            function parseStream() {
+                let pos = 0;
+                while (pos < buffer.length) {
+                    let idVint = readVINT(buffer, pos);
+                    if (!idVint) break;
+                    let id = 0;
+                    for (let i = 0; i < idVint.length; i++) id = (id << 8) | buffer[pos + i];
+                    
+                    let sizeVint = readVINT(buffer, pos + idVint.length);
+                    if (!sizeVint) break;
+                    
+                    let elementStart = pos;
+                    let dataStart = pos + idVint.length + sizeVint.length;
+                    
+                    if (dataStart + sizeVint.value > buffer.length) break;
+
+                    if (id === 0x1654AE6B) {
+                        let tPos = dataStart;
+                        let tEnd = dataStart + sizeVint.value;
+                        let currentTrack = {};
+                        while(tPos < tEnd) {
+                            let sId = readVINT(buffer, tPos);
+                            let sSize = readVINT(buffer, tPos + sId.length);
+                            let sData = tPos + sId.length + sSize.length;
+                            let sidVal = 0;
+                            for(let i=0; i<sId.length; i++) sidVal = (sidVal<<8)|buffer[tPos+i];
+                            
+                            if (sidVal === 0xD7) currentTrack.number = buffer[sData];
+                            if (sidVal === 0x83) currentTrack.type = buffer[sData];
+                            if (sidVal === 0x86) {
+                                let codecStr = "";
+                                for(let i=0; i<sSize.value; i++) codecStr += String.fromCharCode(buffer[sData+i]);
+                                currentTrack.codec = codecStr;
+                            }
+                            tPos = sData + sSize.value;
+                        }
+                        if (currentTrack.type === 1) {
+                            videoTrackId = currentTrack.number;
+                            initDecoder(currentTrack.codec);
+                        }
+                    }
+
+                    if (id === 0x1F43B675) {
+                        clusterOffsets.push({ offset: offset + elementStart, timestamp: 0 });
+                        parsingHeader = false;
+                        let cPos = dataStart;
+                        let cEnd = dataStart + sizeVint.value;
+                        let clusterTime = 0;
+                        while(cPos < cEnd) {
+                            let cId = readVINT(buffer, cPos);
+                            let cSize = readVINT(buffer, cPos + cId.length);
+                            let cData = cPos + cId.length + cSize.length;
+                            let cidVal = 0;
+                            for(let i=0; i<cId.length; i++) cidVal = (cidVal<<8)|buffer[cPos+i];
+                            
+                            if (cidVal === 0xE7) {
+                                for(let i=0; i<cSize.value; i++) clusterTime = (clusterTime * 256) + buffer[cData+i];
+                                clusterOffsets[clusterOffsets.length-1].timestamp = clusterTime * timecodeScale;
+                            }
+                            if (cidVal === 0xA3) {
+                                let trackNumVint = readVINT(buffer, cData);
+                                let trackNum = trackNumVint.value;
+                                if (trackNum === videoTrackId) {
+                                    let flags = buffer[cData + trackNumVint.length + 2];
+                                    let isKeyframe = (flags & 0x80) !== 0;
+                                    let relTs = (buffer[cData + trackNumVint.length] << 8) | buffer[cData + trackNumVint.length + 1];
+                                    if (relTs > 32767) relTs -= 65536;
+                                    
+                                    let frameTs = clusterTime * timecodeScale + (relTs * timecodeScale);
+                                    let payloadStart = cData + trackNumVint.length + 3;
+                                    let payloadSize = cSize.value - (trackNumVint.length + 3);
+                                    let chunkData = buffer.slice(payloadStart, payloadStart + payloadSize);
+                                    
+                                    if (decoder && decoder.state === 'configured') {
+                                        decoder.decode(new EncodedVideoChunk({
+                                            type: isKeyframe ? 'key' : 'delta',
+                                            timestamp: frameTs,
+                                            data: chunkData
+                                        }));
+                                    }
+                                }
+                            }
+                            cPos = cData + cSize.value;
+                        }
+                    }
+                    pos = dataStart + sizeVint.value;
+                }
+                buffer = buffer.slice(pos);
+            }
+
+            function initDecoder(codecId) {
+                let codecString = 'vp09.00.10.08';
+                if (codecId.includes('HEVC')) codecString = 'hev1.1.6.L93.B0';
+                if (codecId.includes('AVC')) codecString = 'avc1.4D401E';
+                
+                decoder = new VideoDecoder({
+                    output(frame) {
+                        createImageBitmap(frame).then(bmp => {
+                            self.postMessage({ type: 'FRAME', bitmap: bmp, timestamp: frame.timestamp }, [bmp]);
+                            frame.close();
+                        });
+                    },
+                    error(e) {}
+                });
+                decoder.configure({ codec: codecString });
+            }
+
+            async function readLoop() {
+                if (offset >= fileBlob.size) return;
+                const chunkSize = 5 * 1024 * 1024;
+                const slice = fileBlob.slice(offset, offset + chunkSize);
+                const buf = await slice.arrayBuffer();
+                offset += buf.byteLength;
+                appendBuffer(new Uint8Array(buf));
+                parseStream();
+                if (decoder && decoder.decodeQueueSize < 30) {
+                    readLoop();
+                } else {
+                    setTimeout(readLoop, 50);
+                }
+            }
+
+            self.onmessage = async (e) => {
+                if (e.data.type === 'INIT') {
+                    const res = await fetch(e.data.url);
+                    fileBlob = await res.blob();
+                    readLoop();
+                } else if (e.data.type === 'SEEK') {
+                    if (decoder && decoder.state !== 'closed') await decoder.flush();
+                    let targetTs = e.data.timestamp;
+                    let bestCluster = clusterOffsets[0];
+                    for (let c of clusterOffsets) {
+                        if (c.timestamp <= targetTs) bestCluster = c;
+                        else break;
+                    }
+                    offset = bestCluster ? bestCluster.offset : 0;
+                    buffer = new Uint8Array(0);
+                    parsingHeader = false;
+                    readLoop();
+                }
+            };
+        `;
+
+          this.worker = new Worker(
+            URL.createObjectURL(
+              new Blob([workerCode], { type: "application/javascript" }),
+            ),
+          );
+
+          this.worker.onmessage = (e) => {
+            if (e.data.type === "FRAME") {
+              this.frameQueue.push({
+                bitmap: e.data.bitmap,
+                timestamp: e.data.timestamp,
+              });
+              this.frameQueue.sort((a, b) => a.timestamp - b.timestamp);
+            }
+          };
+
+          this.worker.postMessage({ type: "INIT", url: this.blobUrl });
+
+          this.video.addEventListener("seeking", () => {
+            this.frameQueue.forEach((f) => f.bitmap.close());
+            this.frameQueue = [];
+            this.worker.postMessage({
+              type: "SEEK",
+              timestamp: this.video.currentTime * 1000000,
+            });
+          });
+
+          this.video.style.display = "none";
+          this.canvas.classList.remove("hidden");
+
+          this.renderLoop();
+        }
+
+        renderLoop = () => {
+          if (this.destroyed) return;
+          requestAnimationFrame(this.renderLoop);
+
+          if (this.video.paused || this.frameQueue.length === 0) return;
+
+          const currentSyncTime = this.video.currentTime * 1000000;
+
+          while (
+            this.frameQueue.length > 1 &&
+            this.frameQueue[1].timestamp <= currentSyncTime
+          ) {
+            let oldFrame = this.frameQueue.shift();
+            oldFrame.bitmap.close();
+          }
+
+          if (
+            this.frameQueue[0] &&
+            this.frameQueue[0].timestamp <= currentSyncTime
+          ) {
+            this.canvas.width = this.frameQueue[0].bitmap.width;
+            this.canvas.height = this.frameQueue[0].bitmap.height;
+            this.ctx.drawImage(
+              this.frameQueue[0].bitmap,
+              0,
+              0,
+              this.canvas.width,
+              this.canvas.height,
+            );
+          }
+        };
+
+        destroy() {
+          this.destroyed = true;
+          if (this.worker) this.worker.terminate();
+          this.frameQueue.forEach((f) => f.bitmap.close());
+          this.frameQueue = [];
+          if (this.video) URL.revokeObjectURL(this.video.src);
+        }
+      }
     </script>
     <svg width="0" height="0" style="position: absolute">
       <filter id="mini-liquid-lens" x="-50%" y="-50%" width="200%" height="50%">
