@@ -1,6 +1,8 @@
 v1.7:
 1. Added support for multiple audio tracks and subtitle tracks switching using MP4Box.
 2. Fixed code and text leaking out of the files into the webOS' parts like the Start Menu.
+3. Fixed, when the name of a file was very big, and was being acted upon, in some thing like the deletion modal and notifications, the name bled out of the modal.
+4. Changed default auto hide dock width to 100% and thickness to 50%.
 
 v1.6:
 1. Added support for IndexedDB, localForage, so that users can upload their own files.
