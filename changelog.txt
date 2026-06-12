@@ -3,6 +3,11 @@ v1.7:
 2. Fixed code and text leaking out of the files into the webOS' parts like the Start Menu.
 3. Fixed, when the name of a file was very big, and was being acted upon, in some thing like the deletion modal and notifications, the name bled out of the modal.
 4. Changed default auto hide dock width to 100% and thickness to 50%.
+5. Added zoome in/out and rotate buttons in the Gallery app.
+6. Made a custom modal for the "File not found" error.
+7. Fixed double controls in the Gallery app in videos.
+8. Added option to upload videos as the wallpaper from the host PC, and added option to add videos as wallpaper from the vFS.
+9. Fixed, there was no blur on the lock screen after locking the system manually, there was a subtle blur on the first lock screen when booting, which was missing on the manual lock.
 
 v1.6:
 1. Added support for IndexedDB, localForage, so that users can upload their own files.
