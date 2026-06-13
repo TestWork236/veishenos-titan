@@ -14,6 +14,7 @@ v1.7:
 13. Added a custom move cursor.
 14. Added a custom landing page on new tab in Stratos.
 15. Added a shake to minimize feature like Windows 7.
+16. Changed placeholder text in the weather widget's typing fields to be black in light mode.
 
 v1.6:
 1. Added support for IndexedDB, localForage, so that users can upload their own files.
