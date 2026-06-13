@@ -15,6 +15,7 @@ v1.7:
 14. Added a custom landing page on new tab in Stratos.
 15. Added a shake to minimize feature like Windows 7.
 16. Changed placeholder text in the weather widget's typing fields to be black in light mode.
+17. Added semantic vFS search to AI Assistant; handles vague user queries (e.g., "find the file about British India history") and returns inline file cards with "Open" and "Open Location" shortcuts.
 
 v1.6:
 1. Added support for IndexedDB, localForage, so that users can upload their own files.
