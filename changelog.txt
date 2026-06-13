@@ -8,6 +8,12 @@ v1.7:
 7. Fixed double controls in the Gallery app in videos.
 8. Added option to upload videos as the wallpaper from the host PC, and added option to add videos as wallpaper from the vFS.
 9. Fixed, there was no blur on the lock screen after locking the system manually, there was a subtle blur on the first lock screen when booting, which was missing on the manual lock.
+10. Redesigned the web browser to look better.
+11. Rebranding of the "Web Browser" to "Stratos".
+12. Some buttons in the web browser are cosmetic only and some actually work, like go backward, forward, and refresh.
+13. Added a custom move cursor.
+14. Added a custom landing page on new tab in Stratos.
+15. Added a shake to minimize feature like Windows 7.
 
 v1.6:
 1. Added support for IndexedDB, localForage, so that users can upload their own files.
