@@ -23,6 +23,7 @@ v1.7:
 22. Added uninstalling of custom made apps.
 23. Fixed multi-selected files were not being deleted in one go.
 24. Updated the old Gemini 2.5 Flash to the new Gemini 3.5 Flash in the Veishen Assistant app.
+25. Fixed the bottom padding of the Clock widget to match the other widgets, keeping consistency.
 
 v1.6:
 1. Added support for IndexedDB, localForage, so that users can upload their own files.
