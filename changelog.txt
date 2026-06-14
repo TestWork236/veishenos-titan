@@ -10,7 +10,7 @@ v1.7:
 9. Fixed, there was no blur on the lock screen after locking the system manually, there was a subtle blur on the first lock screen when booting, which was missing on the manual lock.
 10. Redesigned the web browser to look better.
 11. Rebranding of the "Web Browser" to "Stratos".
-12. Some buttons in the web browser are cosmetic only and some actually work, like go backward, forward, and refresh.
+12. Some buttons in the web browser are cosmetic only and some actually work, like go backward, forward, refresh, and bookmark, with fully working bookmark adding, editing, and deletion.
 13. Added a custom move cursor.
 14. Added a custom landing page on new tab in Stratos.
 15. Added a shake to minimize feature like Windows 7.
@@ -20,6 +20,8 @@ v1.7:
 19. Fixed when a file was deleted and the modal for "File not found" was called, then that file/app didn't depopulate from the start menu.
 20. Fixed custom made apps that were installed from .hai files were not being saved and went away on page reload.
 21. Fixed .sha App Duplication Bug: Corrected the app registration framework so running a .sha script no longer clones a ghost application in the Start Menu. Standalone scripts now execute cleanly without permanent menu placement; permanent Start Menu entries are now gated strictly behind .hai package installations or manual user whitelisting.
+22. Added uninstalling of custom made apps.
+23. Fixed multi-selected files were not being deleted in one go.
 
 v1.6:
 1. Added support for IndexedDB, localForage, so that users can upload their own files.
