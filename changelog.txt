@@ -22,6 +22,7 @@ v1.7:
 21. Fixed .sha App Duplication Bug: Corrected the app registration framework so running a .sha script no longer clones a ghost application in the Start Menu. Standalone scripts now execute cleanly without permanent menu placement; permanent Start Menu entries are now gated strictly behind .hai package installations or manual user whitelisting.
 22. Added uninstalling of custom made apps.
 23. Fixed multi-selected files were not being deleted in one go.
+24. Updated the old Gemini 2.5 Flash to the new Gemini 3.5 Flash in the Veishen Assistant app.
 
 v1.6:
 1. Added support for IndexedDB, localForage, so that users can upload their own files.
