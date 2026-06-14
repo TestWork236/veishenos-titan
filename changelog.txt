@@ -18,6 +18,8 @@ v1.7:
 17. Added semantic vFS search to AI Assistant; handles vague user queries (e.g., "find the file about British India history") and returns inline file cards with "Open" and "Open Location" shortcuts.
 18. Added Agentic OS Integration: Veishen Assistant can now execute active system tasks, including launching specific Settings menus from natural language, instantly opening discovered files, and processing heavy batch actions like date-based file renaming.
 19. Fixed when a file was deleted and the modal for "File not found" was called, then that file/app didn't depopulate from the start menu.
+20. Fixed custom made apps that were installed from .hai files were not being saved and went away on page reload.
+21. Fixed .sha App Duplication Bug: Corrected the app registration framework so running a .sha script no longer clones a ghost application in the Start Menu. Standalone scripts now execute cleanly without permanent menu placement; permanent Start Menu entries are now gated strictly behind .hai package installations or manual user whitelisting.
 
 v1.6:
 1. Added support for IndexedDB, localForage, so that users can upload their own files.
