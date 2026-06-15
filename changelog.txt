@@ -25,6 +25,10 @@ v1.7:
 24. Updated the old Gemini 2.5 Flash to the new Gemini 3.5 Flash in the Veishen Assistant app.
 25. Fixed the bottom padding of the Clock widget to match the other widgets, keeping consistency.
 26. Added working ls command in terminal which lists system folders in the root directory, with more functions and commands to control them.
+27. Fixed, when a folder pinned on the sidebar was deleted, it could still be accessed through the sidebar, and creating a file in it renamed the title on the tab to "Unknown."
+28. Added the ability to drag and drop through tabs.
+29. Added the ability to snap widgets in close proximity of other widgets.
+
 
 v1.6:
 1. Added support for IndexedDB, localForage, so that users can upload their own files.
