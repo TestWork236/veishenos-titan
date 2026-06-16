@@ -1,3 +1,8 @@
+v1.8:
+1. Added the ability to pick any picture as your account profile picture, from both the host machine and the vFS.
+2. Added ability to set any emoji and any background colour on the account profile picture instead of only the preset ones.
+3. Made the custom new tab landing page better in looks.
+
 v1.7:
 1. Added support for multiple audio tracks and subtitle tracks switching using MP4Box.
 2. Fixed code and text leaking out of the files into the webOS' parts like the Start Menu.
