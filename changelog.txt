@@ -28,7 +28,7 @@ v1.7:
 27. Fixed, when a folder pinned on the sidebar was deleted, it could still be accessed through the sidebar, and creating a file in it renamed the title on the tab to "Unknown."
 28. Added the ability to drag and drop through tabs.
 29. Added the ability to snap widgets in close proximity of other widgets.
-
+30. Added multi-chat support in the Veishen Assistant app.
 
 v1.6:
 1. Added support for IndexedDB, localForage, so that users can upload their own files.
