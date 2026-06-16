@@ -68,6 +68,11 @@
         --music-search-text: #000000;
       }
 
+      [data-theme="light"] .weather-input::placeholder {
+        color: #000000 !important;
+        opacity: 0.65 !important;
+      }
+
       /* --- LIGHT MODE TEXT & HOVER READABILITY FIXES --- */
       [data-theme="light"] .hover\:bg-white\/10:hover,
       [data-theme="light"] .hover\:bg-white\/5:hover {
@@ -300,6 +305,20 @@
         background: var(--ui-400);
       }
 
+      ::cue {
+        color: #ffffff;
+        background-color: transparent;
+        text-shadow:
+          -2px -2px 0 #000,
+          2px -2px 0 #000,
+          -2px 2px 0 #000,
+          2px 2px 0 #000,
+          0px 4px 6px rgba(0, 0, 0, 0.8);
+        font-family: "Inter", "Open Sans", sans-serif;
+        font-weight: 600;
+        font-size: 1.4rem;
+      }
+
       .ai-response ul {
         list-style-type: disc;
         margin-left: 20px;
@@ -432,7 +451,8 @@
         border: 2px solid var(--accent-500);
         background-color: transparent;
         pointer-events: none;
-        z-index: 100; /* Inside the window, on top of file icons */
+        z-index: 100;
+        display: none;
         opacity: 1;
         transition: opacity 0.2s ease-out;
       }
@@ -851,7 +871,7 @@
       }
 
       .widget-draggable {
-        cursor: move;
+        cursor: var(--cursor-move) !important;
         user-select: none;
       }
 
@@ -1414,12 +1434,17 @@
           url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g transform="rotate(45 12 12)"><path d="M12 2 L8 6 H11 V18 H8 L12 22 L16 18 H13 V6 H16 Z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/></g></svg>')
             12 12,
           nesw-resize;
+        --cursor-move:
+          url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L9 5h2v6H5V9l-3 3 3 3v-2h6v6H9l3 3 3-3h-2v-6h6v2l3-3-3-3v2h-6V5h2l-3-3z" fill="white" stroke="black" stroke-width="1.5" stroke-linejoin="round"/></svg>')
+            12 12,
+          move;
       }
 
       /* Default cursor everywhere (buttons, icons, taskbar) */
       body,
       .os-window,
       button,
+      label,
       [onclick],
       .desktop-icon,
       .dock-item,
@@ -1453,8 +1478,10 @@
       input[type="radio"],
       input[type="range"],
       input[type="file"],
+      input[type="file"]::file-selector-button,
       input[type="submit"],
-      input[type="button"] {
+      input[type="button"],
+      select {
         cursor: var(--cursor-pointer) !important;
       }
 
@@ -2414,6 +2441,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mp4box@0.5.3/dist/mp4box.all.min.js"></script>
   </head>
   <body
     class="h-screen w-screen overflow-hidden relative"
@@ -3480,7 +3508,7 @@
     </div>
 
     <script>
-      const SYSTEM_VERSION = "1.6";
+      const SYSTEM_VERSION = "1.7";
       const appStorage = {
         cache: null,
         isSandboxed: false,
@@ -4160,6 +4188,7 @@
         lockScreenPassword: "password",
         timeFormat: "12h",
         shakeToFind: true,
+        shakeToMinimize: true,
         ctrlToFind: true,
         sonarToFind: false,
         cursorFill: "#ffffff",
@@ -4186,6 +4215,8 @@
       if (!settings.stageManagerPosition)
         settings.stageManagerPosition = "left";
       if (settings.shakeToFind === undefined) settings.shakeToFind = true;
+      if (settings.shakeToMinimize === undefined)
+        settings.shakeToMinimize = true;
       if (settings.ctrlToFind === undefined) settings.ctrlToFind = true;
       if (settings.sonarToFind === undefined) settings.sonarToFind = false;
       if (settings.cursorFill === undefined) settings.cursorFill = "#ffffff";
@@ -4208,9 +4239,9 @@
         settings.showTaskbarSearch = false;
       if (settings.autoHideDock === undefined) settings.autoHideDock = false;
       if (settings.dockIndicatorWidth === undefined)
-        settings.dockIndicatorWidth = 140;
+        settings.dockIndicatorWidth = 400;
       if (settings.dockIndicatorHeight === undefined)
-        settings.dockIndicatorHeight = 5;
+        settings.dockIndicatorHeight = 9;
       if (settings.dockSquircleN === undefined) settings.dockSquircleN = 3.77;
       if (settings.dockColor === undefined) settings.dockColor = "system";
       if (settings.macMenuBarTransparent === undefined)
@@ -4282,6 +4313,8 @@
       let resizeDirection = "";
       let draggedWindowId = null;
       let currentSnapArea = null;
+      let windowDragHistory = [];
+      let lastWindowShakeTime = 0;
 
       let selectionContext = null;
       let selectionStart = { x: 0, y: 0 };
@@ -4303,7 +4336,7 @@
           icon: "fa-clock",
           color: "text-blue-400",
           width: "w-80",
-          height: "h-32",
+          height: "h-auto",
           render: (id) => `
             <div class="glass-panel rounded-xl p-4 shadow-lg ${widgetLibrary.clock.width} ${widgetLibrary.clock.height}" 
                  style="color: var(--widget-text);">
@@ -4314,7 +4347,7 @@
                     </button>
                 </div>
                 <div id="widget-clock-${id}" class="text-4xl font-bold text-center mt-4">00:00:00</div>
-                <div id="widget-date-${id}" class="text-sm text-center mt-2" style="color: var(--widget-dim-text)">Loading...</div>
+                <div id="widget-date-${id}" class="text-sm text-center mt-2 mb-2" style="color: var(--widget-dim-text)">Loading...</div>
             </div>
         `,
           update: (id) => {
@@ -4406,7 +4439,7 @@
                             
                             <div class="bg-black/20 p-3 rounded-lg">
                                 <label class="font-medium mb-2 block">City Name</label>
-                                <input type="text" id="weather-city-${id}" class="w-full bg-black/20 border border-white/10 rounded p-2 text-inherit text-xs outline-none focus:border-accent-400" placeholder="e.g., London, UK">
+                                <input type="text" id="weather-city-${id}" class="weather-input w-full bg-black/20 border border-white/10 rounded p-2 text-inherit text-xs outline-none focus:border-accent-400" placeholder="e.g., London, UK">
                                 <button onclick="setWeatherByCity('${id}')" class="w-full mt-2 px-3 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded text-xs transition">
                                     <i class="fa-solid fa-map-marker-alt mr-1"></i> Use City
                                 </button>
@@ -4417,8 +4450,8 @@
                             <div class="bg-black/20 p-3 rounded-lg">
                                 <label class="font-medium mb-2 block">Coordinates</label>
                                 <div class="flex gap-2 mb-2">
-                                    <input type="text" id="weather-lat-${id}" class="w-1/2 bg-black/20 border border-white/10 rounded p-2 text-inherit text-xs outline-none focus:border-accent-400" placeholder="Latitude">
-                                    <input type="text" id="weather-lon-${id}" class="w-1/2 bg-black/20 border border-white/10 rounded p-2 text-inherit text-xs outline-none focus:border-accent-400" placeholder="Longitude">
+                                    <input type="text" id="weather-lat-${id}" class="weather-input w-1/2 bg-black/20 border border-white/10 rounded p-2 text-inherit text-xs outline-none focus:border-accent-400" placeholder="Latitude">
+                                    <input type="text" id="weather-lon-${id}" class="weather-input w-1/2 bg-black/20 border border-white/10 rounded p-2 text-inherit text-xs outline-none focus:border-accent-400" placeholder="Longitude">
                                 </div>
                                 <button onclick="setWeatherByCoords('${id}')" class="w-full px-3 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded text-xs transition">
                                     <i class="fa-solid fa-location-crosshairs mr-1"></i> Use Coordinates
@@ -4876,6 +4909,154 @@
         "https://images.unsplash.com/photo-1534796636912-3b95b3ab5980?q=80&w=2072&auto=format&fit=crop",
       ];
 
+      let stratosBookmarks = JSON.parse(
+        appStorage.getItem("gemini_stratos_bookmarks"),
+      ) || [
+        { id: 1, title: "GH", url: "https://github.com" },
+        { id: 2, title: "YT", url: "https://youtube.com" },
+        { id: 3, title: "W", url: "https://wikipedia.org" },
+      ];
+
+      function saveStratosBookmarks() {
+        appStorage.setItem(
+          "gemini_stratos_bookmarks",
+          JSON.stringify(stratosBookmarks),
+        );
+        Object.keys(windows).forEach((wid) => {
+          if (windows[wid].appId === "browser") {
+            const state = windows[wid].state;
+            state.tabs.forEach((tab) => {
+              if (isStratosNewTab(tab.url) && tab.title === "New Tab") {
+                tab.url = getStratosNewTabURL();
+                const iframe = document.getElementById(tab.iframeId);
+                if (iframe) iframe.src = tab.url;
+              }
+            });
+          }
+        });
+      }
+
+      function getStratosNewTabURL() {
+        let shortcutsHTML = stratosBookmarks
+          .map(
+            (b) => `
+              <div style="position:relative; display:inline-block; margin: 10px;">
+                  <a href="${b.url}" class="shortcut">${b.title}</a>
+                  <button onclick="editBookmark(${b.id}, '${b.title.replace(/'/g, "\\'")}')" style="position:absolute; top:-5px; right:-5px; background:#4b5563; color:white; border:none; border-radius:50%; width:22px; height:22px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 4px rgba(0,0,0,0.5);">✎</button>
+                  <button onclick="deleteBookmark(${b.id})" style="position:absolute; top:-5px; left:-5px; background:#ef4444; color:white; border:none; border-radius:50%; width:22px; height:22px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 4px rgba(0,0,0,0.5);">✕</button>
+              </div>
+          `,
+          )
+          .join("");
+
+        const html = `<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { background: #111827; color: white; font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+  .logo { font-size: 48px; font-weight: bold; margin-bottom: 20px; background: linear-gradient(to right, #60a5fa, #a855f7); -webkit-background-clip: text; color: transparent; }
+  .search { width: 400px; padding: 15px 20px; border-radius: 30px; border: 1px solid #374151; background: #1f2937; color: white; outline: none; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  .search:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.3); }
+  .shortcuts { display: flex; flex-wrap: wrap; justify-content: center; max-width: 600px; margin-top: 30px; }
+  .shortcut { width: 60px; height: 60px; background: #1f2937; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.2s; text-decoration: none; color: white; border: 1px solid #374151; text-align: center; overflow: hidden; word-break: break-all; padding: 4px; line-height: 1.1; }
+  .shortcut:hover { background: #374151; transform: translateY(-5px); border-color: #60a5fa; }
+</style>
+</head>
+<body>
+<div class="logo">Stratos</div>
+<form action="https://www.google.com/search" method="get" target="_self">
+  <input type="text" name="q" class="search" placeholder="Search the web..." autocomplete="off" autofocus>
+</form>
+<div class="shortcuts">
+  ${shortcutsHTML}
+</div>
+<script>
+  function editBookmark(id, title) {
+      window.parent.postMessage({ type: 'REQUEST_EDIT_BOOKMARK', id: id, title: title }, '*');
+  }
+  function deleteBookmark(id) {
+      window.parent.postMessage({ type: 'REQUEST_DELETE_BOOKMARK', id: id }, '*');
+  }
+<\/script>
+</body>
+</html>`;
+        return "data:text/html;charset=utf-8," + encodeURIComponent(html);
+      }
+
+      function isStratosNewTab(url) {
+        return url.startsWith("data:text/html") && url.includes("Stratos");
+      }
+
+      window.addEventListener("message", (e) => {
+        if (e.data && e.data.type === "REQUEST_EDIT_BOOKMARK") {
+          showModal("Enter new name:", e.data.title, (newTitle) => {
+            if (newTitle !== null && newTitle.trim() !== "") {
+              const b = stratosBookmarks.find((x) => x.id === e.data.id);
+              if (b) {
+                b.title = newTitle.trim();
+                saveStratosBookmarks();
+              }
+            }
+          });
+        } else if (e.data && e.data.type === "REQUEST_DELETE_BOOKMARK") {
+          showConfirmModal(
+            "Delete Bookmark",
+            "Are you sure you want to delete this bookmark?",
+            () => {
+              stratosBookmarks = stratosBookmarks.filter(
+                (x) => x.id !== e.data.id,
+              );
+              saveStratosBookmarks();
+            },
+          );
+        }
+      });
+
+      function stratosAddBookmark(wid) {
+        const state = windows[wid].state;
+        const activeTab = state.tabs.find((t) => t.id === state.activeTab);
+        if (!activeTab || isStratosNewTab(activeTab.url)) return;
+
+        const exists = stratosBookmarks.find((b) => b.url === activeTab.url);
+        if (!exists) {
+          let shortTitle = activeTab.title
+            .replace(/[^a-zA-Z0-9]/g, "")
+            .substring(0, 4);
+          if (!shortTitle) shortTitle = "Site";
+          stratosBookmarks.push({
+            id: Date.now(),
+            title: shortTitle,
+            url: activeTab.url,
+          });
+          saveStratosBookmarks();
+        } else {
+          stratosBookmarks = stratosBookmarks.filter(
+            (b) => b.url !== activeTab.url,
+          );
+          saveStratosBookmarks();
+        }
+        updateStratosStar(wid);
+      }
+
+      function updateStratosStar(wid) {
+        const state = windows[wid].state;
+        if (!state) return;
+        const activeTab = state.tabs.find((t) => t.id === state.activeTab);
+        const star = document.getElementById(`browser-star-${wid}`);
+        if (!star || !activeTab) return;
+
+        if (
+          !isStratosNewTab(activeTab.url) &&
+          stratosBookmarks.some((b) => b.url === activeTab.url)
+        ) {
+          star.className =
+            "fa-solid fa-star text-accent-400 cursor-pointer text-[12px] ml-2 transition";
+        } else {
+          star.className =
+            "fa-regular fa-star text-ui-400 hover:text-accent-400 cursor-pointer text-[12px] ml-2 transition";
+        }
+      }
+
       const defaultNotesState = {
         tabs: [
           {
@@ -4892,7 +5073,7 @@
           {
             id: 1,
             title: "New Tab",
-            url: "about:blank",
+            url: getStratosNewTabURL(),
             iframeId: "browser-iframe-1",
           },
         ],
@@ -4965,7 +5146,7 @@
                     <div class="h-full flex flex-col items-center justify-center text-center p-8 bg-ui-900 text-ui-100">
                         <i class="fa-solid fa-moon text-6xl text-accent-400 mb-4"></i>
                         <h1 class="text-3xl font-bold mb-2">VeishenOS</h1>
-                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.6</span></p>
+                        <p class="text-ui-400 mb-6">Codename: <span class="text-accent-400 font-mono">Titan v1.7</span></p>
                         <p class="text-sm text-ui-400 mb-8">Needs to be updated!</p>
                         <button onclick="closeApp('${wid}')" class="px-6 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded-lg shadow transition">Get Started</button>
                     </div>
@@ -5030,14 +5211,14 @@
           content: (windowId) => `
                     <div class="h-full bg-black p-2 terminal-font text-sm flex flex-col" onclick="document.getElementById('term-input-${windowId}').focus()">
                         <div id="term-output-${windowId}" class="flex-1 overflow-y-auto p-2 text-green-400 font-mono relative">
-                            <div>VeishenOS Titan Kernel [Version 1.6]</div>
+                            <div>VeishenOS Titan Kernel [Version 1.7]</div>
                             <div>(c) Veishen Corp. All rights reserved.</div>
                             <br>
                             <div>Type 'help' for a list of commands.</div>
                             <br>
                         </div>
                         <div class="flex items-center p-2 text-white border-t border-gray-800">
-                            <span class="text-green-500 mr-2">root@titan:~$</span>
+                            <span id="term-input-prefix-${windowId}" class="text-green-500 mr-2 whitespace-nowrap">root@titan:/$</span>
                             <input type="text" id="term-input-${windowId}" class="bg-transparent border-none outline-none flex-1 text-white font-mono caret-white" autocomplete="off" onkeydown="handleTerminal(event, '${windowId}')">
                         </div>
                     </div>
@@ -5156,19 +5337,30 @@
                 `,
         },
         browser: {
-          title: "Web Browser",
-          icon: "fa-globe",
-          color: "text-accent-400",
-          width: 800,
-          height: 600,
+          title: "Stratos",
+          icon: "fa-compass",
+          color: "text-blue-400",
+          width: 900,
+          height: 650,
           content: (windowId) => `
-                    <div class="h-full flex flex-col bg-ui-900">
-                        <div class="bg-ui-800 flex items-center px-1 pt-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-b border-ui-border" id="browser-tab-bar-${windowId}"></div>
-                        <div class="flex items-center gap-2 p-2 bg-ui-700 border-b border-ui-border">
-                            <i class="fa-solid fa-arrow-left text-ui-400 cursor-pointer hover:text-ui-100"></i>
-                            <i class="fa-solid fa-arrow-right text-ui-400 cursor-pointer hover:text-ui-100"></i>
-                            <i class="fa-solid fa-rotate-right text-ui-100 cursor-pointer" onclick="reloadBrowser('${windowId}')"></i>
-                            <input type="text" id="browser-url-${windowId}" class="flex-1 bg-ui-900 border border-ui-border rounded px-3 py-1 text-sm text-ui-100 outline-none focus:border-accent-400 transition" placeholder="Enter URL (e.g. https://wikipedia.org)" onkeydown="handleBrowserNav(event, '${windowId}')">
+                    <div class="h-full flex flex-col bg-ui-900 rounded-b-xl overflow-hidden relative">
+                        <div class="bg-ui-800 flex items-end px-2 pt-2 gap-1 border-b border-ui-border overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" id="browser-tab-bar-${windowId}"></div>
+                        <div class="flex items-center gap-3 px-3 py-2 bg-ui-800 border-b border-ui-border shadow-sm">
+                            <div class="flex items-center gap-1">
+                                <button onclick="browserGoBack('${windowId}')" class="w-7 h-7 rounded hover:bg-ui-700 flex items-center justify-center text-ui-400 hover:text-ui-100 transition"><i class="fa-solid fa-arrow-left text-xs"></i></button>
+                                <button onclick="browserGoForward('${windowId}')" class="w-7 h-7 rounded hover:bg-ui-700 flex items-center justify-center text-ui-400 hover:text-ui-100 transition"><i class="fa-solid fa-arrow-right text-xs"></i></button>
+                                <button onclick="reloadBrowser('${windowId}')" class="w-7 h-7 rounded hover:bg-ui-700 flex items-center justify-center text-ui-400 hover:text-ui-100 transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
+                            </div>
+                            <div class="flex-1 flex items-center bg-ui-900 border border-ui-border rounded-full px-4 py-1.5 focus-within:border-accent-500 focus-within:ring-1 focus-within:ring-accent-500/50 transition-all shadow-inner group">
+                                <i class="fa-solid fa-shield-halved text-[10px] text-green-400 mr-3"></i>
+                                <input type="text" id="browser-url-${windowId}" class="flex-1 bg-transparent border-none outline-none text-xs text-ui-100 placeholder-ui-400" placeholder="Search or enter website name" onkeydown="handleBrowserNav(event, '${windowId}')" autocomplete="off">
+                                <i id="browser-star-${windowId}" onclick="stratosAddBookmark('${windowId}')" class="fa-regular fa-star text-ui-400 hover:text-accent-400 cursor-pointer text-[12px] ml-2 transition"></i>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button class="w-7 h-7 rounded hover:bg-ui-700 flex items-center justify-center text-ui-400 hover:text-ui-100 transition"><i class="fa-solid fa-puzzle-piece text-xs"></i></button>
+                                <button class="w-7 h-7 rounded hover:bg-ui-700 flex items-center justify-center text-ui-400 hover:text-ui-100 transition"><i class="fa-solid fa-download text-xs"></i></button>
+                                <button class="w-7 h-7 rounded hover:bg-ui-700 flex items-center justify-center text-ui-400 hover:text-ui-100 transition"><i class="fa-solid fa-bars text-xs"></i></button>
+                            </div>
                         </div>
                         <div class="flex-1 bg-white relative" id="browser-content-container-${windowId}"></div>
                     </div>
@@ -5184,7 +5376,7 @@
                     <div class="h-full p-6 bg-ui-900 text-ui-100">
                         <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-brands fa-linux"></i> System Specs</h2>
                         <div class="space-y-2 text-sm text-ui-400">
-                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.6</span></div>
+                            <div class="flex justify-between border-b border-ui-border pb-1"><span>OS:</span> <span class="text-ui-100">VeishenOS Titan v1.7</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Kernel:</span> <span class="text-ui-100">Web-Kernel 5.4</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Memory:</span> <span id="sys-ram-${wid}" class="text-ui-100">Detecting...</span></div>
                             <div class="flex justify-between border-b border-ui-border pb-1"><span>Processor:</span> <span class="text-ui-100">Veishen Quantum Core</span></div>
@@ -5201,27 +5393,27 @@
           width: 400,
           height: 550,
           content: (windowId) => `
-                    <div class="h-full flex flex-col bg-ui-900">
-                        
-                        <div class="flex items-center justify-between px-4 py-2 bg-ui-800 border-b border-ui-border">
-                            <span class="text-xs text-ui-400">Model: Gemini 2.5 Flash</span>
-                            <div class="flex gap-2">
-                                <button onclick="setGeminiKey()" class="text-xs text-ui-400 hover:text-accent-400 transition" title="Set API Key">
-                                    <i class="fa-solid fa-key"></i>
-                                </button>
-                                <button onclick="clearAIChat('${windowId}')" class="text-xs text-ui-400 hover:text-red-400 transition" title="Clear History">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
+                    <div class="h-full flex flex-col bg-ui-900 relative overflow-hidden">
+                        <div class="flex items-center justify-between px-3 py-1.5 bg-ui-800 border-b border-ui-border z-20 gap-2">
+                            <div class="flex items-center gap-3 flex-1 min-w-0">
+                                <button onclick="toggleAIChatList('${windowId}')" class="text-sm text-ui-400 hover:text-white transition shrink-0"><i class="fa-solid fa-bars"></i></button>
+                                <div class="flex flex-col min-w-0">
+                                    <span class="text-xs font-bold text-ui-100 truncate" id="ai-chat-title-${windowId}">New Chat</span>
+                                    <span class="text-[9px] text-accent-400 truncate">Model: Gemini 3.5 Flash</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 shrink-0">
+                                <button onclick="createNewAIChat('${windowId}')" class="text-sm text-ui-400 hover:text-accent-400 transition" title="New Chat"><i class="fa-solid fa-plus"></i></button>
+                                <button onclick="setGeminiKey()" class="text-sm text-ui-400 hover:text-accent-400 transition" title="Set API Key"><i class="fa-solid fa-key"></i></button>
+                                <button onclick="clearAIChat('${windowId}')" class="text-sm text-ui-400 hover:text-red-400 transition" title="Clear Chat"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
-
-                        
-                        <div class="flex-1 p-4 space-y-3 overflow-y-auto scroll-smooth" id="ai-chat-history-${windowId}">
-                            
+                        <div id="ai-chat-list-panel-${windowId}" class="absolute top-[42px] left-0 bottom-0 w-48 bg-ui-800 border-r border-ui-border z-10 transform -translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
+                            <div id="ai-chat-list-${windowId}" class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar"></div>
                         </div>
-
-                        
-                        <div class="p-3 border-t border-ui-border bg-ui-800">
+                        <div class="flex-1 p-4 space-y-3 overflow-y-auto scroll-smooth" id="ai-chat-history-${windowId}" onclick="document.getElementById('ai-chat-list-panel-${windowId}').classList.add('-translate-x-full')">
+                        </div>
+                        <div class="p-3 border-t border-ui-border bg-ui-800 z-20">
                             <div class="flex items-center bg-ui-700 rounded-full px-3 py-2 border border-transparent focus-within:border-accent-500 transition-colors">
                                 <input type="text" id="ai-input-${windowId}" class="bg-transparent flex-1 text-xs text-ui-100 outline-none" placeholder="Ask Veishen..." onkeydown="handleAIChat(event, '${windowId}')" autocomplete="off">
                                 <i class="fa-solid fa-paper-plane text-accent-400 text-xs cursor-pointer hover:text-white transition-colors" onclick="triggerAISend('${windowId}')"></i>
@@ -5354,7 +5546,11 @@
                             </div>
 
                             
-                            <div class="lightbox-controls">
+                            <div class="lightbox-controls" id="lightbox-controls-${wid}">
+                                <div class="lightbox-btn" onclick="mediaZoom(event, '${wid}', 0.2)" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></div>
+                                <div class="lightbox-btn" onclick="mediaZoom(event, '${wid}', -0.2)" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></div>
+                                <div class="lightbox-btn" onclick="mediaRotate(event, '${wid}', -90)" title="Rotate Left"><i class="fa-solid fa-rotate-left"></i></div>
+                                <div class="lightbox-btn" onclick="mediaRotate(event, '${wid}', 90)" title="Rotate Right"><i class="fa-solid fa-rotate-right"></i></div>
                                 <div class="lightbox-btn" id="lb-like-${wid}"><i class="fa-solid fa-heart"></i></div>
                                 <div class="lightbox-btn" id="lb-wall-${wid}" title="Set as Background"><i class="fa-solid fa-desktop"></i></div>
                                 <div class="lightbox-btn" onclick="toggleEnlargeMedia('${wid}')" id="lb-enlarge-${wid}" title="Enlarge to Screen"><i class="fa-solid fa-maximize"></i></div>
@@ -5362,7 +5558,6 @@
                             </div>
                         </div>
 
-                        
                         <div class="flex items-center justify-between p-3 bg-ui-800 border-b border-ui-border z-10">
                             <div class="flex gap-6 text-xs font-bold ml-2">
                                 <span id="p-nav-library-${wid}" class="cursor-pointer transition-colors tab-active-photo text-ui-100" onclick="switchPhotosTab('${wid}', 'library')">Library</span>
@@ -5822,7 +6017,7 @@
             <h2 class="text-lg font-bold mb-4">Desktop Background</h2>
             <div class="mb-4">
                 <label class="block text-xs font-medium text-ui-400 mb-2">Import from Local Device</label>
-                <input type="file" accept="image/*" onchange="handleWallpaperUpload(event)" class="block w-full text-xs text-ui-400 file:mr-2 file:py-2 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-ui-700 file:text-ui-100 hover:file:bg-ui-600 cursor-pointer"/>
+<input type="file" accept="image/*,video/*" onchange="handleWallpaperUpload(event)" class="block w-full text-xs text-ui-400 file:mr-2 file:py-2 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-ui-700 file:text-ui-100 hover:file:bg-ui-600 cursor-pointer"/>
             </div>
             <div class="mb-6">
                 <label class="block text-xs font-medium text-ui-400 mb-2">Or Paste Image/Video/YouTube URL</label>
@@ -6185,6 +6380,17 @@
                 </label>
             </div>
 
+            <div class="flex flex-wrap items-center justify-between p-4 bg-ui-700 rounded-xl mb-4 gap-4">
+                <div class="min-w-[150px]">
+                    <div class="font-bold text-sm">Shake to Minimize</div>
+                    <div class="text-xs text-ui-400">Shake window to minimize others</div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input type="checkbox" class="sr-only peer" ${settings.shakeToMinimize ? "checked" : ""} onchange="toggleSetting('shakeToMinimize', this.checked)">
+                    <div class="w-11 h-6 bg-ui-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-600"></div>
+                </label>
+            </div>
+
             
             <div class="flex flex-wrap items-center justify-between p-4 bg-ui-700 rounded-xl mb-4 gap-4">
                 <div class="min-w-[150px]">
@@ -6268,7 +6474,7 @@
             <i class="fa-solid fa-cloud-arrow-down text-4xl text-accent-500"></i>
             <div>
                 <div class="font-bold">VeishenOS Titan</div>
-                <div class="text-xs text-ui-400">Current version running v1.6</div>
+                <div class="text-xs text-ui-400">Current version running v1.7</div>
             </div>
         </div>
         <div class="flex items-center justify-between mt-6 border-t border-ui-border pt-4">
@@ -6630,12 +6836,15 @@
         );
         if (ytMatch)
           return `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`;
-        if (url.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i))
+        if (
+          url.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i) ||
+          url.startsWith("data:video/")
+        )
           return "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop";
         return url;
       }
 
-      function changeWallpaper(url) {
+      function changeWallpaper(url, isVideoOverride = false) {
         const bgImg = document.getElementById("bg-image");
         const bgVid = document.getElementById("bg-video");
         const bgYt = document.getElementById("bg-youtube");
@@ -6645,7 +6854,10 @@
         if (bgYt) bgYt.style.opacity = "0";
 
         setTimeout(() => {
-          const isVideo = url.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i);
+          const isVideo =
+            isVideoOverride ||
+            url.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i) ||
+            url.startsWith("data:video/");
           const ytMatch = url.match(
             /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i,
           );
@@ -6753,7 +6965,7 @@
       }
 
       function openApp(appId) {
-        if (apps[appId]) {
+        if (apps[appId] && !apps[appId].isTransient) {
           addToRecent({
             id: appId,
             type: "app",
@@ -6799,6 +7011,9 @@
             operator: null,
             resetNext: false,
           };
+        }
+        if (appId === "terminal") {
+          appState = { cwd: "root" };
         }
 
         const top = 50 + (Object.keys(windows).length % 8) * 25;
@@ -7067,7 +7282,7 @@
         const newTab = {
           id: newId,
           title: "New Tab",
-          url: "about:blank",
+          url: getStratosNewTabURL(),
           iframeId: `browser-iframe-${wid}-${newId}`,
         };
         state.tabs.push(newTab);
@@ -7102,9 +7317,16 @@
 
       function handleBrowserNav(e, wid) {
         if (e.key === "Enter") {
-          let url = e.target.value;
-          if (!url.startsWith("http") && url.includes("."))
-            url = "https://" + url;
+          let url = e.target.value.trim();
+          if (!url.startsWith("http")) {
+            if (url.includes(".") && !url.includes(" ")) {
+              url = "https://" + url;
+            } else {
+              url =
+                "https://www.google.com/search?igu=1&q=" +
+                encodeURIComponent(url);
+            }
+          }
 
           const state = windows[wid].state;
           const activeTab = state.tabs.find((t) => t.id === state.activeTab);
@@ -7116,8 +7338,66 @@
             renderBrowserTabs(wid, false);
 
             const iframe = document.getElementById(activeTab.iframeId);
-            if (iframe) iframe.src = url;
+            if (iframe) {
+              iframe.src = url;
+              iframe.onload = () => {
+                try {
+                  const currentUrl = iframe.contentWindow.location.href;
+                  if (
+                    currentUrl &&
+                    currentUrl !== "about:blank" &&
+                    !isStratosNewTab(currentUrl)
+                  ) {
+                    activeTab.url = currentUrl;
+                    const urlInput = document.getElementById(
+                      `browser-url-${wid}`,
+                    );
+                    if (
+                      urlInput &&
+                      windows[wid].state.activeTab === activeTab.id
+                    ) {
+                      urlInput.value = currentUrl;
+                    }
+                  }
+                  const docTitle = iframe.contentDocument.title;
+                  if (docTitle) {
+                    activeTab.title = docTitle;
+                    renderBrowserTabs(wid, false);
+                    updateStratosStar(wid);
+                  }
+                } catch (e) {}
+              };
+            }
             e.target.blur();
+
+            if (url.startsWith("http")) {
+              fetch(
+                `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+              )
+                .then((res) => res.json())
+                .then((data) => {
+                  if (data.contents) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(
+                      data.contents,
+                      "text/html",
+                    );
+                    let docTitle = doc.title;
+                    if (!docTitle) {
+                      const ogTitle = doc.querySelector(
+                        'meta[property="og:title"]',
+                      );
+                      if (ogTitle) docTitle = ogTitle.content;
+                    }
+                    if (docTitle) {
+                      activeTab.title = docTitle.trim();
+                      renderBrowserTabs(wid, false);
+                      updateStratosStar(wid);
+                    }
+                  }
+                })
+                .catch((e) => {});
+            }
           }
         }
       }
@@ -7127,7 +7407,43 @@
         const activeTab = state.tabs.find((t) => t.id === state.activeTab);
         if (activeTab) {
           const iframe = document.getElementById(activeTab.iframeId);
-          if (iframe) iframe.src = activeTab.url;
+          if (iframe) {
+            try {
+              iframe.contentWindow.location.reload();
+            } catch (e) {
+              iframe.src = iframe.src;
+            }
+          }
+        }
+      }
+
+      function browserGoBack(wid) {
+        const state = windows[wid].state;
+        const tab = state.tabs.find((t) => t.id === state.activeTab);
+        if (tab) {
+          const iframe = document.getElementById(tab.iframeId);
+          if (iframe) {
+            try {
+              iframe.contentWindow.history.back();
+            } catch (e) {
+              window.history.back();
+            }
+          }
+        }
+      }
+
+      function browserGoForward(wid) {
+        const state = windows[wid].state;
+        const tab = state.tabs.find((t) => t.id === state.activeTab);
+        if (tab) {
+          const iframe = document.getElementById(tab.iframeId);
+          if (iframe) {
+            try {
+              iframe.contentWindow.history.forward();
+            } catch (e) {
+              window.history.forward();
+            }
+          }
         }
       }
 
@@ -7143,13 +7459,15 @@
         if (!bar || !container || !activeTab) return;
 
         if (urlInput)
-          urlInput.value = activeTab.url === "about:blank" ? "" : activeTab.url;
+          urlInput.value = isStratosNewTab(activeTab.url) ? "" : activeTab.url;
 
         bar.innerHTML = "";
         state.tabs.forEach((tab) => {
           const isActive = tab.id === state.activeTab;
           const tabEl = document.createElement("div");
-          tabEl.className = `px-3 py-1.5 text-xs flex items-center gap-2 cursor-pointer transition-colors relative top-[1px] ${isActive ? "bg-ui-900 text-ui-100 rounded-t-lg border-t border-l border-r border-ui-border" : "text-ui-400 hover:bg-ui-700/50"}`;
+
+          tabEl.className = `group px-3 py-1.5 min-w-[140px] max-w-[200px] text-xs flex items-center justify-between gap-2 cursor-pointer transition-all relative top-[1px] ${isActive ? "bg-ui-900 text-ui-100 rounded-t-lg border-t border-l border-r border-ui-border z-10 before:content-[''] before:absolute before:bottom-0 before:-left-2 before:w-2 before:h-2 before:bg-transparent before:rounded-br-lg before:shadow-[4px_0_0_0_var(--ui-900)] after:content-[''] after:absolute after:bottom-0 after:-right-2 after:w-2 after:h-2 after:bg-transparent after:rounded-bl-lg after:shadow-[-4px_0_0_0_var(--ui-900)]" : "bg-transparent text-ui-400 hover:bg-ui-700/50 rounded-t-lg border-t border-l border-r border-transparent hover:border-ui-border/50"}`;
+
           tabEl.onclick = () => switchBrowserTab(wid, tab.id);
           tabEl.draggable = true;
           tabEl.ondragstart = (e) =>
@@ -7160,21 +7478,29 @@
           tabEl.ondragover = (e) => e.preventDefault();
           tabEl.ondrop = (e) => handleTabDrop(e, wid, tab.id, "browser");
 
+          const favUrl = !isStratosNewTab(tab.url)
+            ? tab.url
+            : "https://google.com";
+
           tabEl.innerHTML = `
-                    <span class="truncate max-w-[80px]">${tab.title}</span>
-                    ${state.tabs.length > 1 ? `<i class="fa-solid fa-xmark text-[10px] hover:text-red-400 ml-1 p-1.5 rounded-full hover:bg-ui-900/50" onclick="event.stopPropagation(); closeBrowserTab('${wid}', ${tab.id})"></i>` : ""}
-                `;
+                <div class="flex items-center gap-2 overflow-hidden pointer-events-none">
+                    <img src="https://www.google.com/s2/favicons?domain=${favUrl}&sz=16" class="w-3.5 h-3.5 rounded-sm opacity-80" onerror="this.style.display='none'">
+                    <span class="truncate font-medium">${tab.title}</span>
+                </div>
+                ${state.tabs.length > 1 ? `<button class="w-5 h-5 flex items-center justify-center rounded-md hover:bg-ui-700/80 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 ${isActive ? "opacity-100" : ""}" onclick="event.stopPropagation(); closeBrowserTab('${wid}', ${tab.id})"><i class="fa-solid fa-xmark text-[10px]"></i></button>` : `<div class="w-5 h-5"></div>`}
+            `;
           bar.appendChild(tabEl);
         });
 
-        const plusBtn = document.createElement("div");
+        const plusBtn = document.createElement("button");
         plusBtn.className =
-          "px-2 py-1.5 text-ui-400 hover:text-ui-100 cursor-pointer transition-colors";
+          "w-6 h-6 ml-1 mt-1 mb-1 rounded hover:bg-ui-700 text-ui-400 hover:text-ui-100 flex items-center justify-center transition-colors";
         plusBtn.innerHTML = '<i class="fa-solid fa-plus text-xs"></i>';
         plusBtn.onclick = () => addBrowserTab(wid);
         bar.appendChild(plusBtn);
 
         if (shouldUpdateContent) {
+          updateStratosStar(wid);
           container
             .querySelectorAll("iframe")
             .forEach((i) => i.classList.add("hidden"));
@@ -7185,6 +7511,33 @@
             iframe.id = activeTab.iframeId;
             iframe.className = "w-full h-full border-none absolute inset-0";
             iframe.src = activeTab.url;
+            iframe.onload = () => {
+              try {
+                const currentUrl = iframe.contentWindow.location.href;
+                if (
+                  currentUrl &&
+                  currentUrl !== "about:blank" &&
+                  !isStratosNewTab(currentUrl)
+                ) {
+                  activeTab.url = currentUrl;
+                  const urlInput = document.getElementById(
+                    `browser-url-${wid}`,
+                  );
+                  if (
+                    urlInput &&
+                    windows[wid].state.activeTab === activeTab.id
+                  ) {
+                    urlInput.value = currentUrl;
+                  }
+                }
+                const docTitle = iframe.contentDocument.title;
+                if (docTitle) {
+                  activeTab.title = docTitle;
+                  renderBrowserTabs(wid, false);
+                  updateStratosStar(wid);
+                }
+              } catch (e) {}
+            };
             container.appendChild(iframe);
           }
           iframe.classList.remove("hidden");
@@ -7243,6 +7596,40 @@
         windows[wid].matrixInterval = interval;
       }
 
+      function getTermPath(cwd) {
+        if (cwd === "root") return "/";
+        let path = [];
+        let curr = fileSystem.find((f) => f.id === cwd);
+        while (curr && curr.id !== "root") {
+          path.unshift(curr.name);
+          curr = fileSystem.find((f) => f.id === curr.parentId);
+        }
+        return "/" + path.join("/");
+      }
+
+      function termResolvePath(cwd, pathStr) {
+        if (!pathStr || pathStr === "/") return "root";
+        let curr = pathStr.startsWith("/") ? "root" : cwd;
+        let parts = pathStr.split("/").filter((p) => p);
+        for (let p of parts) {
+          if (p === ".") continue;
+          if (p === "..") {
+            if (curr !== "root") {
+              let f = fileSystem.find((x) => x.id === curr);
+              if (f && f.parentId) curr = f.parentId;
+            }
+          } else {
+            let next = fileSystem.find(
+              (x) =>
+                x.parentId === curr && x.name.toLowerCase() === p.toLowerCase(),
+            );
+            if (next) curr = next.id;
+            else return null;
+          }
+        }
+        return curr;
+      }
+
       function handleTerminal(e, wid) {
         if (e.key === "Enter") {
           const v = e.target.value.trim();
@@ -7258,7 +7645,10 @@
             if (v.toLowerCase() === "clear") return;
           }
 
-          out.innerHTML += `<div><span class="text-green-500">root@titan:~$</span> <span class="text-white">${v}</span></div>`;
+          let cwd = windows[wid].state.cwd || "root";
+          let promptPath = getTermPath(cwd);
+
+          out.innerHTML += `<div><span class="text-green-500">root@titan:${promptPath}$</span> <span class="text-white">${v}</span></div>`;
 
           let outputText = "";
           const parts = v.split(/\s+/);
@@ -7272,13 +7662,19 @@
                             <div class="text-ui-400 pl-4">help - Display this help message.</div>
                             <div class="text-ui-400 pl-4">clear - Clear the terminal screen.</div>
                             <div class="text-ui-400 pl-4">date - Show the current date and time.</div>
-                            <div class="text-ui-400 pl-4">reboot - Simulate a system reboot (reloads the page).</div>
+                            <div class="text-ui-400 pl-4">reboot - Simulate a system reboot.</div>
                             <div class="text-ui-400 pl-4">uname - Print system information.</div>
                             <div class="text-ui-400 pl-4">echo [text] - Display the text provided.</div>
-                            <div class="text-ui-400 pl-4">ls - List directory contents.</div>
                             <div class="text-ui-400 pl-4">whoami - Print the current user.</div>
-                            <div class="text-ui-400 pl-4">open [app] - Open a specific app (e.g., open notes).</div>
-                            <div class="text-ui-400 pl-4">matrix - Enter The Matrix. (Type anything to exit)</div>
+                            <div class="text-ui-400 pl-4">open [app] - Open a specific app.</div>
+                            <div class="text-ui-400 pl-4">matrix - Enter The Matrix.</div>
+                            <div class="text-ui-400 mt-2">File System Commands:</div>
+                            <div class="text-ui-400 pl-4">ls - List directory contents.</div>
+                            <div class="text-ui-400 pl-4">cd [dir] - Change directory.</div>
+                            <div class="text-ui-400 pl-4">mkdir [name] - Create a new folder.</div>
+                            <div class="text-ui-400 pl-4">touch [name] - Create a new file.</div>
+                            <div class="text-ui-400 pl-4">rm [name] - Delete a file or folder.</div>
+                            <div class="text-ui-400 pl-4">cat [name] - Read a text file.</div>
                         `;
               break;
             case "clear":
@@ -7296,16 +7692,6 @@
             case "echo":
               outputText = args || " ";
               break;
-            case "ls":
-              outputText = `
-                            <div class="grid grid-cols-4 gap-x-4 text-accent-400">
-                                <span>Desktop/</span>
-                                <span>Documents/</span>
-                                <span>Applications/</span>
-                                <span>README.txt</span>
-                            </div>
-                        `;
-              break;
             case "whoami":
               outputText = "root";
               break;
@@ -7320,6 +7706,118 @@
             case "matrix":
               startMatrix(out, wid);
               break;
+            case "ls":
+              let items = fileSystem.filter((f) => f.parentId === cwd);
+              if (items.length === 0) {
+                outputText = "";
+              } else {
+                let list = items
+                  .map((f) => {
+                    let color =
+                      f.type === "folder" ? "text-blue-400" : "text-gray-300";
+                    let suffix = f.type === "folder" ? "/" : "";
+                    return `<span><span class="${color}">${f.name}${suffix}</span></span>`;
+                  })
+                  .join("");
+                outputText = `<div class="grid grid-cols-4 gap-x-4">${list}</div>`;
+              }
+              break;
+            case "cd":
+              let targetId = termResolvePath(cwd, args || "/");
+              if (targetId) {
+                let f = fileSystem.find((x) => x.id === targetId);
+                if (targetId === "root" || (f && f.type === "folder")) {
+                  windows[wid].state.cwd = targetId;
+                } else {
+                  outputText = `<span class="text-red-400">cd: ${args}: Not a directory</span>`;
+                }
+              } else {
+                outputText = `<span class="text-red-400">cd: ${args}: No such file or directory</span>`;
+              }
+              break;
+            case "mkdir":
+              if (!args) {
+                outputText = `<span class="text-red-400">mkdir: missing operand</span>`;
+              } else if (
+                fileSystem.some((f) => f.parentId === cwd && f.name === args)
+              ) {
+                outputText = `<span class="text-red-400">mkdir: cannot create directory '${args}': File exists</span>`;
+              } else {
+                fileSystem.push({
+                  id: "folder-" + Date.now(),
+                  parentId: cwd,
+                  name: args,
+                  type: "folder",
+                });
+                saveFileSystem();
+                renderDesktopIcons();
+                Object.keys(windows).forEach((k) => {
+                  if (windows[k].appId === "files") renderFileView(k);
+                });
+              }
+              break;
+            case "touch":
+              if (!args) {
+                outputText = `<span class="text-red-400">touch: missing operand</span>`;
+              } else if (
+                fileSystem.some((f) => f.parentId === cwd && f.name === args)
+              ) {
+                outputText = ``;
+              } else {
+                fileSystem.push({
+                  id: "file-" + Date.now(),
+                  parentId: cwd,
+                  name: args,
+                  type: "file",
+                  content: "",
+                });
+                saveFileSystem();
+                renderDesktopIcons();
+                Object.keys(windows).forEach((k) => {
+                  if (windows[k].appId === "files") renderFileView(k);
+                });
+              }
+              break;
+            case "rm":
+              if (!args) {
+                outputText = `<span class="text-red-400">rm: missing operand</span>`;
+              } else {
+                let toDel = fileSystem.find(
+                  (f) => f.parentId === cwd && f.name === args,
+                );
+                if (!toDel) {
+                  outputText = `<span class="text-red-400">rm: cannot remove '${args}': No such file or directory</span>`;
+                } else {
+                  let children = fileSystem.filter(
+                    (f) => f.parentId === toDel.id,
+                  );
+                  if (toDel.type === "folder" && children.length > 0) {
+                    outputText = `<span class="text-red-400">rm: cannot remove '${args}': Directory not empty</span>`;
+                  } else {
+                    fsDeleteItem("desktop", toDel.id);
+                    outputText = `Moved '${args}' to Recycle Bin`;
+                  }
+                }
+              }
+              break;
+            case "cat":
+              if (!args) {
+                outputText = `<span class="text-red-400">cat: missing operand</span>`;
+              } else {
+                let toRead = fileSystem.find(
+                  (f) => f.parentId === cwd && f.name === args,
+                );
+                if (!toRead) {
+                  outputText = `<span class="text-red-400">cat: ${args}: No such file or directory</span>`;
+                } else if (toRead.type === "folder") {
+                  outputText = `<span class="text-red-400">cat: ${args}: Is a directory</span>`;
+                } else if (typeof toRead.content !== "undefined") {
+                  outputText = `<pre class="whitespace-pre-wrap text-ui-100">${toRead.content}</pre>`;
+                } else {
+                  outputText = `<span class="text-red-400">cat: ${args}: Cannot read binary file</span>`;
+                }
+              }
+              break;
             default:
               if (v)
                 outputText = `<span class="text-red-400">Command not found: ${command}</span>. Type 'help'.`;
@@ -7327,6 +7825,12 @@
           }
 
           if (outputText) out.innerHTML += `<div>${outputText}</div>`;
+
+          let newCwd = windows[wid].state.cwd || "root";
+          let newPromptPath = getTermPath(newCwd);
+
+          document.getElementById(`term-input-prefix-${wid}`).innerText =
+            `root@titan:${newPromptPath}$`;
           out.scrollTop = out.scrollHeight;
         }
       }
@@ -7404,6 +7908,79 @@
           bg: "",
         },
       ];
+
+      function renderAIResponse(responseText) {
+        let actionHtml = "";
+        let cleanText = responseText.replace(
+          /\[ACTION:([^\]]+)\]/g,
+          (match, actionData) => {
+            const parts = actionData.split(":");
+            const cmd = parts[0];
+
+            if (cmd === "OPEN_SETTING") {
+              const pageId = parts[1];
+              actionHtml += `<div class="text-accent-400 mt-2 bg-ui-800 p-2 rounded border border-ui-border flex items-center gap-2"><i class="fa-solid fa-gear"></i> Opened Settings: ${pageId}</div>`;
+              return "";
+            }
+            if (cmd === "OPEN_APP") {
+              const appId = parts[1];
+              actionHtml += `<div class="text-accent-400 mt-2 bg-ui-800 p-2 rounded border border-ui-border flex items-center gap-2"><i class="fa-solid fa-window-maximize"></i> Opened App: ${appId}</div>`;
+              return "";
+            }
+            if (
+              cmd === "OPEN_FILE" ||
+              cmd === "OPEN_FOLDER" ||
+              cmd === "FIND"
+            ) {
+              const fileId = parts[1];
+              const file = fileSystem.find((f) => f.id === fileId);
+              if (file) {
+                let iconHtml = `<i class="fa-solid ${getFileIcon(file.type)} text-2xl drop-shadow-md"></i>`;
+                if (file.type === "folder") {
+                  const emblem = getFolderEmblem(file.id);
+                  if (emblem)
+                    iconHtml = `<div class="relative flex items-center justify-center"><i class="fa-solid fa-folder text-blue-400 text-2xl drop-shadow-md"></i><i class="fa-solid ${emblem} absolute text-[10px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i></div>`;
+                  else
+                    iconHtml = `<i class="fa-solid fa-folder text-blue-400 text-2xl drop-shadow-md"></i>`;
+                } else if (
+                  (file.type === "image" || file.type === "video") &&
+                  file.url
+                ) {
+                  iconHtml = `<img src="${file.type === "video" ? "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100&q=80" : file.url}" class="w-full h-full object-cover">`;
+                }
+
+                actionHtml += `
+                      <div class="mt-3 flex flex-col gap-3 p-3 bg-ui-800 rounded-lg border border-ui-border shadow-md">
+                          <div class="flex items-center gap-3">
+                              <div class="w-12 h-12 rounded-lg bg-ui-900 flex items-center justify-center shrink-0 overflow-hidden shadow-inner border border-white/5">
+                                  ${iconHtml}
+                              </div>
+                              <div class="flex-1 min-w-0">
+                                  <div class="text-sm font-bold text-ui-100 truncate">${file.name}</div>
+                                  <div class="text-[10px] text-ui-400 uppercase tracking-wider mt-0.5">${file.type}</div>
+                              </div>
+                          </div>
+                          <div class="flex flex-wrap gap-2">
+                              <button onclick="${file.type === "folder" ? `let fw=Object.values(windows).find(w=>w.appId==='files'); if(fw){ const wid=fw.element.id.replace('window-',''); focusWindow(wid); fw.fsState.tabs.find(t=>t.id===fw.fsState.activeTab).currentFolder='${file.id}'; renderFileView(wid); } else { openApp('files'); setTimeout(()=>{ let nw=Object.values(windows).find(w=>w.appId==='files'); if(nw){ const nwid=nw.element.id.replace('window-',''); nw.fsState.tabs.find(t=>t.id===nw.fsState.activeTab).currentFolder='${file.id}'; renderFileView(nwid); } }, 100); }` : `openFileById('${file.id}')`}" class="flex-1 px-3 py-1.5 bg-accent-600 hover:bg-accent-500 rounded text-[10px] font-medium text-white transition shadow"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Open</button>
+                              <button onclick="let fw=Object.values(windows).find(w=>w.appId==='files'); if(fw){ const wid=fw.element.id.replace('window-',''); focusWindow(wid); fw.fsState.tabs.find(t=>t.id===fw.fsState.activeTab).currentFolder='${file.parentId || "root"}'; renderFileView(wid); } else { openApp('files'); setTimeout(()=>{ let nw=Object.values(windows).find(w=>w.appId==='files'); if(nw){ const nwid=nw.element.id.replace('window-',''); nw.fsState.tabs.find(t=>t.id===nw.fsState.activeTab).currentFolder='${file.parentId || "root"}'; renderFileView(nwid); } }, 100); }" class="flex-1 px-3 py-1.5 bg-ui-700 hover:bg-ui-600 rounded text-[10px] font-medium text-white border border-ui-border transition shadow"><i class="fa-solid fa-folder-open mr-1"></i> Location</button>
+                          </div>
+                      </div>`;
+              }
+              return "";
+            }
+            if (cmd === "RENAME") {
+              const newName = parts.slice(2).join(":");
+              actionHtml += `<div class="text-accent-400 mt-2 bg-ui-800 p-2 rounded border border-ui-border flex items-center gap-2"><i class="fa-solid fa-pen"></i> Renamed to "${newName}"</div>`;
+              return "";
+            }
+            return "";
+          },
+        );
+
+        cleanText = cleanText.replace(/\[FILE_ACTION:\s*([^\]]+)\]/g, "");
+
+        return formatAIResponse(cleanText.trim()) + actionHtml;
+      }
 
       function renderPfpOptions() {
         const container = document.getElementById("pfp-options");
@@ -7695,13 +8272,105 @@
         saveSettings();
       }
 
-      function initAI(wid) {
-        const history = JSON.parse(
-          appStorage.getItem("gemini_chat_history") || "[]",
+      function getAIChats() {
+        let chats = JSON.parse(appStorage.getItem("gemini_chats"));
+        if (!chats) {
+          let oldHist = JSON.parse(
+            appStorage.getItem("gemini_chat_history") || "[]",
+          );
+          chats = [
+            { id: "chat-" + Date.now(), title: "Chat 1", history: oldHist },
+          ];
+          appStorage.setItem("gemini_chats", JSON.stringify(chats));
+        }
+        return chats;
+      }
+      function saveAIChats(chats) {
+        appStorage.setItem("gemini_chats", JSON.stringify(chats));
+      }
+      function getActiveAIChatId() {
+        let activeId = appStorage.getItem("gemini_active_chat");
+        let chats = getAIChats();
+        if (!activeId || !chats.find((c) => c.id === activeId)) {
+          if (chats.length === 0) {
+            activeId = "chat-" + Date.now();
+            chats.push({ id: activeId, title: "New Chat", history: [] });
+            saveAIChats(chats);
+          } else {
+            activeId = chats[0].id;
+          }
+          appStorage.setItem("gemini_active_chat", activeId);
+        }
+        return activeId;
+      }
+      function toggleAIChatList(wid) {
+        const panel = document.getElementById(`ai-chat-list-panel-${wid}`);
+        if (panel) panel.classList.toggle("-translate-x-full");
+      }
+      function renderAIChatList(wid) {
+        const listContainer = document.getElementById(`ai-chat-list-${wid}`);
+        if (!listContainer) return;
+        const chats = getAIChats();
+        const activeId = getActiveAIChatId();
+        listContainer.innerHTML = chats
+          .map(
+            (c) => `
+              <div class="flex items-center justify-between p-2 rounded cursor-pointer ${c.id === activeId ? "bg-ui-700 border border-ui-border" : "hover:bg-ui-700/50"}" onclick="switchAIChat('${wid}', '${c.id}')">
+                  <span class="text-xs text-ui-100 truncate flex-1 pr-2">${c.title}</span>
+                  <i class="fa-solid fa-trash text-[10px] text-ui-400 hover:text-red-400 transition" onclick="event.stopPropagation(); deleteAIChat('${wid}', '${c.id}')"></i>
+              </div>
+          `,
+          )
+          .join("");
+      }
+      function createNewAIChat(wid) {
+        const chats = getAIChats();
+        const newId = "chat-" + Date.now();
+        chats.push({ id: newId, title: "New Chat", history: [] });
+        saveAIChats(chats);
+        appStorage.setItem("gemini_active_chat", newId);
+        initAI(wid);
+        const panel = document.getElementById(`ai-chat-list-panel-${wid}`);
+        if (panel) panel.classList.add("-translate-x-full");
+      }
+      function switchAIChat(wid, chatId) {
+        appStorage.setItem("gemini_active_chat", chatId);
+        initAI(wid);
+        const panel = document.getElementById(`ai-chat-list-panel-${wid}`);
+        if (panel) panel.classList.add("-translate-x-full");
+      }
+      function deleteAIChat(wid, chatId) {
+        let chats = getAIChats();
+        if (chats.length === 1) {
+          clearAIChat(wid);
+          return;
+        }
+
+        showConfirmModal(
+          "Delete Chat",
+          "Are you sure you want to delete this chat?",
+          () => {
+            chats = chats.filter((c) => c.id !== chatId);
+            saveAIChats(chats);
+            if (getActiveAIChatId() === chatId) {
+              appStorage.setItem("gemini_active_chat", chats[0].id);
+            }
+            initAI(wid);
+            pushNotification("Veishen Assistant", "Chat deleted.");
+          },
         );
+      }
+
+      function initAI(wid) {
+        const chats = getAIChats();
+        const activeId = getActiveAIChatId();
+        const activeChat = chats.find((c) => c.id === activeId) || chats[0];
+        const history = activeChat.history;
         const container = document.getElementById(`ai-chat-history-${wid}`);
+        const titleEl = document.getElementById(`ai-chat-title-${wid}`);
         if (!container) return;
 
+        if (titleEl) titleEl.innerText = activeChat.title;
         container.innerHTML = "";
 
         if (history.length === 0) {
@@ -7715,11 +8384,14 @@
                 `;
         } else {
           history.forEach((msg) => {
-            const content = formatAIResponse(msg.content);
-
             if (msg.role === "user") {
-              container.innerHTML += `<div class="flex justify-end gap-2 mb-2"><div class="bg-accent-600 p-2 rounded-lg text-white text-xs max-w-[85%]">${msg.content}</div></div>`;
+              const safeUserMsg = escapeHtml(msg.content).replace(
+                /\n/g,
+                "<br>",
+              );
+              container.innerHTML += `<div class="flex justify-end gap-2 mb-2"><div class="bg-accent-600 p-2 rounded-lg text-white text-xs max-w-[85%]">${safeUserMsg}</div></div>`;
             } else {
+              const content = renderAIResponse(msg.content);
               container.innerHTML += `
                             <div class="flex items-start gap-2 mb-2">
                                 <div class="w-6 h-6 rounded-full bg-gradient-to-r from-accent-500 to-purple-500 flex items-center justify-center text-[10px] flex-shrink-0"><i class="fa-solid fa-brain text-white"></i></div>
@@ -7730,14 +8402,29 @@
           });
         }
         container.scrollTop = container.scrollHeight;
+        renderAIChatList(wid);
       }
 
       function saveToHistory(role, content) {
-        const history = JSON.parse(
-          appStorage.getItem("gemini_chat_history") || "[]",
-        );
-        history.push({ role, content });
-        appStorage.setItem("gemini_chat_history", JSON.stringify(history));
+        const chats = getAIChats();
+        const activeId = getActiveAIChatId();
+        const activeChat = chats.find((c) => c.id === activeId);
+        if (activeChat) {
+          activeChat.history.push({ role, content });
+          if (activeChat.history.length === 1 && role === "user") {
+            activeChat.title =
+              content.substring(0, 20) + (content.length > 20 ? "..." : "");
+          }
+          saveAIChats(chats);
+          Object.keys(windows).forEach((k) => {
+            if (windows[k].appId === "gemini-ai") {
+              const kId = k.replace("window-", "");
+              const tEl = document.getElementById(`ai-chat-title-${kId}`);
+              if (tEl) tEl.innerText = activeChat.title;
+              renderAIChatList(kId);
+            }
+          });
+        }
       }
 
       function setGeminiKey() {
@@ -7756,11 +8443,18 @@
       function clearAIChat(wid) {
         showConfirmModal(
           "Clear Chat",
-          "Are you sure you want to clear your chat history?",
+          "Are you sure you want to clear the current chat history?",
           () => {
-            appStorage.removeItem("gemini_chat_history");
-            initAI(wid);
-            pushNotification("Veishen Assistant", "Chat history cleared.");
+            const chats = getAIChats();
+            const activeId = getActiveAIChatId();
+            const activeChat = chats.find((c) => c.id === activeId);
+            if (activeChat) {
+              activeChat.history = [];
+              activeChat.title = "New Chat";
+              saveAIChats(chats);
+              initAI(wid);
+              pushNotification("Veishen Assistant", "Chat history cleared.");
+            }
           },
         );
       }
@@ -7789,17 +8483,26 @@
         hist.innerHTML += `<div id="${loadingId}" class="flex items-start gap-2 mb-2"><div class="bg-ui-800 p-2 rounded-lg text-xs text-ui-400 border border-ui-border">Thinking...</div></div>`;
         hist.scrollTop = hist.scrollHeight;
 
-        const storedHistory = JSON.parse(
-          appStorage.getItem("gemini_chat_history") || "[]",
-        );
+        const chats = getAIChats();
+        const activeChat = chats.find((c) => c.id === getActiveAIChatId());
+        const storedHistory = activeChat ? activeChat.history : [];
         const contextParts = storedHistory.slice(-10).map((m) => ({
           role: m.role === "user" ? "user" : "model",
           parts: [{ text: m.content }],
         }));
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+
+        const vfsContext = fileSystem
+          .map(
+            (f) =>
+              `ID: ${f.id} | Name: ${f.name} | Type: ${f.type} | ContentSnippet: ${typeof f.content === "string" ? f.content.substring(0, 150).replace(/\n/g, " ") : ""}`,
+          )
+          .join("\n");
         const systemPrompt =
-          "You are Veishen Assistant. You are running in a web-based simulated OS. Keep answers concise and helpful. Use Markdown for code.";
+          "You are Veishen Assistant, an agentic AI in a web-based OS. Keep answers concise. CURRENT FILE SYSTEM:\n" +
+          vfsContext +
+          "\nControl the OS using these tags:\n- Open Settings: [ACTION:OPEN_SETTING:pageId] (Valid: account, layout, background, colors, theme, input, lockscreen, update)\n- Open App: [ACTION:OPEN_APP:appId]\n- Find File/Folder: [ACTION:FIND:id] (Shows file UI card)\n- Open File: [ACTION:OPEN_FILE:id] (Opens it immediately)\n- Open Folder: [ACTION:OPEN_FOLDER:id] (Opens folder immediately)\n- Rename: [ACTION:RENAME:id:newName]\nFor bulk operations, output multiple tags (e.g. multiple RENAME tags). Always use the exact ID from the FILE SYSTEM context.";
 
         if (contextParts.length > 0 && contextParts[0].role === "user") {
           contextParts[0].parts[0].text = `[System Instructions: ${systemPrompt}]\n\n${contextParts[0].parts[0].text}`;
@@ -7826,7 +8529,166 @@
 
           document.getElementById(loadingId)?.remove();
 
-          const htmlResponse = formatAIResponse(responseText);
+          let actionHtml = "";
+          let cleanText = responseText.replace(
+            /\[ACTION:([^\]]+)\]/g,
+            (match, actionData) => {
+              const parts = actionData.split(":");
+              const cmd = parts[0];
+
+              if (cmd === "OPEN_SETTING") {
+                const pageId = parts[1];
+                setTimeout(() => {
+                  let settingsWin = Object.values(windows).find(
+                    (w) => w.appId === "settings",
+                  );
+                  if (!settingsWin) {
+                    openApp("settings");
+                    setTimeout(() => showSettingsPage(pageId), 150);
+                  } else {
+                    const swid = settingsWin.element.id.replace("window-", "");
+                    focusWindow(swid);
+                    showSettingsPage(pageId, swid);
+                  }
+                }, 50);
+                actionHtml += `<div class="text-accent-400 mt-2 bg-ui-800 p-2 rounded border border-ui-border flex items-center gap-2"><i class="fa-solid fa-gear"></i> Opened Settings: ${pageId}</div>`;
+                return "";
+              }
+              if (cmd === "OPEN_APP") {
+                const appId = parts[1];
+                setTimeout(() => openApp(appId), 50);
+                actionHtml += `<div class="text-accent-400 mt-2 bg-ui-800 p-2 rounded border border-ui-border flex items-center gap-2"><i class="fa-solid fa-window-maximize"></i> Opened App: ${appId}</div>`;
+                return "";
+              }
+              if (
+                cmd === "OPEN_FILE" ||
+                cmd === "OPEN_FOLDER" ||
+                cmd === "FIND"
+              ) {
+                const fileId = parts[1];
+                const file = fileSystem.find((f) => f.id === fileId);
+                if (file) {
+                  if (cmd === "OPEN_FILE" || cmd === "OPEN_FOLDER") {
+                    if (file.type === "folder") {
+                      setTimeout(() => {
+                        let fw = Object.values(windows).find(
+                          (w) => w.appId === "files",
+                        );
+                        if (!fw) {
+                          openApp("files");
+                          setTimeout(() => {
+                            fw = Object.values(windows).find(
+                              (w) => w.appId === "files",
+                            );
+                            if (fw) {
+                              const fwid = fw.element.id.replace("window-", "");
+                              fw.fsState.tabs.find(
+                                (t) => t.id === fw.fsState.activeTab,
+                              ).currentFolder = file.id;
+                              renderFileView(fwid);
+                            }
+                          }, 150);
+                        } else {
+                          const fwid = fw.element.id.replace("window-", "");
+                          focusWindow(fwid);
+                          fw.fsState.tabs.find(
+                            (t) => t.id === fw.fsState.activeTab,
+                          ).currentFolder = file.id;
+                          renderFileView(fwid);
+                        }
+                      }, 50);
+                    } else {
+                      setTimeout(() => openFileById(file.id), 50);
+                    }
+                  }
+
+                  let iconHtml = `<i class="fa-solid ${getFileIcon(file.type)} text-2xl drop-shadow-md"></i>`;
+                  if (file.type === "folder") {
+                    const emblem = getFolderEmblem(file.id);
+                    if (emblem)
+                      iconHtml = `<div class="relative flex items-center justify-center"><i class="fa-solid fa-folder text-blue-400 text-2xl drop-shadow-md"></i><i class="fa-solid ${emblem} absolute text-[10px] text-blue-900/40 z-10" style="top: 55%; left: 50%; transform: translate(-50%, -50%);"></i></div>`;
+                    else
+                      iconHtml = `<i class="fa-solid fa-folder text-blue-400 text-2xl drop-shadow-md"></i>`;
+                  } else if (
+                    (file.type === "image" || file.type === "video") &&
+                    file.url
+                  ) {
+                    iconHtml = `<img src="${file.type === "video" ? "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=100&q=80" : file.url}" class="w-full h-full object-cover">`;
+                  }
+
+                  actionHtml += `
+                      <div class="mt-3 flex flex-col gap-3 p-3 bg-ui-800 rounded-lg border border-ui-border shadow-md">
+                          <div class="flex items-center gap-3">
+                              <div class="w-12 h-12 rounded-lg bg-ui-900 flex items-center justify-center shrink-0 overflow-hidden shadow-inner border border-white/5">
+                                  ${iconHtml}
+                              </div>
+                              <div class="flex-1 min-w-0">
+                                  <div class="text-sm font-bold text-ui-100 truncate">${file.name}</div>
+                                  <div class="text-[10px] text-ui-400 uppercase tracking-wider mt-0.5">${file.type}</div>
+                              </div>
+                          </div>
+                          <div class="flex flex-wrap gap-2">
+                              <button onclick="${file.type === "folder" ? `let fw=Object.values(windows).find(w=>w.appId==='files'); if(fw){ const wid=fw.element.id.replace('window-',''); focusWindow(wid); fw.fsState.tabs.find(t=>t.id===fw.fsState.activeTab).currentFolder='${file.id}'; renderFileView(wid); } else { openApp('files'); setTimeout(()=>{ let nw=Object.values(windows).find(w=>w.appId==='files'); if(nw){ const nwid=nw.element.id.replace('window-',''); nw.fsState.tabs.find(t=>t.id===nw.fsState.activeTab).currentFolder='${file.id}'; renderFileView(nwid); } }, 100); }` : `openFileById('${file.id}')`}" class="flex-1 px-3 py-1.5 bg-accent-600 hover:bg-accent-500 rounded text-[10px] font-medium text-white transition shadow"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Open</button>
+                              <button onclick="let fw=Object.values(windows).find(w=>w.appId==='files'); if(fw){ const wid=fw.element.id.replace('window-',''); focusWindow(wid); fw.fsState.tabs.find(t=>t.id===fw.fsState.activeTab).currentFolder='${file.parentId || "root"}'; renderFileView(wid); } else { openApp('files'); setTimeout(()=>{ let nw=Object.values(windows).find(w=>w.appId==='files'); if(nw){ const nwid=nw.element.id.replace('window-',''); nw.fsState.tabs.find(t=>t.id===nw.fsState.activeTab).currentFolder='${file.parentId || "root"}'; renderFileView(nwid); } }, 100); }" class="flex-1 px-3 py-1.5 bg-ui-700 hover:bg-ui-600 rounded text-[10px] font-medium text-white border border-ui-border transition shadow"><i class="fa-solid fa-folder-open mr-1"></i> Location</button>
+                          </div>
+                      </div>`;
+                }
+                return "";
+              }
+              if (cmd === "RENAME") {
+                const fileId = parts[1];
+                const newName = parts.slice(2).join(":");
+                const file = fileSystem.find((f) => f.id === fileId);
+                if (file) {
+                  const oldName = file.name;
+                  let finalName = newName.trim();
+                  let baseName = finalName;
+                  let ext = "";
+
+                  if (file.type !== "folder" && finalName.includes(".")) {
+                    const lastDot = finalName.lastIndexOf(".");
+                    if (lastDot > 0) {
+                      baseName = finalName.substring(0, lastDot);
+                      ext = finalName.substring(lastDot);
+                    }
+                  }
+
+                  let counter = 1;
+                  while (
+                    fileSystem.some(
+                      (f) =>
+                        f.parentId === file.parentId &&
+                        f.name.toLowerCase() === finalName.toLowerCase() &&
+                        f.id !== fileId,
+                    )
+                  ) {
+                    finalName = `${baseName} (${counter})${ext}`;
+                    counter++;
+                  }
+
+                  file.name = finalName;
+                  saveFileSystem();
+                  setTimeout(() => {
+                    renderDesktopIcons();
+                    Object.keys(windows).forEach((k) => {
+                      if (windows[k].appId === "files") {
+                        const wid = k.replace("window-", "");
+                        renderFileView(wid);
+                        renderFilesSidebar(wid);
+                      }
+                    });
+                  }, 50);
+                  actionHtml += `<div class="text-accent-400 mt-2 bg-ui-800 p-2 rounded border border-ui-border flex items-center gap-2"><i class="fa-solid fa-pen"></i> Renamed "${oldName}" to "${finalName}"</div>`;
+                }
+                return "";
+              }
+              return "";
+            },
+          );
+
+          cleanText = cleanText.replace(/\[FILE_ACTION:\s*([^\]]+)\]/g, "");
+
+          const htmlResponse = formatAIResponse(cleanText.trim()) + actionHtml;
 
           hist.innerHTML += `
                     <div class="flex items-start gap-2 mb-2">
@@ -8018,6 +8880,7 @@
         const ctxMenu = document.getElementById("taskbar-ctx-menu");
         const isPinned = pinnedTaskbarApps.includes(appId);
         const pinLocation = settings.layout === "macos" ? "Dock" : "Taskbar";
+        const isCustomApp = installedApps.some((a) => a.id === appId);
 
         ctxMenu.innerHTML = `
         <div class="ctx-item" onclick="openApp('${appId}'); hideContextMenu()">
@@ -8029,6 +8892,17 @@
             <i class="fa-solid fa-thumbtack ${isPinned ? "text-accent-400" : "text-ui-400"}"></i>
             <span>${isPinned ? `Unpin from ${pinLocation}` : `Pin to ${pinLocation}`}</span>
         </div>
+        ${
+          isCustomApp
+            ? `
+        <div class="border-t border-ui-border my-1"></div>
+        <div class="ctx-item" onclick="uninstallApp('${appId}'); hideContextMenu()">
+            <i class="fa-solid fa-trash text-red-400"></i>
+            <span class="text-red-400">Uninstall</span>
+        </div>
+        `
+            : ""
+        }
     `;
 
         const rect = e.currentTarget.getBoundingClientRect();
@@ -8249,6 +9123,63 @@
       }
 
       function pushNotification(title, message) {
+        let activeApp = "desktop";
+        if (
+          activeWindow &&
+          windows[activeWindow] &&
+          !windows[activeWindow].element.classList.contains("minimized")
+        ) {
+          activeApp = windows[activeWindow].appId;
+        } else if (
+          (document.getElementById("widget-gallery") &&
+            !document
+              .getElementById("widget-gallery")
+              .classList.contains("hidden")) ||
+          (document.getElementById("control-center") &&
+            !document
+              .getElementById("control-center")
+              .classList.contains("opacity-0")) ||
+          (document.getElementById("system-file-dialog") &&
+            !document
+              .getElementById("system-file-dialog")
+              .classList.contains("hidden"))
+        ) {
+          activeApp = "system-ui";
+        }
+
+        const map = {
+          Files: ["files", "system-ui", "desktop"],
+          FileSystem: ["files", "system-ui", "desktop"],
+          Sidebar: "files",
+          Bin: ["files", "desktop"],
+          Clipboard: ["files", "desktop"],
+          "App Studio": "appstudio",
+          Notes: "notes",
+          Permissions: "notes",
+          "Veishen Assistant": "gemini-ai",
+          "Gemini Assistant": "gemini-ai",
+          Music: "music",
+          "Now Playing": "music",
+          Gallery: ["photos", "desktop", "files"],
+          Settings: ["settings", "system-ui", "desktop"],
+          Account: "settings",
+          Security: "settings",
+          Display: ["settings", "system-ui"],
+          Desktop: ["desktop", "system-ui"],
+          Widgets: ["desktop", "system-ui"],
+          Weather: ["desktop", "system-ui"],
+          "System Update": "settings",
+        };
+
+        let relatedApp = map[title];
+        if (relatedApp) {
+          if (Array.isArray(relatedApp)) {
+            if (relatedApp.includes(activeApp)) return;
+          } else {
+            if (relatedApp === activeApp) return;
+          }
+        }
+
         if (title.toLowerCase().includes("error")) {
           playErrorSound();
         } else {
@@ -8300,11 +9231,11 @@
           toast.className =
             "glass-panel p-1.5 px-3 rounded-lg shadow-xl border border-white/10 w-64 transform translate-x-full transition-all duration-300 pointer-events-auto";
           toast.innerHTML = `
-            <div class="flex items-center gap-2 mb-1">
-                <i class="fa-solid fa-circle-info text-accent-500 text-xs"></i>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-ui-400">${title}</span>
+            <div class="flex items-center gap-2 mb-1 w-full overflow-hidden">
+                <i class="fa-solid fa-circle-info text-accent-500 text-xs shrink-0"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-ui-400 truncate">${title}</span>
             </div>
-            <p class="text-xs text-ui-100">${message}</p>
+            <p class="text-xs text-ui-100 break-all">${message}</p>
         `;
           toastContainer.appendChild(toast);
           requestAnimationFrame(() =>
@@ -8324,10 +9255,10 @@
           "w-72 bg-ui-800/95 backdrop-blur border border-ui-border p-3 rounded-lg shadow-2xl pointer-events-auto transform transition-all duration-300 translate-x-full";
         toast.innerHTML = `
         <div class="flex justify-between items-start mb-1">
-            <span class="text-[10px] font-bold text-accent-400 uppercase tracking-tighter">${title}</span>
-            <button onclick="this.parentElement.parentElement.remove()" class="text-ui-400 hover:text-white"><i class="fa-solid fa-xmark text-[10px]"></i></button>
+            <span class="text-[10px] font-bold text-accent-400 uppercase tracking-tighter truncate pr-2">${title}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-ui-400 hover:text-white shrink-0"><i class="fa-solid fa-xmark text-[10px]"></i></button>
         </div>
-        <p class="text-xs text-ui-100 leading-snug">${message}</p>
+        <p class="text-xs text-ui-100 leading-snug break-all">${message}</p>
     `;
         container.appendChild(toast);
         setTimeout(() => toast.classList.remove("translate-x-full"), 10);
@@ -8353,11 +9284,11 @@
             .map(
               (n) => `
             <div class="p-3 bg-white/5 border border-white/5 rounded-lg hover:bg-white/10 transition group">
-                <div class="flex justify-between items-start mb-1">
-                    <span class="text-[10px] font-bold text-accent-400 uppercase">${n.title}</span>
-                    <span class="text-[9px] text-ui-400">${n.time || ""}</span>
+                <div class="flex justify-between items-start mb-1 w-full overflow-hidden gap-2">
+                    <span class="text-[10px] font-bold text-accent-400 uppercase truncate">${n.title}</span>
+                    <span class="text-[9px] text-ui-400 shrink-0">${n.time || ""}</span>
                 </div>
-                <p class="text-xs text-ui-100">${n.message}</p>
+                <p class="text-xs text-ui-100 break-all">${n.message}</p>
             </div>
         `,
             )
@@ -8924,6 +9855,7 @@
       function removeFromTaskbar(id) {}
 
       function startDrag(e, id) {
+        windowDragHistory = [];
         isDragging = true;
         draggedWindowId = id;
         const rect = windows[id].element.getBoundingClientRect();
@@ -9062,14 +9994,19 @@
 
           selectionStart = { x: relX, y: relY };
 
-          const box = document.createElement("div");
-          box.id = `selection-box-${context}`;
-          box.className = "window-selection-box";
+          let box = document.getElementById(`selection-box-${context}`);
+          if (!box) {
+            box = document.createElement("div");
+            box.id = `selection-box-${context}`;
+            box.className = "window-selection-box";
+            grid.appendChild(box);
+          }
+          box.classList.remove("fading");
+          box.style.display = "block";
           box.style.left = relX + "px";
           box.style.top = relY + "px";
           box.style.width = "0px";
           box.style.height = "0px";
-          grid.appendChild(box);
         }
       }
 
@@ -9341,6 +10278,41 @@
           const el = windows[draggedWindowId].element;
           e.preventDefault();
 
+          if (settings.shakeToMinimize) {
+            const now = Date.now();
+            windowDragHistory.push({ x: e.clientX, t: now });
+            windowDragHistory = windowDragHistory.filter(
+              (p) => now - p.t < 400,
+            );
+
+            if (
+              now - lastWindowShakeTime > 1000 &&
+              windowDragHistory.length > 5
+            ) {
+              let directionChanges = 0;
+              let lastDir = 0;
+              let totalDist = 0;
+
+              for (let i = 1; i < windowDragHistory.length; i++) {
+                const dx = windowDragHistory[i].x - windowDragHistory[i - 1].x;
+                totalDist += Math.abs(dx);
+                if (Math.abs(dx) > 3) {
+                  const dir = Math.sign(dx);
+                  if (lastDir !== 0 && dir !== lastDir) {
+                    directionChanges++;
+                  }
+                  lastDir = dir;
+                }
+              }
+
+              if (directionChanges >= 4 && totalDist > 250) {
+                lastWindowShakeTime = now;
+                windowDragHistory = [];
+                triggerAeroShake(draggedWindowId);
+              }
+            }
+          }
+
           const container = document.getElementById("windows-container");
           const containerRect = container.getBoundingClientRect();
 
@@ -9538,26 +10510,28 @@
 
             if (box && grid) {
               const boxRect = box.getBoundingClientRect();
+              const state = windows[selectionContext].fsState.tabs.find(
+                (t) => t.id === windows[selectionContext].fsState.activeTab,
+              );
 
               grid.querySelectorAll(".file-item").forEach((item) => {
                 const rect = item.getBoundingClientRect();
                 if (rectIntersect(boxRect, rect)) {
-                  windows[selectionContext].fsState.tabs
-                    .find(
-                      (t) =>
-                        t.id === windows[selectionContext].fsState.activeTab,
-                    )
-                    .selected.add(item.dataset.id);
+                  state.selected.add(item.dataset.id);
                 }
-                item.classList.remove("selected-file-item");
+
+                if (state.selected.has(item.dataset.id)) {
+                  item.classList.add("selected-file-item");
+                } else {
+                  item.classList.remove("selected-file-item");
+                }
               });
 
               box.classList.add("fading");
               setTimeout(() => {
-                if (box.parentNode) box.remove();
+                box.style.display = "none";
+                box.classList.remove("fading");
               }, 200);
-
-              renderFileView(selectionContext);
             }
           }
           selectionContext = null;
@@ -9919,7 +10893,8 @@
         }
         function showShortcutContext(e, item) {
           const ctxMenu = document.getElementById("desktop-ctx-menu");
-          ctxMenu.innerHTML = `<div class="ctx-item" onclick="openApp('${item.id}'); hideDesktopContextMenu()">Open</div><div class="ctx-item" onclick="removeFromDesktop('${item.id}'); hideDesktopContextMenu()">Remove</div>`;
+          const isCustomApp = installedApps.some((a) => a.id === item.id);
+          ctxMenu.innerHTML = `<div class="ctx-item" onclick="openApp('${item.id}'); hideDesktopContextMenu()">Open</div><div class="ctx-item" onclick="removeFromDesktop('${item.id}'); hideDesktopContextMenu()">Remove</div>${isCustomApp ? `<div class="border-t border-ui-border my-1"></div><div class="ctx-item" onclick="uninstallApp('${item.id}'); hideDesktopContextMenu()"><span class="text-red-400">Uninstall App</span></div>` : ""}`;
           placeMenu(e, ctxMenu);
         }
         function placeMenu(e, menu) {
@@ -10085,6 +11060,28 @@
           newX = Math.max(0, Math.min(window.innerWidth - rect.width, newX));
           newY = Math.max(0, Math.min(window.innerHeight - rect.height, newY));
 
+          const snapT = 15;
+          const others = document.querySelectorAll("#desktop-widgets > div");
+
+          others.forEach((other) => {
+            if (other === widgetElement) return;
+            const oRect = other.getBoundingClientRect();
+
+            if (Math.abs(newX - oRect.left) < snapT) newX = oRect.left;
+            else if (Math.abs(newX - oRect.right) < snapT) newX = oRect.right;
+            else if (Math.abs(newX + rect.width - oRect.left) < snapT)
+              newX = oRect.left - rect.width;
+            else if (Math.abs(newX + rect.width - oRect.right) < snapT)
+              newX = oRect.right - rect.width;
+
+            if (Math.abs(newY - oRect.top) < snapT) newY = oRect.top;
+            else if (Math.abs(newY - oRect.bottom) < snapT) newY = oRect.bottom;
+            else if (Math.abs(newY + rect.height - oRect.top) < snapT)
+              newY = oRect.top - rect.height;
+            else if (Math.abs(newY + rect.height - oRect.bottom) < snapT)
+              newY = oRect.bottom - rect.height;
+          });
+
           widgetElement.style.left = newX + "px";
           widgetElement.style.top = newY + "px";
           widgetElement.style.right = "auto";
@@ -10170,8 +11167,8 @@
         const modalContent = document.getElementById("modal-content");
 
         modalContent.innerHTML = `
-                <h3 class="text-ui-100 font-bold mb-2">${title}</h3>
-                <p class="text-ui-400 text-sm mb-4 leading-relaxed">${message}</p>
+                <h3 class="text-ui-100 font-bold mb-2 break-all">${title}</h3>
+                <p class="text-ui-400 text-sm mb-4 leading-relaxed break-all">${message}</p>
                 <div class="flex justify-end gap-2">
                     <button onclick="closeModal()" class="px-4 py-2 text-xs text-ui-400 hover:text-ui-100 bg-ui-700 hover:bg-ui-600 rounded transition">Cancel</button>
                     <button id="modal-confirm-action" class="px-4 py-2 text-xs bg-accent-600 hover:bg-accent-500 text-white rounded transition">Confirm</button>
@@ -10310,8 +11307,43 @@
               "text/plain",
               JSON.stringify({ wid, id: tab.id, app: "files" }),
             );
-          tabEl.ondragover = (e) => e.preventDefault();
-          tabEl.ondrop = (e) => handleTabDrop(e, wid, tab.id, "files");
+          tabEl.ondragover = (e) => {
+            e.preventDefault();
+            tabEl.classList.add("drop-target-active");
+            if (!tabEl.hoverTimer) {
+              tabEl.hoverTimer = setTimeout(() => {
+                if (windows[wid].fsState.activeTab !== tab.id) {
+                  switchFsTab(wid, tab.id);
+                }
+              }, 800);
+            }
+          };
+          tabEl.ondragleave = (e) => {
+            tabEl.classList.remove("drop-target-active");
+            if (tabEl.hoverTimer) {
+              clearTimeout(tabEl.hoverTimer);
+              tabEl.hoverTimer = null;
+            }
+          };
+          tabEl.ondrop = (e) => {
+            e.preventDefault();
+            tabEl.classList.remove("drop-target-active");
+            if (tabEl.hoverTimer) {
+              clearTimeout(tabEl.hoverTimer);
+              tabEl.hoverTimer = null;
+            }
+            try {
+              const dataStr = e.dataTransfer.getData("text/plain");
+              if (dataStr) {
+                const data = JSON.parse(dataStr);
+                if (data.app === "files") {
+                  handleTabDrop(e, wid, tab.id, "files");
+                  return;
+                }
+              }
+            } catch (err) {}
+            handleDrop(e, tab.currentFolder);
+          };
 
           tabEl.innerHTML = `
             <span class="truncate max-w-[100px]">${title}</span>
@@ -10559,6 +11591,21 @@
           };
 
           const handleItemOpen = (targetItem) => {
+            let inBin = false;
+            let curr = targetItem;
+            while (curr && curr.id !== "root") {
+              if (curr.id === "bin" || curr.parentId === "bin") {
+                inBin = true;
+                break;
+              }
+              curr = fileSystem.find((f) => f.id === curr.parentId);
+            }
+
+            if (inBin && targetItem.id !== "bin") {
+              pushNotification("System", "Please restore the item to open it.");
+              return;
+            }
+
             if (targetItem.type === "folder") {
               addToRecent({
                 id: targetItem.id,
@@ -11084,6 +12131,21 @@
       }
 
       function fsDeleteItem(wid, itemId) {
+        let selected = [];
+        if (wid === "desktop") {
+          selected = Array.from(selectedIcons);
+        } else if (windows[wid]) {
+          selected = Array.from(
+            windows[wid].fsState.tabs.find(
+              (t) => t.id === windows[wid].fsState.activeTab,
+            ).selected,
+          );
+        }
+
+        if (!selected.includes(itemId)) {
+          selected = [itemId];
+        }
+
         const protectedFolders = [
           "root",
           "bin",
@@ -11093,65 +12155,122 @@
           "music_sys",
           "vids_sys",
         ];
-        if (protectedFolders.includes(itemId)) {
+        selected = selected.filter((id) => !protectedFolders.includes(id));
+
+        if (selected.length === 0) {
           pushNotification("Error", "Cannot delete system folders.");
           return;
         }
 
-        const item = fileSystem.find((f) => f.id === itemId);
-        if (!item) return;
+        const clickedItem = fileSystem.find((f) => f.id === itemId);
+        if (!clickedItem) return;
 
-        const isInBin = item.parentId === "bin";
+        const isInBin = clickedItem.parentId === "bin";
         const title = isInBin ? "Delete Permanently" : "Move to Bin";
-        const msg = isInBin
-          ? `Are you sure you want to permanently delete "${item.name}"?`
-          : `Move "${item.name}" to the Recycle Bin?`;
+
+        let msg = "";
+        if (selected.length === 1) {
+          msg = isInBin
+            ? `Are you sure you want to permanently delete "${clickedItem.name}"?`
+            : `Move "${clickedItem.name}" to the Recycle Bin?`;
+        } else {
+          msg = isInBin
+            ? `Are you sure you want to permanently delete ${selected.length} items?`
+            : `Move ${selected.length} items to the Recycle Bin?`;
+        }
 
         showConfirmModal(title, msg, () => {
-          if (isInBin) {
-            fileSystem = fileSystem.filter(
-              (f) => f.id !== itemId && f.parentId !== itemId,
-            );
-            pushNotification("FileSystem", "Item permanently deleted.");
+          let deletedCount = 0;
+          let changedPins = false;
+          let changedApps = false;
+          let changedTaskbar = false;
 
-            if (pinnedSidebarFolders.includes(itemId)) {
-              pinnedSidebarFolders = pinnedSidebarFolders.filter(
-                (id) => id !== itemId,
-              );
-              saveSidebarFolders();
-            }
-
-            if (pinnedApps.includes(itemId)) {
-              pinnedApps = pinnedApps.filter((id) => id !== itemId);
-              appStorage.setItem(
-                "gemini_pinned_apps",
-                JSON.stringify(pinnedApps),
-              );
-            }
-            if (pinnedTaskbarApps.includes(itemId)) {
-              pinnedTaskbarApps = pinnedTaskbarApps.filter(
-                (id) => id !== itemId,
-              );
-              saveTaskbarPins();
-            }
-          } else {
-            item.originalParentId = item.parentId;
-            item.parentId = "bin";
-            delete item.x;
-            delete item.y;
-            pushNotification("FileSystem", "Item moved to Bin.");
+          let allDeletedIds = new Set(selected);
+          let added = true;
+          while (added) {
+            added = false;
+            fileSystem.forEach((f) => {
+              if (allDeletedIds.has(f.parentId) && !allDeletedIds.has(f.id)) {
+                allDeletedIds.add(f.id);
+                added = true;
+              }
+            });
           }
+
+          selected.forEach((id) => {
+            const item = fileSystem.find((f) => f.id === id);
+            if (!item) return;
+
+            if (isInBin) {
+              fileSystem = fileSystem.filter(
+                (f) => f.id !== id && f.parentId !== id,
+              );
+            } else {
+              item.originalParentId = item.parentId;
+              item.parentId = "bin";
+              delete item.x;
+              delete item.y;
+            }
+            deletedCount++;
+          });
+
+          allDeletedIds.forEach((id) => {
+            if (pinnedSidebarFolders.includes(id)) {
+              pinnedSidebarFolders = pinnedSidebarFolders.filter(
+                (p) => p !== id,
+              );
+              changedPins = true;
+            }
+            if (pinnedApps.includes(id)) {
+              pinnedApps = pinnedApps.filter((p) => p !== id);
+              changedApps = true;
+            }
+            if (pinnedTaskbarApps.includes(id)) {
+              pinnedTaskbarApps = pinnedTaskbarApps.filter((p) => p !== id);
+              changedTaskbar = true;
+            }
+          });
+
+          if (changedPins) saveSidebarFolders();
+          if (changedApps)
+            appStorage.setItem(
+              "gemini_pinned_apps",
+              JSON.stringify(pinnedApps),
+            );
+          if (changedTaskbar) saveTaskbarPins();
+
+          pushNotification(
+            "FileSystem",
+            isInBin
+              ? `${deletedCount} item(s) permanently deleted.`
+              : `${deletedCount} item(s) moved to Bin.`,
+          );
           saveFileSystem();
+
+          Object.keys(windows).forEach((key) => {
+            if (windows[key].appId === "files") {
+              let needsRender = false;
+              windows[key].fsState.tabs.forEach((t) => {
+                if (allDeletedIds.has(t.currentFolder)) {
+                  t.currentFolder = "root";
+                  t.history = ["root"];
+                  t.historyIndex = 0;
+                  needsRender = true;
+                }
+              });
+              if (needsRender) {
+                renderFileView(key);
+                renderFilesSidebar(key);
+              }
+            }
+          });
 
           renderDesktopIcons();
           updateTaskbar();
 
           if (wid !== "desktop" && windows[wid]) {
             renderFileView(wid);
-          } else {
-            Object.keys(windows).forEach((key) => {
-              if (windows[key].appId === "files") renderFileView(key);
-            });
+            renderFilesSidebar(wid);
           }
         });
       }
@@ -11354,6 +12473,55 @@
         pushNotification("App Studio", `Saved ${data.title}.hai to Desktop`);
       }
 
+      function removeMissingItem(id) {
+        recentApps = recentApps.filter((r) => r.id !== id);
+        appStorage.setItem("gemini_recent_apps", JSON.stringify(recentApps));
+        pinnedApps = pinnedApps.filter((p) => p !== id);
+        appStorage.setItem("gemini_pinned_apps", JSON.stringify(pinnedApps));
+        pinnedTaskbarApps = pinnedTaskbarApps.filter((p) => p !== id);
+        saveTaskbarPins();
+        desktopAppShortcuts = desktopAppShortcuts.filter((s) => s.id !== id);
+        appStorage.setItem(
+          "gemini_desktop_shortcuts",
+          JSON.stringify(desktopAppShortcuts),
+        );
+        renderStartMenu();
+        renderDesktopIcons();
+        updateTaskbar();
+      }
+
+      function uninstallApp(appId) {
+        showConfirmModal(
+          "Uninstall App",
+          `Are you sure you want to uninstall ${apps[appId]?.title}?`,
+          () => {
+            installedApps = installedApps.filter((a) => a.id !== appId);
+            appStorage.setItem(
+              "gemini_installed_apps",
+              JSON.stringify(installedApps),
+            );
+            Object.keys(windows).forEach((wid) => {
+              if (windows[wid].appId === appId) {
+                closeApp(wid);
+              }
+            });
+            delete apps[appId];
+            removeMissingItem(appId);
+            pushNotification("System", "App uninstalled successfully.");
+          },
+        );
+      }
+
+      function openFileById(id) {
+        const file = fileSystem.find((f) => f.id === id);
+        if (file) {
+          openFile(file);
+        } else {
+          removeMissingItem(id);
+          showAlertModal("Error", "File not found.");
+        }
+      }
+
       function openFile(file) {
         addToRecent({
           id: file.id,
@@ -11372,6 +12540,8 @@
               color: "text-ui-100",
               width: 600,
               height: 400,
+              isTransient: true,
+              hidden: true,
               content: (wid) => {
                 const sourceCode =
                   appData.mode === "single"
@@ -11596,6 +12766,26 @@
             "vids_sys",
           ].includes(itemId);
 
+          let setWallOption = "";
+          if (
+            item &&
+            (item.type === "image" ||
+              item.type === "video" ||
+              (item.name && item.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i)))
+          ) {
+            const isVid =
+              item.type === "video" ||
+              !!(
+                item.name && item.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i)
+              );
+            setWallOption = `
+                <div class="ctx-item" onclick="setAsWallpaper('${item.url}', ${isVid}); hideDesktopContextMenu()">
+                    <i class="fa-solid fa-desktop text-ui-400"></i> <span>Set as Desktop Background</span>
+                </div>
+                <div class="border-t border-ui-border my-1"></div>
+            `;
+          }
+
           let extraOptions = "";
 
           if (isInBin) {
@@ -11631,6 +12821,7 @@
           }
 
           ctxMenu.innerHTML = `
+            ${!isInBin && !isSystemFolder ? setWallOption : ""}
             ${
               !isInBin && !isSystemFolder
                 ? `
@@ -11942,9 +13133,9 @@
           settings.showTaskbarSearch = false;
         if (settings.autoHideDock === undefined) settings.autoHideDock = false;
         if (settings.dockIndicatorWidth === undefined)
-          settings.dockIndicatorWidth = 140;
+          settings.dockIndicatorWidth = 400;
         if (settings.dockIndicatorHeight === undefined)
-          settings.dockIndicatorHeight = 5;
+          settings.dockIndicatorHeight = 9;
         if (settings.dockSquircleN === undefined) settings.dockSquircleN = 3.77;
         if (settings.dockColor === undefined) settings.dockColor = "system";
         if (settings.macMenuBarTransparent === undefined)
@@ -13475,7 +14666,11 @@
             searchView.classList.remove("hidden");
 
             const matchedApps = Object.keys(apps)
-              .filter((k) => apps[k].title.toLowerCase().includes(query))
+              .filter(
+                (k) =>
+                  !apps[k].hidden &&
+                  apps[k].title.toLowerCase().includes(query),
+              )
               .map((k) => ({ id: k, ...apps[k], type: "app" }));
 
             const matchedFiles = fileSystem.filter((f) =>
@@ -13524,7 +14719,7 @@
                     const clickAction =
                       f.type === "folder"
                         ? `addToRecent({id:'${f.id}', type:'folder', title:'${f.name}', icon:'fa-folder', color:'text-blue-400'}); openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.tabs.find(t=>t.id===w.fsState.activeTab).currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100)`
-                        : `openFile({id:'${f.id}', name:'${f.name}', type:'${f.type}', content:'${f.content || ""}'})`;
+                        : `openFileById('${f.id}')`;
                     return `
                         <button onclick="${clickAction}; toggleStartMenu(false)" class="flex items-center p-2 hover:bg-white/10 rounded transition gap-3 w-full text-left">
                                 <div class="w-6 flex justify-center">${iconHtml}</div>
@@ -13592,9 +14787,9 @@
                   }
                 } else {
                   const fullFile = fileSystem.find((f) => f.id === item.id);
-                  if (fullFile)
-                    clickAction = `openFile({id:'${fullFile.id}', name:'${fullFile.name}', type:'${fullFile.type}', content:'${fullFile.content || ""}'})`;
-                  else clickAction = "alert('File not found')";
+                  if (fullFile) clickAction = `openFileById('${fullFile.id}')`;
+                  else
+                    clickAction = `removeMissingItem('${item.id}'); showAlertModal('Error', 'File not found.')`;
                   iconClass = item.icon;
                 }
 
@@ -13618,9 +14813,9 @@
 
         const allContainer = document.getElementById("start-all-list");
         if (allContainer) {
-          const sortedKeys = Object.keys(apps).sort((a, b) =>
-            apps[a].title.localeCompare(apps[b].title),
-          );
+          const sortedKeys = Object.keys(apps)
+            .filter((k) => !apps[k].hidden)
+            .sort((a, b) => apps[a].title.localeCompare(apps[b].title));
           let currentLetter = "";
           let html = "";
 
@@ -13653,6 +14848,7 @@
         const isTaskbarPinned = pinnedTaskbarApps.includes(appId);
         const isOnDesktop = desktopAppShortcuts.some((s) => s.id === appId);
         const pinLocation = settings.layout === "macos" ? "Dock" : "Taskbar";
+        const isCustomApp = installedApps.some((a) => a.id === appId);
 
         ctxMenu.innerHTML = `
         <div class="ctx-item" onclick="openApp('${appId}'); hideDesktopContextMenu(); toggleStartMenu(false)">
@@ -13673,6 +14869,17 @@
             <i class="fa-solid fa-desktop ${isOnDesktop ? "text-accent-400" : "text-ui-400"}"></i>
             <span>Create Desktop Shortcut</span>
         </div>
+        ${
+          isCustomApp
+            ? `
+        <div class="border-t border-ui-border my-1"></div>
+        <div class="ctx-item" onclick="uninstallApp('${appId}'); hideDesktopContextMenu(); toggleStartMenu(false)">
+            <i class="fa-solid fa-trash text-red-400"></i>
+            <span class="text-red-400">Uninstall</span>
+        </div>
+        `
+            : ""
+        }
     `;
 
         let x = e.clientX;
@@ -14168,9 +15375,27 @@
               .filter((f) => f.parentId === "bin")
               .map((f) => f.id);
 
+            let allDeletedIds = new Set(itemsToDelete);
+            let added = true;
+            while (added) {
+              added = false;
+              fileSystem.forEach((f) => {
+                if (allDeletedIds.has(f.parentId) && !allDeletedIds.has(f.id)) {
+                  allDeletedIds.add(f.id);
+                  added = true;
+                }
+              });
+            }
+
             let pinsChanged = false;
             let taskbarPinsChanged = false;
-            itemsToDelete.forEach((id) => {
+            allDeletedIds.forEach((id) => {
+              if (pinnedSidebarFolders.includes(id)) {
+                pinnedSidebarFolders = pinnedSidebarFolders.filter(
+                  (p) => p !== id,
+                );
+                pinsChanged = true;
+              }
               if (pinnedApps.includes(id)) {
                 pinnedApps = pinnedApps.filter((p) => p !== id);
                 pinsChanged = true;
@@ -14180,16 +15405,36 @@
                 taskbarPinsChanged = true;
               }
             });
-            if (pinsChanged)
+            if (pinsChanged) {
               appStorage.setItem(
                 "gemini_pinned_apps",
                 JSON.stringify(pinnedApps),
               );
+              saveSidebarFolders();
+            }
             if (taskbarPinsChanged) saveTaskbarPins();
 
-            fileSystem = fileSystem.filter((f) => f.parentId !== "bin");
+            fileSystem = fileSystem.filter((f) => !allDeletedIds.has(f.id));
             saveFileSystem();
             pushNotification("Bin", "Recycle Bin emptied.");
+
+            Object.keys(windows).forEach((key) => {
+              if (windows[key].appId === "files") {
+                let needsRender = false;
+                windows[key].fsState.tabs.forEach((t) => {
+                  if (allDeletedIds.has(t.currentFolder)) {
+                    t.currentFolder = "root";
+                    t.history = ["root"];
+                    t.historyIndex = 0;
+                    needsRender = true;
+                  }
+                });
+                if (needsRender) {
+                  renderFileView(key);
+                  renderFilesSidebar(key);
+                }
+              }
+            });
 
             renderDesktopIcons();
             updateTaskbar();
@@ -14209,23 +15454,56 @@
       }
 
       function fsRestoreItem(wid, itemId) {
-        const item = fileSystem.find((f) => f.id === itemId);
-        if (!item) return;
+        let selected = [];
+        if (wid === "desktop") {
+          selected = Array.from(selectedIcons);
+        } else if (windows[wid]) {
+          selected = Array.from(
+            windows[wid].fsState.tabs.find(
+              (t) => t.id === windows[wid].fsState.activeTab,
+            ).selected,
+          );
+        }
 
-        const originalParent =
-          item.originalParentId &&
-          fileSystem.find((f) => f.id === item.originalParentId)
-            ? item.originalParentId
-            : "desktop";
+        if (!selected.includes(itemId)) {
+          selected = [itemId];
+        }
 
-        item.parentId = originalParent;
-        delete item.originalParentId;
+        let restoredCount = 0;
+        let lastRestoredName = "";
+
+        selected.forEach((id) => {
+          const item = fileSystem.find((f) => f.id === id);
+          if (!item) return;
+
+          const originalParent =
+            item.originalParentId &&
+            fileSystem.find((f) => f.id === item.originalParentId)
+              ? item.originalParentId
+              : "desktop";
+
+          item.parentId = originalParent;
+          delete item.originalParentId;
+          restoredCount++;
+          lastRestoredName = item.name;
+        });
 
         saveFileSystem();
-        pushNotification("Bin", `Restored "${item.name}"`);
+
+        if (restoredCount === 1) {
+          pushNotification("Bin", `Restored "${lastRestoredName}"`);
+        } else if (restoredCount > 1) {
+          pushNotification("Bin", `Restored ${restoredCount} items`);
+        }
 
         renderDesktopIcons();
-        if (wid && windows[wid]) renderFileView(wid);
+        if (wid !== "desktop" && windows[wid]) {
+          renderFileView(wid);
+        } else {
+          Object.keys(windows).forEach((key) => {
+            if (windows[key].appId === "files") renderFileView(key);
+          });
+        }
       }
 
       let rawDesktopShortcuts = JSON.parse(
@@ -14297,7 +15575,9 @@
             url.match(
               /\.(jpeg|jpg|gif|png|webp|bmp|svg|mp4|webm|ogg|mkv|avi|mov)$/i,
             ) ||
-            url.startsWith("http")
+            url.startsWith("http") ||
+            url.startsWith("data:image/") ||
+            url.startsWith("data:video/")
           ) {
             changeWallpaper(url);
             pushNotification("Settings", "Wallpaper updated");
@@ -14498,6 +15778,9 @@
           document.getElementById("desktop").classList.add("hidden");
           document.getElementById("taskbar").classList.add("hidden");
           document.getElementById("mac-dock-container").classList.add("hidden");
+
+          lockScreen.style.filter = "";
+          lockScreen.style.transition = "";
 
           updateLockScreenClock();
           if (window.lockScreenInterval)
@@ -14947,6 +16230,8 @@
                   "gemini_widgets",
                   "gemini_desktop_shortcuts",
                   "gemini_chat_history",
+                  "gemini_chats",
+                  "gemini_active_chat",
                   "gemini_api_key",
                   "gemini_welcome_shown",
                 ];
@@ -15100,7 +16385,10 @@
         if (!container) return;
 
         const matchedApps = Object.keys(apps)
-          .filter((k) => apps[k].title.toLowerCase().includes(query))
+          .filter(
+            (k) =>
+              !apps[k].hidden && apps[k].title.toLowerCase().includes(query),
+          )
           .map((k) => ({ id: k, ...apps[k], type: "app" }));
         const matchedFiles = fileSystem.filter((f) =>
           f.name.toLowerCase().includes(query),
@@ -15148,7 +16436,7 @@
                 const clickAction =
                   f.type === "folder"
                     ? `addToRecent({id:'${f.id}', type:'folder', title:'${f.name}', icon:'fa-folder', color:'text-blue-400'}); openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.tabs.find(t=>t.id===w.fsState.activeTab).currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100)`
-                    : `openFile({id:'${f.id}', name:'${f.name}', type:'${f.type}', content:'${f.content || ""}'})`;
+                    : `openFileById('${f.id}')`;
                 return `
                 <button onclick="${clickAction}; toggleTaskbarSearchPopup(false); document.getElementById('taskbar-search-input').value=''" class="flex items-center p-2 hover:bg-white/10 rounded transition gap-3 w-full text-left">
                         <div class="w-6 flex justify-center">${iconHtml}</div>
@@ -15986,6 +17274,10 @@
           transform: "rotate(45 12 12)",
           hs: "16 16",
         },
+        move: {
+          d: "M12 2L9 5h2v6H5V9l-3 3 3 3v-2h6v6H9l3 3 3-3h-2v-6h6v2l3-3-3-3v2h-6V5h2l-3-3z",
+          hs: "12 12",
+        },
       };
 
       function updateSystemCursors() {
@@ -16043,6 +17335,7 @@
           if (key === "ew") root.style.setProperty("--cursor-ew", uri);
           if (key === "nwse") root.style.setProperty("--cursor-nwse", uri);
           if (key === "nesw") root.style.setProperty("--cursor-nesw", uri);
+          if (key === "move") root.style.setProperty("--cursor-move", uri);
         }
 
         const shakeEl = document.getElementById("mac-shake-cursor");
@@ -16980,7 +18273,7 @@
           (f) =>
             f.type === "image" ||
             f.type === "video" ||
-            f.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i),
+            (f.name && f.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i)),
         );
 
         const displayItems = filterLiked
@@ -16993,7 +18286,7 @@
             const isLiked = likedPhotos.includes(item.id);
             const isVideo =
               item.type === "video" ||
-              item.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i);
+              (item.name && item.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i));
             const mediaTag = isVideo
               ? `<video src="${item.url}" class="w-full block" loading="lazy"></video><div class="absolute inset-0 flex items-center justify-center pointer-events-none"><i class="fa-solid fa-play text-white/70 text-3xl drop-shadow-lg"></i></div>`
               : `<img src="${item.url}" class="w-full block" loading="lazy">`;
@@ -17007,13 +18300,9 @@
                             <button onclick="event.stopPropagation(); toggleLikePhoto('${wid}', '${item.id}')" class="w-8 h-8 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 flex items-center justify-center transition">
                                 <i class="${isLiked ? "fa-solid text-red-500" : "fa-regular text-white"} fa-heart"></i>
                             </button>
-                            ${
-                              !isVideo
-                                ? `<button onclick="event.stopPropagation(); setAsWallpaper('${item.url}')" class="w-8 h-8 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 flex items-center justify-center transition" title="Set as Wallpaper">
+                            <button onclick="event.stopPropagation(); setAsWallpaper('${item.url}', ${isVideo})" class="w-8 h-8 rounded-full bg-white/10 backdrop-blur hover:bg-white/20 flex items-center justify-center transition" title="Set as Wallpaper">
                                 <i class="fa-solid fa-desktop text-white text-[10px]"></i>
-                            </button>`
-                                : ""
-                            }
+                            </button>
                         </div>
                         <div class="text-[9px] text-white/70 font-bold uppercase tracking-wider truncate ml-2">${item.name}</div>
                     </div>
@@ -17028,21 +18317,44 @@
         if (!item) return;
 
         windows[wid].currentMediaId = mediaId;
+        windows[wid].mediaTransform = { scale: 1, rotate: 0 };
         const lightbox = document.getElementById(`photos-lightbox-${wid}`);
         const container = document.getElementById(
           `lightbox-media-container-${wid}`,
         );
+        const lightboxControls = document.getElementById(
+          `lightbox-controls-${wid}`,
+        );
         const likeBtn = document.getElementById(`lb-like-${wid}`);
         const wallBtn = document.getElementById(`lb-wall-${wid}`);
+
+        let mediaUrl = item.url;
+        let arrayBuffer = null;
+
+        // Convert Base64 data strings back into a true Blob and an ArrayBuffer for demuxing
+        if (mediaUrl && mediaUrl.startsWith("data:video/")) {
+          try {
+            const arr = mediaUrl.split(",");
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) u8arr[n] = bstr.charCodeAt(n);
+
+            arrayBuffer = u8arr.buffer; // Stash arrayBuffer for MP4Box parsing
+            mediaUrl = URL.createObjectURL(new Blob([u8arr], { type: mime }));
+          } catch (e) {}
+        }
 
         if (
           item.type === "video" ||
           (item.name && item.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i))
         ) {
+          if (lightboxControls) lightboxControls.style.display = "none";
           container.innerHTML = `
                 <div class="relative flex items-center justify-center w-full h-full overflow-hidden outline-none" id="video-wrapper-${wid}" tabindex="0" onkeydown="handleVideoKey(event, '${wid}')">
                     <canvas id="canvas-full-${wid}" class="w-full h-full object-contain rounded-lg hidden"></canvas>
-                    <video src="${item.url}" class="w-full h-full object-contain rounded-lg" id="img-full-${wid}" autoplay></video>
+                    <video src="${mediaUrl}" class="w-full h-full object-contain rounded-lg" id="img-full-${wid}" autoplay crossorigin="anonymous"></video>
                     
                     <div id="video-left-icon-${wid}" class="absolute left-10 flex items-center justify-center pointer-events-none opacity-0 transition-all duration-300 z-[100] scale-50"><div id="video-left-icon-i-${wid}" class="w-auto min-w-[5rem] px-6 h-20 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white text-3xl shadow-2xl"></div></div>
                     <div id="video-center-icon-${wid}" class="absolute flex items-center justify-center pointer-events-none opacity-0 transition-all duration-300 z-[100] scale-50"><div id="video-center-icon-i-${wid}" class="w-auto min-w-[5rem] px-6 h-20 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white text-3xl shadow-2xl"><i class="fa-solid fa-play ml-1"></i></div></div>
@@ -17069,6 +18381,9 @@
                                 <span class="text-xs font-mono opacity-80" id="video-time-${wid}">0:00 / 0:00</span>
                             </div>
                             <div class="flex items-center gap-1">
+                                <button id="video-like-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition" title="Like"></button>
+                                <button id="video-wall-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition" title="Set as Background"><i class="fa-solid fa-desktop text-[12px]"></i></button>
+                                <div class="w-[1px] h-4 bg-white/20 mx-1"></div>
                                 <div class="relative">
                                     <button id="video-audio-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition opacity-50 pointer-events-none" title="Audio Tracks"><i class="fa-solid fa-music"></i></button>
                                     <div id="video-audio-menu-${wid}" class="absolute bottom-full right-0 mb-2 bg-black/90 border border-white/20 rounded p-2 hidden min-w-[120px] shadow-xl text-left"></div>
@@ -17080,6 +18395,8 @@
                                 <button id="video-pip-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition" title="Picture-in-Picture"><i class="fa-solid fa-clone"></i></button>
                                 <button id="video-crop-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition" title="Fit/Fill"><i class="fa-solid fa-crop"></i></button>
                                 <button id="video-fs-btn-${wid}" class="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-full transition" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
+                                <div class="w-[1px] h-4 bg-white/20 mx-1"></div>
+                                <button onclick="closeMediaFull('${wid}')" class="w-8 h-8 flex items-center justify-center hover:bg-red-500/80 hover:text-white rounded-full transition text-white" title="Close"><i class="fa-solid fa-xmark"></i></button>
                             </div>
                         </div>
                     </div>
@@ -17099,7 +18416,7 @@
               );
               canvas.classList.remove("hidden");
               windows[wid].mkvStreamer = new MKVStreamer(
-                item.url,
+                mediaUrl,
                 video,
                 canvas,
                 wid,
@@ -17127,6 +18444,26 @@
             const audioMenu = document.getElementById(
               `video-audio-menu-${wid}`,
             );
+
+            const vidLikeBtn = document.getElementById(`video-like-btn-${wid}`);
+            const vidWallBtn = document.getElementById(`video-wall-btn-${wid}`);
+
+            const isLikedVideo = likedPhotos.includes(item.id);
+            if (vidLikeBtn) {
+              vidLikeBtn.innerHTML = `<i class="${isLikedVideo ? "fa-solid text-red-500" : "fa-regular"} fa-heart"></i>`;
+              vidLikeBtn.onclick = (e) => {
+                e.stopPropagation();
+                toggleLikePhoto(wid, item.id);
+                const nowLiked = likedPhotos.includes(item.id);
+                vidLikeBtn.innerHTML = `<i class="${nowLiked ? "fa-solid text-red-500" : "fa-regular"} fa-heart"></i>`;
+              };
+            }
+            if (vidWallBtn) {
+              vidWallBtn.onclick = (e) => {
+                e.stopPropagation();
+                setAsWallpaper(item.url, true);
+              };
+            }
 
             const wrapper = document.getElementById(`video-wrapper-${wid}`);
             const controls = document.getElementById(`video-controls-${wid}`);
@@ -17210,7 +18547,6 @@
             };
 
             wrapper.focus();
-
             playBtn.onclick = togglePlay;
             video.onclick = togglePlay;
 
@@ -17313,77 +18649,362 @@
               } catch (err) {}
             };
 
+            // ----------------------------------------------------
+            // 🎬 MP4BOX DEMUXER FOR AUDIO/CC TRACK EXTRACTION 🎬
+            // ----------------------------------------------------
+            class MP4TrackHandler {
+              constructor(
+                video,
+                arrayBuffer,
+                audioBtn,
+                audioMenu,
+                ccBtn,
+                ccMenu,
+              ) {
+                this.video = video;
+                this.arrayBuffer = arrayBuffer;
+                this.audioBtn = audioBtn;
+                this.audioMenu = audioMenu;
+                this.ccBtn = ccBtn;
+                this.ccMenu = ccMenu;
+
+                this.mp4boxfile = MP4Box.createFile();
+                this.info = null;
+                this.audioEl = new Audio();
+                this.ms = null;
+                this.sb = null;
+                this.activeAudioId = -1;
+                this.queue = [];
+                this.updating = false;
+
+                this.video.addEventListener("play", () => {
+                  if (this.activeAudioId !== -1)
+                    this.audioEl.play().catch(() => {});
+                });
+                this.video.addEventListener("pause", () =>
+                  this.audioEl.pause(),
+                );
+                this.video.addEventListener("seeking", () => {
+                  if (this.activeAudioId !== -1)
+                    this.audioEl.currentTime = this.video.currentTime;
+                });
+                this.video.addEventListener(
+                  "ratechange",
+                  () => (this.audioEl.playbackRate = this.video.playbackRate),
+                );
+                this.video.addEventListener(
+                  "volumechange",
+                  () => (this.audioEl.volume = this.video.volume),
+                );
+
+                this.parse();
+              }
+
+              parse() {
+                this.mp4boxfile.onReady = (info) => {
+                  this.info = info;
+                  this.buildMenus();
+                };
+                this.arrayBuffer.fileStart = 0;
+                this.mp4boxfile.appendBuffer(this.arrayBuffer);
+                this.mp4boxfile.flush();
+              }
+
+              buildMenus() {
+                const audioTracks = this.info.audioTracks;
+                const subtitleTracks = this.info.subtitleTracks;
+
+                if (audioTracks && audioTracks.length > 1) {
+                  this.audioBtn.classList.remove(
+                    "opacity-50",
+                    "pointer-events-none",
+                  );
+                  let html =
+                    '<div class="text-[10px] text-gray-400 mb-1 px-1">Audio Tracks</div>';
+                  html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer audio-track" data-id="-1">Default</div>`;
+                  audioTracks.forEach((t, i) => {
+                    const label = t.language || t.name || "Track " + (i + 1);
+                    html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer audio-track" data-id="${t.id}">${label}</div>`;
+                  });
+                  this.audioMenu.innerHTML = html;
+                  this.audioBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.audioMenu.classList.toggle("hidden");
+                    this.ccMenu.classList.add("hidden");
+                  };
+                  this.audioMenu
+                    .querySelectorAll(".audio-track")
+                    .forEach((el) => {
+                      el.onclick = (e) => {
+                        e.stopPropagation();
+                        this.setAudioTrack(parseInt(el.dataset.id));
+                        this.audioMenu.classList.add("hidden");
+                      };
+                    });
+                }
+
+                if (subtitleTracks && subtitleTracks.length > 0) {
+                  this.ccBtn.classList.remove(
+                    "opacity-50",
+                    "pointer-events-none",
+                  );
+                  let html =
+                    '<div class="text-[10px] text-gray-400 mb-1 px-1">Subtitles</div>';
+                  html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer cc-track" data-id="-1">Off</div>`;
+                  subtitleTracks.forEach((t, i) => {
+                    const label = t.language || t.name || "Track " + (i + 1);
+                    html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer cc-track" data-id="${t.id}">${label}</div>`;
+                  });
+                  this.ccMenu.innerHTML = html;
+                  this.ccBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.ccMenu.classList.toggle("hidden");
+                    this.audioMenu.classList.add("hidden");
+                  };
+                  this.ccMenu.querySelectorAll(".cc-track").forEach((el) => {
+                    el.onclick = (e) => {
+                      e.stopPropagation();
+                      this.setSubtitleTrack(parseInt(el.dataset.id));
+                      this.ccMenu.classList.add("hidden");
+                    };
+                  });
+                }
+              }
+
+              formatTime(sec) {
+                const h = Math.floor(sec / 3600)
+                  .toString()
+                  .padStart(2, "0");
+                const m = Math.floor((sec % 3600) / 60)
+                  .toString()
+                  .padStart(2, "0");
+                const s = Math.floor(sec % 60)
+                  .toString()
+                  .padStart(2, "0");
+                const ms = Math.floor((sec % 1) * 1000)
+                  .toString()
+                  .padStart(3, "0");
+                return `${h}:${m}:${s}.${ms}`;
+              }
+
+              setSubtitleTrack(id) {
+                Array.from(this.video.querySelectorAll("track")).forEach((t) =>
+                  t.remove(),
+                );
+                if (id === -1) {
+                  this.ccBtn.classList.remove("text-accent-400");
+                  return;
+                }
+                this.ccBtn.classList.add("text-accent-400");
+
+                this.mp4boxfile.onSamples = (track_id, user, samples) => {
+                  if (track_id === id) {
+                    let vtt = "WEBVTT\n\n";
+                    samples.forEach((s) => {
+                      const start = this.formatTime(s.dts / s.timescale);
+                      const end = this.formatTime(
+                        (s.dts + s.duration) / s.timescale,
+                      );
+                      let text = "";
+                      if (s.data.length > 2) {
+                        let len = (s.data[0] << 8) | s.data[1];
+                        if (len <= s.data.length - 2) {
+                          text = new TextDecoder().decode(
+                            s.data.slice(2, 2 + len),
+                          );
+                        } else {
+                          text = new TextDecoder().decode(s.data);
+                        }
+                      } else {
+                        text = new TextDecoder().decode(s.data);
+                      }
+                      vtt += `${start} --> ${end}\n${text}\n\n`;
+                    });
+                    const blob = new Blob([vtt], { type: "text/vtt" });
+                    const track = document.createElement("track");
+                    track.src = URL.createObjectURL(blob);
+                    track.kind = "subtitles";
+                    track.srclang = "en";
+                    track.default = true;
+                    this.video.appendChild(track);
+                  }
+                };
+                this.mp4boxfile.setExtractionOptions(id);
+                this.mp4boxfile.start();
+              }
+
+              setAudioTrack(id) {
+                if (id === -1) {
+                  this.activeAudioId = -1;
+                  this.video.muted = false;
+                  this.audioEl.pause();
+                  this.audioBtn.classList.remove("text-accent-400");
+                  return;
+                }
+
+                this.audioBtn.classList.add("text-accent-400");
+                this.activeAudioId = id;
+                this.video.muted = true;
+                this.queue = [];
+
+                const track = this.info.audioTracks.find((t) => t.id === id);
+                this.ms = new MediaSource();
+                this.audioEl.src = URL.createObjectURL(this.ms);
+
+                this.ms.addEventListener("sourceopen", () => {
+                  const mime = 'audio/mp4; codecs="' + track.codec + '"';
+                  if (!MediaSource.isTypeSupported(mime))
+                    return console.error("Audio codec not supported:", mime);
+
+                  this.sb = this.ms.addSourceBuffer(mime);
+                  this.sb.addEventListener("updateend", () => {
+                    this.updating = false;
+                    this.pumpQueue();
+                  });
+
+                  this.mp4boxfile.setSegmentOptions(id, this.sb, {
+                    nbSamples: 10000,
+                  });
+                  const initSegs = this.mp4boxfile.initializeSegmentation();
+                  this.queue.push(initSegs.find((s) => s.id === id).buffer);
+                  this.pumpQueue();
+
+                  this.mp4boxfile.onSegment = (tid, user, buffer) => {
+                    if (tid === id) {
+                      this.queue.push(buffer);
+                      this.pumpQueue();
+                    }
+                  };
+
+                  this.mp4boxfile.seek(0, true);
+                  this.mp4boxfile.start();
+
+                  this.audioEl.currentTime = this.video.currentTime;
+                  if (!this.video.paused) this.audioEl.play().catch(() => {});
+                });
+              }
+
+              pumpQueue() {
+                if (
+                  !this.updating &&
+                  this.queue.length > 0 &&
+                  this.sb &&
+                  !this.sb.updating
+                ) {
+                  this.updating = true;
+                  this.sb.appendBuffer(this.queue.shift());
+                }
+              }
+
+              destroy() {
+                this.audioEl.pause();
+                this.audioEl.src = "";
+                this.mp4boxfile.stop();
+              }
+            }
+
+            // Standard Native Webkit Fallback Tracks Setup
             let trackCheckTimer;
-            const setupTracks = () => {
-              let hasTracks = false;
+            let lastTextTrackCount = -1;
+            let lastAudioTrackCount = -1;
+            let checks = 0;
 
-              if (video.textTracks && video.textTracks.length > 0) {
-                ccBtn.classList.remove("opacity-50", "pointer-events-none");
-                let html =
-                  '<div class="text-[10px] text-gray-400 mb-1 px-1">Subtitles</div>';
-                html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer cc-track" data-idx="-1">Off</div>`;
-                for (let i = 0; i < video.textTracks.length; i++) {
-                  const t = video.textTracks[i];
-                  const label = t.label || t.language || "Track " + (i + 1);
-                  html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer cc-track" data-idx="${i}">${label}</div>`;
-                }
-                ccMenu.innerHTML = html;
-                ccBtn.onclick = (e) => {
-                  e.stopPropagation();
-                  ccMenu.classList.toggle("hidden");
-                  audioMenu.classList.add("hidden");
-                };
-                ccMenu.querySelectorAll(".cc-track").forEach((el) => {
-                  el.onclick = (e) => {
-                    e.stopPropagation();
-                    const idx = parseInt(el.dataset.idx);
-                    for (let i = 0; i < video.textTracks.length; i++) {
-                      video.textTracks[i].mode =
-                        i === idx ? "showing" : "hidden";
-                    }
-                    ccMenu.classList.add("hidden");
-                    if (idx >= 0) ccBtn.classList.add("text-accent-400");
-                    else ccBtn.classList.remove("text-accent-400");
-                  };
-                });
-                hasTracks = true;
-              }
+            const setupNativeTracks = () => {
+              checks++;
+              const tTracks = video.textTracks || video.webkitTextTracks;
+              const aTracks = video.audioTracks || video.webkitAudioTracks;
 
-              if (video.audioTracks && video.audioTracks.length > 1) {
-                audioBtn.classList.remove("opacity-50", "pointer-events-none");
-                let html =
-                  '<div class="text-[10px] text-gray-400 mb-1 px-1">Audio Tracks</div>';
-                for (let i = 0; i < video.audioTracks.length; i++) {
-                  const t = video.audioTracks[i];
-                  const label = t.label || t.language || "Track " + (i + 1);
-                  html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer audio-track" data-idx="${i}">${label}</div>`;
-                }
-                audioMenu.innerHTML = html;
-                audioBtn.onclick = (e) => {
-                  e.stopPropagation();
-                  audioMenu.classList.toggle("hidden");
-                  ccMenu.classList.add("hidden");
-                };
-                audioMenu.querySelectorAll(".audio-track").forEach((el) => {
-                  el.onclick = (e) => {
+              if (tTracks && tTracks.length !== lastTextTrackCount) {
+                lastTextTrackCount = tTracks.length;
+                if (tTracks.length > 0) {
+                  ccBtn.classList.remove("opacity-50", "pointer-events-none");
+                  let html =
+                    '<div class="text-[10px] text-gray-400 mb-1 px-1">Subtitles</div>';
+                  html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer cc-track" data-idx="-1">Off</div>`;
+                  for (let i = 0; i < tTracks.length; i++) {
+                    const t = tTracks[i];
+                    const label = t.label || t.language || "Track " + (i + 1);
+                    html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer cc-track" data-idx="${i}">${label}</div>`;
+                  }
+                  ccMenu.innerHTML = html;
+                  ccBtn.onclick = (e) => {
                     e.stopPropagation();
-                    const idx = parseInt(el.dataset.idx);
-                    for (let i = 0; i < video.audioTracks.length; i++) {
-                      video.audioTracks[i].enabled = i === idx;
-                    }
+                    ccMenu.classList.toggle("hidden");
                     audioMenu.classList.add("hidden");
-                    audioBtn.classList.add("text-accent-400");
                   };
-                });
-                hasTracks = true;
+                  ccMenu.querySelectorAll(".cc-track").forEach((el) => {
+                    el.onclick = (e) => {
+                      e.stopPropagation();
+                      const idx = parseInt(el.dataset.idx);
+                      for (let i = 0; i < tTracks.length; i++) {
+                        tTracks[i].mode = i === idx ? "showing" : "hidden";
+                      }
+                      ccMenu.classList.add("hidden");
+                      if (idx >= 0) ccBtn.classList.add("text-accent-400");
+                      else ccBtn.classList.remove("text-accent-400");
+                    };
+                  });
+                }
               }
 
-              if (hasTracks && trackCheckTimer) clearInterval(trackCheckTimer);
+              if (aTracks && aTracks.length !== lastAudioTrackCount) {
+                lastAudioTrackCount = aTracks.length;
+                if (aTracks.length > 1) {
+                  audioBtn.classList.remove(
+                    "opacity-50",
+                    "pointer-events-none",
+                  );
+                  let html =
+                    '<div class="text-[10px] text-gray-400 mb-1 px-1">Audio Tracks</div>';
+                  for (let i = 0; i < aTracks.length; i++) {
+                    const t = aTracks[i];
+                    const label = t.label || t.language || "Track " + (i + 1);
+                    html += `<div class="text-xs hover:bg-white/20 px-2 py-1 rounded cursor-pointer audio-track" data-idx="${i}">${label}</div>`;
+                  }
+                  audioMenu.innerHTML = html;
+                  audioBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    audioMenu.classList.toggle("hidden");
+                    ccMenu.classList.add("hidden");
+                  };
+                  audioMenu.querySelectorAll(".audio-track").forEach((el) => {
+                    el.onclick = (e) => {
+                      e.stopPropagation();
+                      const idx = parseInt(el.dataset.idx);
+                      for (let i = 0; i < aTracks.length; i++) {
+                        aTracks[i].enabled = i === idx;
+                      }
+                      audioMenu.classList.add("hidden");
+                      audioBtn.classList.add("text-accent-400");
+                    };
+                  });
+                }
+              }
+
+              if (checks > 15 && trackCheckTimer)
+                clearInterval(trackCheckTimer);
             };
 
-            video.addEventListener("loadedmetadata", setupTracks);
-            video.addEventListener("canplay", setupTracks);
-            trackCheckTimer = setInterval(setupTracks, 1000);
+            // Use the advanced MP4 demuxer if MP4Box is available and file is mp4, else native fallback
+            if (
+              arrayBuffer &&
+              typeof MP4Box !== "undefined" &&
+              item.name &&
+              item.name.toLowerCase().endsWith(".mp4")
+            ) {
+              windows[wid].mp4Handler = new MP4TrackHandler(
+                video,
+                arrayBuffer,
+                audioBtn,
+                audioMenu,
+                ccBtn,
+                ccMenu,
+              );
+            } else {
+              video.addEventListener("loadedmetadata", setupNativeTracks);
+              video.addEventListener("canplay", setupNativeTracks);
+              trackCheckTimer = setInterval(setupNativeTracks, 1000);
+            }
 
             document.addEventListener("click", () => {
               if (!ccMenu.classList.contains("hidden"))
@@ -17433,7 +19054,8 @@
             };
           }, 50);
         } else {
-          container.innerHTML = `<img src="${item.url}" class="lightbox-content relative" id="img-full-${wid}" 
+          if (lightboxControls) lightboxControls.style.display = "flex";
+          container.innerHTML = `<img src="${item.url}" class="lightbox-content relative" id="img-full-${wid}" style="transform: scale(1) rotate(0deg); left: 0px; top: 0px;"
                             ondblclick="togglePhotoZoom(event, '${wid}')" 
                             onmousedown="startPanning(event, '${wid}')">`;
         }
@@ -17448,20 +19070,25 @@
 
         wallBtn.onclick = (e) => {
           e.stopPropagation();
-          setAsWallpaper(item.url);
+          setAsWallpaper(
+            item.url,
+            item.type === "video" ||
+              !!(
+                item.name && item.name.match(/\.(mp4|webm|ogg|mkv|avi|mov)$/i)
+              ),
+          );
         };
 
         lightbox.classList.add("active");
       }
 
-      function setAsWallpaper(url) {
-        changeWallpaper(url);
+      function setAsWallpaper(url, isVideo = false) {
+        changeWallpaper(url, isVideo);
         pushNotification("Gallery", "Wallpaper updated successfully.");
       }
 
       function navigateMedia(wid, direction) {
-        const visibleIds =
-          windows[wid].visibleMediaIds || sampleMedia.map((m) => m.id);
+        const visibleIds = windows[wid].visibleMediaIds || [];
         const currentId = windows[wid].currentMediaId;
         const currentIndex = visibleIds.indexOf(currentId);
         let nextIndex = currentIndex + direction;
@@ -17476,10 +19103,15 @@
 
       function startPanning(e, wid) {
         const img = e.target;
-        if (!img.classList.contains("is-zoomed")) return;
+        if (
+          !windows[wid].mediaTransform ||
+          windows[wid].mediaTransform.scale <= 1
+        )
+          return;
 
         isPanning = true;
         img.style.transition = "none";
+        img.style.cursor = "grabbing";
 
         const currentX = parseInt(img.style.left) || 0;
         const currentY = parseInt(img.style.top) || 0;
@@ -17502,6 +19134,7 @@
           isPanning = false;
 
           img.style.transition = "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)";
+          img.style.cursor = "grab";
           document.removeEventListener("mousemove", movePan);
           document.removeEventListener("mouseup", stopPan);
         };
@@ -17512,18 +19145,64 @@
 
       function togglePhotoZoom(e, wid) {
         e.stopPropagation();
-        const img = e.target;
-        const isZoomingIn = !img.classList.contains("is-zoomed");
+        if (!windows[wid].mediaTransform)
+          windows[wid].mediaTransform = { scale: 1, rotate: 0 };
+        const isZoomed = windows[wid].mediaTransform.scale > 1;
+        windows[wid].mediaTransform.scale = isZoomed ? 1 : 3;
 
-        img.classList.toggle("is-zoomed");
-
-        if (isZoomingIn) {
+        const img = document.getElementById(`img-full-${wid}`);
+        if (img) {
           img.style.left = "0px";
           img.style.top = "0px";
-        } else {
-          img.style.left = "0px";
-          img.style.top = "0px";
+          img.style.cursor =
+            windows[wid].mediaTransform.scale > 1 ? "grab" : "zoom-in";
         }
+        applyMediaTransform(wid);
+      }
+
+      function mediaZoom(e, wid, delta) {
+        if (e) e.stopPropagation();
+        if (!windows[wid].mediaTransform)
+          windows[wid].mediaTransform = { scale: 1, rotate: 0 };
+        windows[wid].mediaTransform.scale = Math.max(
+          0.2,
+          windows[wid].mediaTransform.scale + delta,
+        );
+        const img = document.getElementById(`img-full-${wid}`);
+        if (img)
+          img.style.cursor =
+            windows[wid].mediaTransform.scale > 1 ? "grab" : "zoom-in";
+        applyMediaTransform(wid);
+      }
+
+      function mediaRotate(e, wid, degrees = 90) {
+        if (e) e.stopPropagation();
+        if (!windows[wid].mediaTransform)
+          windows[wid].mediaTransform = { scale: 1, rotate: 0 };
+        windows[wid].mediaTransform.rotate += degrees;
+        applyMediaTransform(wid);
+      }
+
+      function applyMediaTransform(wid) {
+        const el = document.getElementById(`img-full-${wid}`);
+        if (el) {
+          const t = windows[wid].mediaTransform;
+          el.style.transform = `scale(${t.scale}) rotate(${t.rotate}deg)`;
+        }
+      }
+
+      function showAlertModal(title, message) {
+        const modal = document.getElementById("custom-modal");
+        const modalContent = document.getElementById("modal-content");
+        modalContent.innerHTML = `
+            <h3 class="text-ui-100 font-bold mb-2">${title}</h3>
+            <p class="text-ui-400 text-sm mb-4 leading-relaxed">${message}</p>
+            <div class="flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 text-xs bg-accent-600 hover:bg-accent-500 text-white rounded transition">OK</button>
+            </div>
+        `;
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
       }
 
       function toggleEnlargeMedia(wid) {
@@ -17854,8 +19533,9 @@
           hasResults = true;
         }
 
-        const matchedApps = Object.keys(apps).filter((k) =>
-          apps[k].title.toLowerCase().includes(lowerQuery),
+        const matchedApps = Object.keys(apps).filter(
+          (k) =>
+            !apps[k].hidden && apps[k].title.toLowerCase().includes(lowerQuery),
         );
         if (matchedApps.length > 0) {
           resultsHTML += `<div class="px-5 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 w-full">Applications</div>`;
@@ -17896,7 +19576,7 @@
             const action =
               f.type === "folder"
                 ? `openApp('files'); setTimeout(() => { const w=Object.values(windows).find(win=>win.appId==='files'); if(w) { w.fsState.tabs.find(t=>t.id===w.fsState.activeTab).currentFolder='${f.id}'; renderFileView(w.element.id.replace('window-','')); } }, 100);`
-                : `openFile({id:'${f.id}', name:'${f.name}', type:'${f.type}', content:'${f.content || ""}'})`;
+                : `openFileById('${f.id}')`;
 
             const path = getFilePath(f.id);
 
@@ -19093,6 +20773,30 @@
           this.frameQueue.forEach((f) => f.bitmap.close());
           this.frameQueue = [];
           if (this.video) URL.revokeObjectURL(this.video.src);
+        }
+      }
+
+      function triggerAeroShake(activeId) {
+        const otherWindows = Object.values(windows).filter(
+          (w) =>
+            w.element.id !== `window-${activeId}` &&
+            w.desktopId === currentDesktopId,
+        );
+        const visibleOthers = otherWindows.filter(
+          (w) => !w.element.classList.contains("minimized"),
+        );
+
+        if (visibleOthers.length > 0) {
+          window.shakenWindows = visibleOthers.map((w) => w.element.id);
+          visibleOthers.forEach((w) =>
+            minimizeWindow(w.element.id.replace("window-", "")),
+          );
+        } else if (window.shakenWindows && window.shakenWindows.length > 0) {
+          window.shakenWindows.forEach((wid) => {
+            const id = wid.replace("window-", "");
+            if (windows[id]) restoreWindow(id);
+          });
+          window.shakenWindows = [];
         }
       }
     </script>
