@@ -2,6 +2,8 @@ v1.8:
 1. Added the ability to pick any picture as your account profile picture, from both the host machine and the vFS.
 2. Added ability to set any emoji and any background colour on the account profile picture instead of only the preset ones.
 3. Made the custom new tab landing page better in looks.
+4. Fixed drag to select not working from last update.
+5. Added a lot of options in the right click context menus of folders and files.
 
 v1.7:
 1. Added support for multiple audio tracks and subtitle tracks switching using MP4Box.
